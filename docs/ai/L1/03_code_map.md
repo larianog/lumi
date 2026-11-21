@@ -26,6 +26,8 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `invite-agent/route.ts`: validates input/env, configures and starts agent session.
 - `stop-conversation/route.ts`: stops agent and handles idempotent already-stopping cases.
 - `chat/completions/route.ts`: optional OpenAI-compatible SSE proxy for custom LLM path.
+- `materials/route.ts`: upload validation, cache reservation, Feita extraction, and child/family lists.
+- `materials/[id]/route.ts`: authorized detail and explicit completion.
 
 ## Client Ownership (`components`)
 
@@ -35,12 +37,17 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `QuickstartTranscriptPanel.tsx`: live transcript panel.
 - `QuickstartPipelineMetrics.tsx`: latency chips from metrics stream.
 - `ConnectionStatusPanel.tsx` + `ConversationErrorCard.tsx`: issue rendering/severity.
+- `MaterialStudyPageClient.tsx`: inline grounded Lumi plus extracted-text workspace.
+- `MaterialHistoryPageClient.tsx`: child material history/status list.
 
 ## Shared Logic (`lib`)
 
 - `chat-completions.ts`: server-side custom LLM SSE handler factory, shared by the route and contract tests.
 - `agora.ts`: default constants (`DEFAULT_AGENT_UID`).
 - `conversation.ts`: transcript normalization, spacing cleanup, timestamp normalization, visualizer state mapping.
+- `feita-extraction.ts`: Feita request, extraction prompt, timeout, and response parsing.
+- `material-storage.ts`: private temporary local file storage.
+- `study-materials.ts`: ownership, DTO, demo isolation, and expiry cleanup.
 
 ## Validation and Tooling
 
@@ -54,6 +61,8 @@ Auto-discovered project files remain at the repository root. This includes packa
 - Change token policy/channel naming -> `app/api/generate-agora-token/route.ts`.
 - Change transcript mapping behavior -> `lib/conversation.ts` + `components/ConversationComponent.tsx`.
 - Change session bootstrap UX -> `components/LandingPage.tsx`.
+- Change material ingestion/cache -> `app/api/materials/route.ts` + `lib/db.ts`.
+- Change material study/history UX -> `components/MaterialStudyPageClient.tsx` / `MaterialHistoryPageClient.tsx`.
 
 ## Additional Component Roles
 
@@ -66,6 +75,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 ## Type Contract Locations
 
 - `types/conversation.ts`: request/response payloads and component prop types.
+- `types/database.d.ts` and `types/materials.ts`: persisted material and browser-safe DTO contracts.
 - `types/env.d.ts`: typed environment variable expectations.
 - `types/jsx.d.ts` and `types/react-jsx.d.ts`: JSX typing support details.
 

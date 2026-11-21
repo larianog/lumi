@@ -103,8 +103,12 @@ Defined in [`config/env/env.local.example`](config/env/env.local.example).
 | ---------------------------- | :------: | ---------------------------------------------------------------- |
 | `NEXT_PUBLIC_AGORA_APP_ID`   |    ✅    | Agora Console → Project → App ID.                                |
 | `NEXT_AGORA_APP_CERTIFICATE` |    ✅    | Agora Console → Project → App Certificate. **Server-side only.** |
+| `FEITA_AI_API_KEY`           |    ✅    | Feita gateway key used only by the material extraction route.    |
+| `FEITA_AI_MODEL`             |    ✅    | Multimodal model identifier used for extraction and cache keys.  |
+| `FEITA_AI_URL`               |    ➖    | Defaults to the Feita chat-completions gateway.                   |
+| `LUMI_MATERIAL_RETENTION_HOURS` | ➖ | Temporary file/text retention; defaults to 168 hours.             |
 
-The default agent configuration in [`app/api/invite-agent/route.ts`](app/api/invite-agent/route.ts) uses Agora-managed STT, LLM, and TTS, so no extra vendor API keys are required for the base quickstart.
+The default voice-agent configuration in [`app/api/invite-agent/route.ts`](app/api/invite-agent/route.ts) uses Agora-managed STT, LLM, and TTS. The separate study-material extraction workflow requires the Feita variables above.
 
 ## Commands
 
@@ -142,6 +146,8 @@ docker build -f deploy/docker/Dockerfile -t lumi-by-agora .
 
 The browser fetches a combined RTC + RTM token (`buildTokenWithRtm`) from this app, joins the channel using a single RTC client, and uses RTM as the data channel for transcript, agent state, metrics, and error events. The Conversational AI Engine joins the same channel as the shared agent UID in [`lib/agora.ts`](lib/agora.ts) and runs the STT → LLM → TTS pipeline in Agora Cloud.
 
+Study-material images are uploaded to the authenticated `/api/materials` route. The server validates and hashes each image, reuses an unexpired extraction with the same profile, model, and prompt version, or sends the image to Feita for text extraction. The private file and extracted text expire automatically; metadata and completion state remain available to the child history and adult report.
+
 ## What You Get
 
 - browser voice client built with Next.js App Router
@@ -150,6 +156,7 @@ The browser fetches a combined RTC + RTM token (`buildTokenWithRtm`) from this a
 - [`AgentVisualizer`](https://agoraio-conversational-ai.github.io/agent-uikit/) for agent state and a built-in transcript panel for live turns
 - per-stage latency header driven by `AGENT_METRICS`
 - Agora-managed default STT, LLM, and TTS configuration
+- private image upload, cached Feita text extraction, study history, and parent-visible completion state
 
 ## How It Works
 
@@ -158,6 +165,8 @@ The browser fetches a combined RTC + RTM token (`buildTokenWithRtm`) from this a
 3. The browser joins the channel and publishes mic audio.
 4. The client receives transcript, agent state, and `AGENT_METRICS` (per-stage latency) events over RTM.
 5. On end, the client calls `/api/stop-conversation`, logs out RTM, and unmounts the call view so Agora React hooks clean up RTC publish/join and the local microphone track.
+
+For uploaded study material, the browser sends multipart form data to `/api/materials`, navigates to `/profile/:profileId/materials/:materialId`, and starts an inline Lumi session grounded with server-loaded extracted text. The child explicitly completes the activity; ending the voice session alone does not mark it complete.
 
 ## Optional BYOK
 
@@ -181,6 +190,10 @@ NEXT_ELEVENLABS_VOICE_ID=...
 - `app/api/generate-agora-token/route.ts` — issues RTC + RTM tokens
 - `app/api/invite-agent/route.ts` — starts the agent session and configures the pipeline
 - `app/api/stop-conversation/route.ts` — stops the agent session
+- `app/api/materials/route.ts` — uploads, validates, deduplicates, extracts, and lists study material
+- `app/api/materials/[id]/route.ts` — returns material detail and records completion
+- `app/profile/[id]/history/page.tsx` — child material history
+- `app/profile/[id]/materials/[materialId]/page.tsx` — extracted-text study workspace
 - `config/env/env.local.example` — tracked local environment template
 - `deploy/docker/` — container build definition and Docker-specific ignore rules
 - `docs/assets/architecture/` — light and dark architecture diagrams
@@ -193,6 +206,8 @@ NEXT_ELEVENLABS_VOICE_ID=...
 - `components/QuickstartPreCallCard.tsx` — pre-call hero card
 - `lib/chat-completions.ts` — server-side custom LLM SSE handler used by the chat completions route
 - `lib/conversation.ts` — transcript normalization and visualizer state mapping
+- `lib/feita-extraction.ts` — server-only Feita multimodal extraction client
+- `lib/material-storage.ts` — private temporary file-cache adapter
 - `AGENTS.md` — primary agent-facing guide
 
 Files such as `.npmrc`, `.nvmrc`, `.vercelignore`, `vercel.json`, `next.config.mjs`, and `package.json` intentionally remain at the project root because their tools discover them there.
@@ -217,6 +232,8 @@ Files such as `.npmrc`, `.nvmrc`, `.vercelignore`, `vercel.json`, `next.config.m
 Pull requests welcome — see [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) for development setup and conventions.
 
 ## Security
+
+Uploaded school material can contain personal information. Files are stored outside `public/`, Feita credentials remain server-only, demo uploads are isolated by session, and expired content is purged lazily. The bundled JSON database and filesystem cache are for local/container development; use durable private object storage and a persistent database before deploying this workflow to serverless Vercel production.
 
 Please do **not** open public issues for security reports. Email security@agora.io with details and reproduction steps.
 

@@ -29,7 +29,12 @@ if (!fs.existsSync(envPath)) {
 }
 
 const envContents = fs.readFileSync(envPath, 'utf8');
-for (const key of ['NEXT_PUBLIC_AGORA_APP_ID', 'NEXT_AGORA_APP_CERTIFICATE']) {
+for (const key of [
+  'NEXT_PUBLIC_AGORA_APP_ID',
+  'NEXT_AGORA_APP_CERTIFICATE',
+  'FEITA_AI_API_KEY',
+  'FEITA_AI_MODEL',
+]) {
   const matcher = new RegExp(`^${key}=.+$`, 'm');
   if (!matcher.test(envContents)) {
     fail(`.env.local is missing a value for ${key}`);

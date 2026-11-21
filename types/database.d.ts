@@ -32,6 +32,31 @@ export type ActivityCompletion = {
   completedAt: string;
 };
 
+export type StudyMaterialExtractionStatus = 'processing' | 'ready' | 'failed';
+
+export type StudyMaterial = {
+  id: string;
+  familyId: string;
+  profileId: string;
+  /** Shared demo families are isolated by the browser session that uploaded the material. */
+  demoSessionId?: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  sha256: string;
+  storageKey?: string;
+  extractedText?: string;
+  extractionStatus: StudyMaterialExtractionStatus;
+  extractionModel: string;
+  promptVersion: string;
+  errorCode?: string;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt: string;
+  purgedAt?: string;
+  completedAt?: string;
+};
+
 export type SessionRecord = {
   id: string;
   tokenHash: string;
@@ -45,6 +70,7 @@ export type SessionRecord = {
 export type Database = {
   families: FamilyRecord[];
   completions: ActivityCompletion[];
+  materials: StudyMaterial[];
   sessions: SessionRecord[];
-  version: 2;
+  version: 3;
 };

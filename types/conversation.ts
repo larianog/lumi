@@ -11,8 +11,10 @@ export interface ClientStartRequest {
   requester_id: string;
   channel_name: string;
   profile_name?: string;
+  profile_id?: string;
   age?: number;
   activity_title?: string;
+  material_id?: string;
 }
 
 export interface StopConversationRequest {

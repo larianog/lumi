@@ -8,3 +8,4 @@
 | [strict_mode_lifecycle.md](strict_mode_lifecycle.md) | React StrictMode-safe RTC/toolkit initialization patterns | Modifying `useJoin`, mic track lifecycle, or `AgoraVoiceAI.init` timing |
 | [token_model.md](token_model.md) | RTC+RTM token build/renewal model and failure modes | Changing token minting, renewal, UID/channel semantics, or expiry |
 | [transcript_pipeline.md](transcript_pipeline.md) | Transcript/event normalization from AgoraVoiceAI and RTM fallback parsing | Changing transcript rendering, metrics/error handling, or RTM integration |
+| [material_pipeline.md](material_pipeline.md) | Authenticated upload, Feita extraction, cache, retention, voice grounding, and history | Changing material ingestion, storage, provider, completion, or parent visibility |

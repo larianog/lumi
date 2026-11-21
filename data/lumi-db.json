@@ -1,6 +1,26 @@
 {
   "families": [],
   "completions": [],
+  "materials": [
+    {
+      "id": "aff6c1a0-f135-46a7-8c8e-c6d2263acb1f",
+      "familyId": "demo-family",
+      "profileId": "demo-lia",
+      "demoSessionId": "f9030759-06ab-4555-8ab5-880c4477e27e",
+      "originalName": "Screenshot From 2026-11-21 18-35-15.png",
+      "mimeType": "image/png",
+      "size": 122149,
+      "sha256": "45612ce0bc826b9faad533dd97f7c213060f032346aefa93615a642860c26be1",
+      "extractionModel": "anthropic/claude-opus-5.5",
+      "promptVersion": "material-text-v1",
+      "expiresAt": "2026-11-28T21:35:23.220Z",
+      "extractionStatus": "ready",
+      "createdAt": "2026-11-21T21:35:23.221Z",
+      "updatedAt": "2026-11-21T21:35:28.434Z",
+      "storageKey": "aff6c1a0-f135-46a7-8c8e-c6d2263acb1f.png",
+      "extractedText": "ORDEM ALFABÉTICA\n\nLeia as palavras e coloque-as em ordem alfabética:\n\npepino - mel - tangerina - amora - manga -\ncebola - nabo - kiwi - repolho - ovos -\nuvas - batata - limão - salsinha - damasco -\nvagem - espinafre - hortelã - figo - quiabo -\ncarambola - inhame - goiaba - melão - jaca -\nbrócolis - tomate\n\n1.________________\n2.________________\n3.________________\n4.________________\n5.________________\n6.________________\n7.________________\n8.________________\n9.________________\n10.________________\n11.________________\n12.________________\n13.________________\n14.________________\n\n15.________________\n16.________________\n17.________________\n18.________________\n19.________________\n20.________________\n21.________________\n22.________________\n23.________________\n24.________________\n25.________________\n26.________________\n27.________________"
+    }
+  ],
   "sessions": [
     {
       "id": "06d5a44f-09db-4c3d-a23a-192d5ea0fe11",
@@ -89,7 +109,23 @@
       "isDemo": true,
       "createdAt": "2026-11-21T19:15:31.746Z",
       "expiresAt": "2026-12-21T19:15:31.746Z"
+    },
+    {
+      "id": "974b479c-af17-465d-aa0a-3d56e8163b83",
+      "tokenHash": "d81418d24883e9d8a6ab2abb7a6c4ab25515500891ade60ddaa9c163ebc00acc",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-21T21:29:48.950Z",
+      "expiresAt": "2026-12-21T21:29:48.950Z"
+    },
+    {
+      "id": "f9030759-06ab-4555-8ab5-880c4477e27e",
+      "tokenHash": "2a4cf7f26369f334a50fdeba717294ea6e97fc8e445aa4455f2dfbeabca09542",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-21T21:34:53.329Z",
+      "expiresAt": "2026-12-21T21:34:53.329Z"
     }
   ],
-  "version": 2
+  "version": 3
 }
