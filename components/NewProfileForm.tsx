@@ -83,13 +83,14 @@ export default function NewProfileForm({ authMode, initialProfileType }: NewProf
           <ArrowLeft size={19} />{messages.common.back}
         </button>
         <div className="profile-form-card">
-          <Brand size="medium" priority />
-          <h1>
-            {authMode === 'signin'
-              ? messages.auth.signInTitle
-              : addingChild ? messages.auth.addChild : messages.auth.createTitle}
-          </h1>
-          <p>{messages.auth.subtitle}</p>
+          <div className="profile-form-header">
+            <h1>
+              {authMode === 'signin'
+                ? messages.auth.signInTitle
+                : addingChild ? messages.auth.addChild : messages.auth.createTitle}
+            </h1>
+            <Brand size="medium" priority />
+          </div>
           <form onSubmit={submitProfile}>
             {authMode === 'signup' && (
               <>
