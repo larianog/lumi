@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { BookOpen, LoaderCircle, LogIn, Sparkles, Star, UserPlus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { messages } from '@/packages/i18n';
 import Brand from './Brand';
 
@@ -11,6 +11,17 @@ export default function LumiApp() {
   const router = useRouter();
   const [demoLoading, setDemoLoading] = useState(false);
   const [demoError, setDemoError] = useState('');
+  const [forestReady, setForestReady] = useState(false);
+  const [mascotReady, setMascotReady] = useState(false);
+  const [introFinished, setIntroFinished] = useState(false);
+  const artworkReady = forestReady && mascotReady;
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Bound the wait so stalled artwork cannot block the welcome actions.
+    const timeout = window.setTimeout(() => setIntroFinished(true), reducedMotion ? 0 : 4500);
+    return () => window.clearTimeout(timeout);
+  }, []);
 
   const enterDemo = async () => {
     setDemoLoading(true);
@@ -33,375 +44,67 @@ export default function LumiApp() {
 
   return (
     <main className="lumi-app">
-      {screen === 'welcome' && (
-        <WelcomeScreen onSignup={() => openSignup()} onSignIn={openSignIn} onDemo={enterDemo} />
-      )}
-      {screen === 'profile-form' && (
-        <ProfileFormScreen
-          authMode={authMode}
-          form={form}
-          error={formError}
-          onChange={setForm}
-          onSubmit={submitProfile}
-          onBack={() => setScreen(family ? 'profile-picker' : 'welcome')}
-        />
-      )}
-      {screen === 'profile-picker' && family && (
-        <ProfilePicker
-          profiles={family.profiles}
-          onSelect={selectProfile}
-          onAdd={() => openSignup('child')}
-        />
-      )}
-      {screen === 'home' && activeProfile && (
-        <HomeScreen
-          profile={activeProfile}
-          onSwitchProfile={() => setScreen('profile-picker')}
-          onActivity={(activityId) => {
-            setSelectedActivity(activityId);
-            setScreen('activity');
-          }}
-        />
-      )}
-      {screen === 'activity' && activeProfile && (
-        <ActivityScreen
-          activityId={selectedActivity}
-          profile={activeProfile}
-          onBack={() => setScreen('home')}
-          onComplete={() => completeActivity(selectedActivity)}
-        />
-      )}
-      {screen === 'report' && family && (
-        <ReportScreen
-          adultName={adultProfile?.firstName ?? messages.auth.adult}
-          childProfiles={childProfiles}
-          completions={completions}
-          onBack={() => setScreen('profile-picker')}
-          onAddChild={() => openSignup('child')}
-        />
-      )}
-
-      {adultPasswordOpen && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => setAdultPasswordOpen(false)}>
-          <form className="password-modal" onSubmit={openAdultArea} onMouseDown={(event) => event.stopPropagation()}>
-            <div className="modal-icon"><LockKeyhole size={24} /></div>
-            <h2>{messages.profiles.passwordTitle}</h2>
-            <p>{messages.profiles.passwordDescription}</p>
-            <label>
-              <span>{messages.profiles.passwordLabel}</span>
-              <input
-                type="password"
-                value={adultPassword}
-                onChange={(event) => setAdultPassword(event.target.value)}
-                autoFocus
-              />
-            </label>
-            {isDemo && <small>{messages.profiles.demoPassword}</small>}
-            {adultPasswordError && <p className="form-error">{adultPasswordError}</p>}
-            <div className="modal-actions">
-              <button type="button" className="button button-ghost" onClick={() => setAdultPasswordOpen(false)}>{messages.common.cancel}</button>
-              <button type="submit" className="button button-primary">{messages.common.continue}</button>
-            </div>
-          </form>
-        </div>
-      )}
-    </main>
-  );
-}
-
-function Brand() {
-  return (
-    <div className="brand" aria-label={messages.brand.name}>
-      <Sparkles aria-hidden="true" size={19} />
-      <span>{messages.brand.name}</span>
-    </div>
-  );
-}
-
-function WelcomeScreen({ onSignup, onSignIn, onDemo }: { onSignup: () => void; onSignIn: () => void; onDemo: () => void }) {
-  const [forestReady, setForestReady] = useState(false);
-  const [mascotReady, setMascotReady] = useState(false);
-  const [introFinished, setIntroFinished] = useState(false);
-  const artworkReady = forestReady && mascotReady;
-
-  useEffect(() => {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // Bound the wait so stalled artwork cannot block the welcome actions.
-    const timeout = window.setTimeout(() => setIntroFinished(true), reducedMotion ? 0 : 4500);
-    return () => window.clearTimeout(timeout);
-  }, []);
-
-  return (
-    <section className="welcome-screen" data-intro={!introFinished || undefined}>
-      <div className="welcome-art" aria-hidden="true">
-        <Image
-          className="welcome-forest"
-          src="/assets/forest-learning-bg.png"
-          alt=""
-          fill
-          loading="eager"
-          fetchPriority="high"
-          data-ready={forestReady}
-          onLoad={() => setForestReady(true)}
-          onError={() => setForestReady(true)}
-        />
-        <div className="welcome-orbit orbit-one" />
-        <div className="welcome-orbit orbit-two" />
-        <div className="welcome-mascot">
+      <section className="welcome-screen" data-intro={!introFinished || undefined}>
+        <div className="welcome-art" aria-hidden="true">
           <Image
-            src="/assets/lumi-avatar.png"
+            className="welcome-forest"
+            src="/assets/forest-learning-bg.png"
             alt=""
-            width={1199}
-            height={1312}
+            fill
             loading="eager"
             fetchPriority="high"
-            data-ready={artworkReady}
-            onLoad={() => setMascotReady(true)}
-            onError={() => setMascotReady(true)}
-            onAnimationEnd={() => setIntroFinished(true)}
+            data-ready={forestReady}
+            onLoad={() => setForestReady(true)}
+            onError={() => setForestReady(true)}
           />
-          <div className="floating-card star-card"><Star size={20} fill="currentColor" />+20</div>
-          <div className="floating-card discovery-card"><BookOpen size={20} />Nova descoberta!</div>
+          <div className="welcome-orbit orbit-one" />
+          <div className="welcome-orbit orbit-two" />
+          <div className="welcome-mascot">
+            <Image
+              src="/assets/lumi-avatar.png"
+              alt=""
+              width={1199}
+              height={1312}
+              loading="eager"
+              fetchPriority="high"
+              data-ready={artworkReady}
+              onLoad={() => setMascotReady(true)}
+              onError={() => setMascotReady(true)}
+              onAnimationEnd={() => setIntroFinished(true)}
+            />
+            <div className="floating-card star-card"><Star size={20} fill="currentColor" />+20</div>
+            <div className="floating-card discovery-card"><BookOpen size={20} />Nova descoberta!</div>
+          </div>
         </div>
-      </div>
-      <div className="welcome-copy" inert={!introFinished}>
-        <Brand />
-        <span className="eyebrow">{messages.welcome.eyebrow}</span>
-        <h1>{messages.welcome.title}</h1>
-        <p>{messages.welcome.description}</p>
-        <div className="welcome-actions">
-          <button className="button button-primary button-large" onClick={onSignup}><UserPlus size={20} />{messages.welcome.signUp}</button>
-          <button className="button button-secondary button-large" onClick={onSignIn}><LogIn size={20} />{messages.welcome.signIn}</button>
-          <button className="demo-link" onClick={onDemo}><Sparkles size={17} />{messages.welcome.demo}<span>{messages.welcome.demoHint}</span></button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProfileFormScreen({ authMode, form, error, onChange, onSubmit, onBack }: {
-  authMode: 'signup' | 'signin';
-  form: ProfileForm;
-  error: string;
-  onChange: (form: ProfileForm) => void;
-  onSubmit: (event: FormEvent) => void;
-  onBack: () => void;
-}) {
-  const update = <K extends keyof ProfileForm>(key: K, value: ProfileForm[K]) => onChange({ ...form, [key]: value });
-  return (
-    <section className="form-screen">
-      <div className="form-forest" />
-      <div className="form-shell">
-        <button className="back-button" onClick={onBack}><ArrowLeft size={19} />{messages.common.back}</button>
-        <div className="profile-form-card">
-          <Brand />
-          <h1>{authMode === 'signin' ? messages.auth.signInTitle : messages.auth.createTitle}</h1>
-          <p>{messages.auth.subtitle}</p>
-          <form onSubmit={onSubmit}>
-            {authMode === 'signup' && (
-              <>
-                <label className="form-field">
-                  <span>{messages.auth.type}</span>
-                  <select value={form.type} onChange={(event) => update('type', event.target.value as ProfileType)}>
-                    <option value="adult">{messages.auth.adult}</option>
-                    <option value="child">{messages.auth.child}</option>
-                  </select>
-                </label>
-                <div className="field-row">
-                  <label className="form-field"><span>{messages.auth.firstName}</span><input value={form.firstName} onChange={(event) => update('firstName', event.target.value)} autoComplete="given-name" /></label>
-                  <label className="form-field"><span>{messages.auth.lastName}</span><input value={form.lastName} onChange={(event) => update('lastName', event.target.value)} autoComplete="family-name" /></label>
-                </div>
-              </>
-            )}
-            <label className="form-field"><span>{messages.auth.phone}</span><input type="tel" value={form.phone} onChange={(event) => update('phone', event.target.value)} autoComplete="tel" /></label>
-            <label className="form-field"><span>{messages.auth.password}</span><input type="password" value={form.password} onChange={(event) => update('password', event.target.value)} autoComplete={authMode === 'signin' ? 'current-password' : 'new-password'} /></label>
-            {authMode === 'signup' && (
-              <label className="form-field"><span>{messages.auth.birthDate}</span><input type="date" value={form.birthDate} onChange={(event) => update('birthDate', event.target.value)} /><small>{messages.auth.birthDateHint}</small></label>
-            )}
-            {error && <p className="form-error">{error}</p>}
-            <button type="submit" className="button button-primary button-large form-submit">{authMode === 'signin' ? messages.auth.submitSignIn : messages.auth.submitCreate}</button>
-          </form>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProfilePicker({ profiles, onSelect, onAdd }: { profiles: Profile[]; onSelect: (profile: Profile) => void; onAdd: () => void }) {
-  const [selectingProfileId, setSelectingProfileId] = useState<string | null>(null);
-
-  const selectWithAnimation = (profile: Profile) => {
-    if (selectingProfileId) return;
-    setSelectingProfileId(profile.id);
-    window.setTimeout(() => {
-      setSelectingProfileId(null);
-      onSelect(profile);
-    }, 420);
-  };
-
-  return (
-    <section className={`forest-screen profile-picker-screen ${selectingProfileId ? 'profile-is-selecting' : ''}`}>
-      <div className="forest-overlay" />
-      <header className="forest-header"><Brand /></header>
-      <div className="profile-picker-heading">
-        <h1>{messages.profiles.title}</h1>
-        <p>{messages.profiles.subtitle}</p>
-      </div>
-      <div className="picker-lumi">
-        <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={420} height={460} priority />
-      </div>
-      <div className="profile-shelf" aria-busy={Boolean(selectingProfileId)}>
-        <div className="profile-grid">
-          {profiles.map((profile) => (
+        <div className="welcome-copy" inert={!introFinished}>
+          <Brand size="large" priority />
+          <span className="eyebrow">{messages.welcome.eyebrow}</span>
+          <h1>{messages.welcome.title}</h1>
+          <p>{messages.welcome.description}</p>
+          <div className="welcome-actions">
             <button
-              key={profile.id}
-              className={`profile-card ${selectingProfileId === profile.id ? 'profile-card-selected' : ''}`}
-              onClick={() => selectWithAnimation(profile)}
-              aria-label={messages.accessibility.selectProfile(profile.firstName)}
-              disabled={Boolean(selectingProfileId)}
+              className="button button-primary button-large"
+              onClick={() => router.push('/new-profile?mode=signup')}
             >
-              <span className="profile-avatar" style={{ backgroundColor: profileColors[profile.avatar % profileColors.length] }}>
-                {profile.type === 'adult' ? <ShieldCheck size={36} /> : <span>{profile.firstName.slice(0, 1).toUpperCase()}</span>}
-              </span>
-              <strong>{profile.firstName}</strong>
-              <small>{profile.type === 'adult' ? messages.profiles.adultArea : `${calculateAge(profile.birthDate)} anos`}</small>
+              <UserPlus size={20} />
+              {messages.welcome.signUp}
             </button>
-          ))}
-          <button className="profile-card profile-add" onClick={onAdd} disabled={Boolean(selectingProfileId)}>
-            <span className="profile-avatar"><Plus size={36} /></span>
-            <strong>{messages.profiles.addProfile}</strong>
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HomeScreen({ profile, onSwitchProfile, onActivity }: { profile: Profile; onSwitchProfile: () => void; onActivity: (id: ActivityId) => void }) {
-  return (
-    <section className="forest-screen home-screen">
-      <div className="forest-overlay forest-overlay-home" />
-      <header className="home-header">
-        <Brand />
-        <div className="home-stats"><span><Flame size={18} />{messages.home.streak}</span><span><Star size={18} fill="currentColor" />{messages.home.stars}</span></div>
-        <button className="mini-profile" onClick={onSwitchProfile}><span>{profile.firstName.slice(0, 1)}</span>{messages.home.switchProfile}</button>
-      </header>
-      <div className="home-layout">
-        <aside className="home-lumi">
-          <div className="lumi-halo" />
-          <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={480} height={520} priority />
-          <button className="button voice-cta" onClick={() => onActivity('suggest')}><Mic size={20} />{messages.home.talkToLumi}</button>
-        </aside>
-        <div className="activity-menu">
-          <span className="eyebrow">{messages.home.greeting(profile.firstName)}</span>
-          <h1>{messages.home.prompt}</h1>
-          <div className="activity-grid">
-            {activities.map(({ id, icon: Icon, accent }) => {
-              const copy = messages.activities[id];
-              return (
-                <button key={id} className={`activity-card accent-${accent}`} onClick={() => onActivity(id)}>
-                  <span className="activity-icon"><Icon size={29} /></span>
-                  <span className="activity-copy"><strong>{copy.title}</strong><small>{copy.description}</small></span>
-                  <span className="activity-badge">{copy.badge}</span>
-                </button>
-              );
-            })}
+            <button
+              className="button button-secondary button-large"
+              onClick={() => router.push('/new-profile?mode=signin')}
+            >
+              <LogIn size={20} />
+              {messages.welcome.signIn}
+            </button>
+            <button className="demo-link" onClick={enterDemo} disabled={demoLoading}>
+              {demoLoading ? <LoaderCircle className="spin" size={17} /> : <Sparkles size={17} />}
+              {demoLoading ? messages.common.loading : messages.welcome.demo}
+              <span>{messages.welcome.demoHint}</span>
+            </button>
+            {demoError && <p className="welcome-error" role="alert">{demoError}</p>}
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function ActivityScreen({ activityId, profile, onBack, onComplete }: { activityId: ActivityId; profile: Profile; onBack: () => void; onComplete: () => void }) {
-  const [answer, setAnswer] = useState('');
-  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
-  const [completed, setCompleted] = useState(false);
-  const [theme, setTheme] = useState('');
-  const [voiceOpen, setVoiceOpen] = useState(false);
-  const task = activityId === 'school' ? messages.activities.schoolTask : activityId === 'games' ? messages.activities.gamesTask : activityId === 'stories' ? messages.activities.storiesTask : messages.activities.suggestTask;
-  const activity = messages.activities[activityId];
-
-  const choose = (value: string) => {
-    setAnswer(value);
-    if ('correct' in task) setFeedback(value === task.correct ? 'correct' : 'incorrect');
-  };
-
-  const finish = () => {
-    if (!completed) onComplete();
-    setCompleted(true);
-  };
-
-  return (
-    <section className="activity-screen">
-      <header className="activity-header"><button className="back-button" onClick={onBack}><ArrowLeft size={19} />{messages.common.back}</button><Brand /><span className="activity-header-profile">{profile.firstName}</span></header>
-      <div className="activity-stage">
-        <div className="task-card">
-          <span className="eyebrow">{task.eyebrow}</span>
-          <h1>{task.title}</h1>
-          <p>{task.body}</p>
-          {activityId === 'games' && <div className="pattern-row" aria-hidden="true"><span className="shape circle" /><span className="shape triangle" /><span className="shape square" /><span className="shape circle" /><span className="shape question">?</span></div>}
-          {'answers' in task ? (
-            <div className="answer-grid" aria-label={messages.activities.chooseAnswer}>
-              {task.answers.map((option) => <button key={option} className={`answer-button ${answer === option ? 'selected' : ''}`} onClick={() => choose(option)}>{option}</button>)}
-            </div>
-          ) : (
-            <textarea value={theme} onChange={(event) => setTheme(event.target.value)} placeholder={task.placeholder} rows={4} />
-          )}
-          {feedback && <div className={`feedback ${feedback}`}><CheckCircle2 size={22} />{feedback === 'correct' ? messages.activities.correct : messages.activities.tryAgain}</div>}
-          {completed && <div className="completion-banner"><Sparkles size={25} /><div><strong>{messages.activities.completed}</strong><span>{messages.activities.completedDescription}</span></div></div>}
-          <div className="task-actions">
-            <button className="button button-secondary" onClick={() => setVoiceOpen(true)}><Mic size={19} />{messages.activities.askHint}</button>
-            <button className="button button-primary" onClick={finish} disabled={activityId === 'suggest' ? !theme.trim() : feedback !== 'correct'}>{messages.common.finish}</button>
-          </div>
-        </div>
-        <aside className="task-lumi">
-          <div className="task-lumi-label">{activity.title}</div>
-          <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={390} height={425} />
-        </aside>
-      </div>
-      {voiceOpen && (
-        <LumiVoiceAgent
-          profileName={profile.firstName}
-          age={calculateAge(profile.birthDate)}
-          activityTitle={activity.title}
-          onClose={() => setVoiceOpen(false)}
-        />
-      )}
-    </section>
-  );
-}
-
-function ReportScreen({ adultName, childProfiles, completions, onBack, onAddChild }: { adultName: string; childProfiles: Profile[]; completions: Completion[]; onBack: () => void; onAddChild: () => void }) {
-  const [selectedChildId, setSelectedChildId] = useState(childProfiles[0]?.id ?? '');
-  const selectedChild = childProfiles.find((child) => child.id === selectedChildId);
-  const childCompletions = useMemo(() => completions.filter((completion) => completion.profileId === selectedChildId), [completions, selectedChildId]);
-  return (
-    <section className="report-screen">
-      <header className="report-header"><button className="back-button" onClick={onBack}><ArrowLeft size={19} />{messages.common.back}</button><Brand /><span>{adultName}</span></header>
-      <div className="report-layout">
-        <aside className="report-sidebar">
-          <span className="eyebrow">{messages.profiles.adultArea}</span>
-          <h1>{messages.report.title}</h1>
-          <p>{messages.report.subtitle}</p>
-          <div className="child-tabs">
-            {childProfiles.map((child) => <button key={child.id} className={selectedChildId === child.id ? 'active' : ''} onClick={() => setSelectedChildId(child.id)}><span style={{ background: profileColors[child.avatar % profileColors.length] }}>{child.firstName.slice(0, 1)}</span>{child.firstName}</button>)}
-          </div>
-          <button className="button button-secondary" onClick={onAddChild}><Plus size={18} />{messages.report.addChild}</button>
-        </aside>
-        <div className="report-content">
-          <div className="report-hero">
-            <div><span className="eyebrow">{selectedChild?.firstName}</span><strong>{childCompletions.length}</strong><p>{messages.report.completed}</p></div>
-            <Image src="/assets/lumi-avatar.png" alt="" width={180} height={200} />
-          </div>
-          <h2>{messages.report.recent}</h2>
-          <div className="history-list">
-            {childCompletions.length === 0 ? <div className="history-empty"><CalendarDays size={28} /><p>{messages.report.empty}</p></div> : childCompletions.map((completion) => (
-              <div className="history-item" key={completion.id}><span className="history-icon"><CheckCircle2 size={22} /></span><div><strong>{completion.activityTitle}</strong><small>{messages.report.today}</small></div><Star size={19} fill="currentColor" /></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    </main>
   );
 }

@@ -155,16 +155,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .forest-screen { min-height: 100dvh; position: relative; isolation: isolate; overflow: hidden; color: white; background: #0f6c5d; }
 .forest-overlay { position: absolute; z-index: -2; inset: 0; background: linear-gradient(180deg, rgba(5,53,47,.08), rgba(4,48,42,.62)), url('/assets/forest-learning-bg.png') center / cover; animation: forest-in 1.2s ease both; }
 .forest-overlay::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 22%, rgba(239,255,193,.25), transparent 30%); }
-.profile-picker-screen { width: 100%; height: 100svh; min-height: 620px; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; align-items: center; padding-top: 72px; }
+.profile-picker-screen { width: 100%; min-height: 100svh; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; align-items: center; padding-top: 72px; }
+.profile-picker-screen > :is(.loading-spinner, .error-message) { grid-row: 1 / -1; min-height: 0; align-self: stretch; }
 .profile-picker-screen::after { content: ""; position: absolute; z-index: -1; inset: 0; background: rgba(7,58,51,.2); backdrop-filter: saturate(.85); }
 .forest-header { position: absolute; z-index: 4; top: max(20px, env(safe-area-inset-top)); left: 20px; }
 .profile-picker-heading { position: relative; z-index: 2; align-self: start; min-width: 0; width: 100%; padding: 0 20px; text-align: center; }
 .profile-picker-heading h1 { max-width: 700px; margin: 0 auto; font-family: var(--font-bricolage), sans-serif; font-size: clamp(2.15rem, 10vw, 3.3rem); line-height: .98; letter-spacing: -.06em; text-shadow: 0 4px 24px rgba(0,0,0,.2); }
 .profile-picker-heading p { margin: 8px auto 0; color: rgba(255,255,255,.78); font-size: .9rem; }
-.picker-lumi { position: relative; z-index: 1; place-self: center; width: min(64vw, 280px); align-self: end; filter: drop-shadow(0 28px 32px rgba(0,0,0,.24)); animation: lumi-wave 4s ease-in-out infinite; }
+.picker-lumi { position: relative; z-index: 1; place-self: center; width: min(64vw, 36svh, 280px); filter: drop-shadow(0 28px 32px rgba(0,0,0,.24)); animation: lumi-wave 4s ease-in-out infinite; }
 .picker-lumi img { width: 100%; height: auto; }
 .profile-shelf { position: relative; z-index: 3; min-width: 0; width: 100%; padding: 15px 0 max(14px, env(safe-area-inset-bottom)); background: linear-gradient(180deg, transparent, rgba(2,35,31,.5) 22%, rgba(2,35,31,.78)); }
-.profile-grid { width: 100%; display: flex; gap: 10px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; padding: 4px 18px; }
+.profile-grid { width: 100%; display: flex; justify-content: safe center; gap: 10px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; padding: 12px 18px 8px; }
 .profile-grid::-webkit-scrollbar { display: none; }
 .profile-card { flex: 0 0 96px; display: grid; justify-items: center; align-content: start; gap: 5px; scroll-snap-align: center; padding: 8px 5px; border: 0; border-radius: 18px; background: transparent; color: white; cursor: pointer; transition: transform .24s ease, opacity .24s ease, background .24s ease; }
 .profile-card:disabled { cursor: default; }
@@ -329,13 +330,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (min-width: 721px) {
-  .profile-picker-screen { min-height: 680px; padding-top: 86px; }
+  .profile-picker-screen { padding-top: 86px; }
   .forest-header { top: 28px; left: 34px; }
   .profile-picker-heading h1 { font-size: clamp(3rem, 5vw, 4.6rem); }
   .profile-picker-heading p { margin-top: 10px; font-size: 1rem; }
   .picker-lumi { width: min(34vh, 360px); }
   .profile-shelf { padding-block: 18px max(20px, env(safe-area-inset-bottom)); }
-  .profile-grid { justify-content: center; gap: clamp(14px, 2vw, 24px); overflow: visible; }
+  .profile-grid { gap: clamp(14px, 2vw, 24px); }
   .profile-card { flex-basis: 132px; gap: 6px; padding: 10px 7px; }
   .profile-avatar { width: 112px; border-width: 4px; border-radius: 27px; }
   .profile-avatar > span { font-size: 3rem; }

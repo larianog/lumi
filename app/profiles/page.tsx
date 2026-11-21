@@ -28,6 +28,7 @@ export default function ProfilesPage() {
   const [adultPasswordError, setAdultPasswordError] = useState('');
   const [showAdultPassword, setShowAdultPassword] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,16 +49,24 @@ export default function ProfilesPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const selectProfile = (profile: Profile) => {
-    if (profile.type === 'adult') {
-      setAdultPasswordOpen(true);
-      setAdultPassword('');
-      setAdultPasswordError('');
-      setShowAdultPassword(false);
-      return;
-    }
-    router.push(`/profile/${profile.id}`);
-  };
+  useEffect(() => {
+    if (!selectedProfile) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timeout = window.setTimeout(() => {
+      if (selectedProfile.type === 'adult') {
+        setAdultPassword('');
+        setAdultPasswordError('');
+        setShowAdultPassword(false);
+        setAdultPasswordOpen(true);
+      } else {
+        router.push(`/profile/${selectedProfile.id}`);
+      }
+      setSelectedProfile(null);
+    }, reducedMotion ? 0 : 420);
+
+    return () => window.clearTimeout(timeout);
+  }, [router, selectedProfile]);
 
   const openAdultArea = async (event: FormEvent) => {
     event.preventDefault();
@@ -91,34 +100,43 @@ export default function ProfilesPage() {
   }
 
   return (
-    <section className="forest-screen profile-picker-screen">
+    <section className={`forest-screen profile-picker-screen${selectedProfile ? ' profile-is-selecting' : ''}`}>
       <div className="forest-overlay" />
       <header className="forest-header"><Brand size="medium" /></header>
-      <div className="picker-layout">
-        <div className="picker-lumi">
-          <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={420} height={460} priority />
-          <div className="speech-bubble">{messages.profiles.title}</div>
-        </div>
-        <div className="profile-picker-content">
-          <h1>{messages.profiles.title}</h1>
-          <p>{messages.profiles.subtitle}</p>
-          <div className="profile-grid">
-            {family.profiles.map((profile) => (
-              <button key={profile.id} className="profile-card" onClick={() => selectProfile(profile)} aria-label={messages.accessibility.selectProfile(profile.firstName)}>
-                <span className="profile-avatar" style={{ backgroundColor: profileColors[profile.avatar % profileColors.length] }}>
-                  {profile.type === 'adult' ? <ShieldCheck size={36} /> : <span>{profile.firstName.slice(0, 1).toUpperCase()}</span>}
-                </span>
-                <strong>{profile.firstName}</strong>
-                <small>{profile.type === 'adult' ? messages.profiles.adultArea : `${calculateAge(profile.birthDate)} anos`}</small>
-              </button>
-            ))}
-            {!isDemo && (
-              <button className="profile-card profile-add" onClick={() => router.push('/new-profile?mode=signup&type=child')}>
-                <span className="profile-avatar"><Plus size={36} /></span>
-                <strong>{messages.profiles.addProfile}</strong>
-              </button>
-            )}
-          </div>
+      <div className="profile-picker-heading">
+        <h1>{messages.profiles.title}</h1>
+        <p>{messages.profiles.subtitle}</p>
+      </div>
+      <div className="picker-lumi">
+        <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={420} height={460} priority />
+      </div>
+      <div className="profile-shelf" aria-busy={Boolean(selectedProfile)}>
+        <div className="profile-grid">
+          {family.profiles.map((profile) => (
+            <button
+              key={profile.id}
+              className={`profile-card${selectedProfile?.id === profile.id ? ' profile-card-selected' : ''}`}
+              onClick={() => setSelectedProfile(profile)}
+              aria-label={messages.accessibility.selectProfile(profile.firstName)}
+              disabled={Boolean(selectedProfile)}
+            >
+              <span className="profile-avatar" style={{ backgroundColor: profileColors[profile.avatar % profileColors.length] }}>
+                {profile.type === 'adult' ? <ShieldCheck size={36} /> : <span>{profile.firstName.slice(0, 1).toUpperCase()}</span>}
+              </span>
+              <strong>{profile.firstName}</strong>
+              <small>{profile.type === 'adult' ? messages.profiles.adultArea : `${calculateAge(profile.birthDate)} anos`}</small>
+            </button>
+          ))}
+          {!isDemo && (
+            <button
+              className="profile-card profile-add"
+              onClick={() => router.push('/new-profile?mode=signup&type=child')}
+              disabled={Boolean(selectedProfile)}
+            >
+              <span className="profile-avatar"><Plus size={36} /></span>
+              <strong>{messages.profiles.addProfile}</strong>
+            </button>
+          )}
         </div>
       </div>
 
