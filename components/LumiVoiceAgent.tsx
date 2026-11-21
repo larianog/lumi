@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { Loader2, Mic, X } from 'lucide-react';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { RTMClient } from 'agora-rtm';
@@ -73,7 +74,11 @@ export default function LumiVoiceAgent({ profileName, age, activityTitle, onClos
             profile_name: profileName,
             age,
             activity_title: activityTitle,
-          } satisfies ClientStartRequest),
+          } satisfies ClientStartRequest & {
+            profile_name: string;
+            age: number;
+            activity_title: string;
+          }),
         })
           .then(async (response) => {
             if (!response.ok) {
@@ -140,14 +145,14 @@ export default function LumiVoiceAgent({ profileName, age, activityTitle, onClos
     setRtmClient(null);
     setShowConversation(false);
     onClose();
-  }, [agoraData?.agentId, onClose, rtmClient]);
+  }, [agoraData, onClose, rtmClient]);
 
   return (
     <div className="voice-modal" role="dialog" aria-modal="true" aria-label={messages.voice.title}>
       {!showConversation ? (
         <div className="voice-precall">
           <button className="voice-close" onClick={onClose} aria-label={messages.common.close}><X size={21} /></button>
-          <div className="voice-precall-orbit"><img src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} /></div>
+          <div className="voice-precall-orbit"><Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={160} height={165} /></div>
           <span className="eyebrow">{messages.voice.title}</span>
           <h2>{messages.voice.preCall}</h2>
           <p>{messages.voice.configurationHint}</p>

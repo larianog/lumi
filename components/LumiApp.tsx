@@ -278,7 +278,7 @@ export default function LumiApp() {
       {screen === 'report' && family && (
         <ReportScreen
           adultName={adultProfile?.firstName ?? messages.auth.adult}
-          children={childProfiles}
+          childProfiles={childProfiles}
           completions={completions}
           onBack={() => setScreen('profile-picker')}
           onAddChild={() => openSignup('child')}
@@ -524,9 +524,9 @@ function ActivityScreen({ activityId, profile, onBack, onComplete }: { activityI
   );
 }
 
-function ReportScreen({ adultName, children, completions, onBack, onAddChild }: { adultName: string; children: Profile[]; completions: Completion[]; onBack: () => void; onAddChild: () => void }) {
-  const [selectedChildId, setSelectedChildId] = useState(children[0]?.id ?? '');
-  const selectedChild = children.find((child) => child.id === selectedChildId);
+function ReportScreen({ adultName, childProfiles, completions, onBack, onAddChild }: { adultName: string; childProfiles: Profile[]; completions: Completion[]; onBack: () => void; onAddChild: () => void }) {
+  const [selectedChildId, setSelectedChildId] = useState(childProfiles[0]?.id ?? '');
+  const selectedChild = childProfiles.find((child) => child.id === selectedChildId);
   const childCompletions = useMemo(() => completions.filter((completion) => completion.profileId === selectedChildId), [completions, selectedChildId]);
   return (
     <section className="report-screen">
@@ -537,7 +537,7 @@ function ReportScreen({ adultName, children, completions, onBack, onAddChild }: 
           <h1>{messages.report.title}</h1>
           <p>{messages.report.subtitle}</p>
           <div className="child-tabs">
-            {children.map((child) => <button key={child.id} className={selectedChildId === child.id ? 'active' : ''} onClick={() => setSelectedChildId(child.id)}><span style={{ background: profileColors[child.avatar % profileColors.length] }}>{child.firstName.slice(0, 1)}</span>{child.firstName}</button>)}
+            {childProfiles.map((child) => <button key={child.id} className={selectedChildId === child.id ? 'active' : ''} onClick={() => setSelectedChildId(child.id)}><span style={{ background: profileColors[child.avatar % profileColors.length] }}>{child.firstName.slice(0, 1)}</span>{child.firstName}</button>)}
           </div>
           <button className="button button-secondary" onClick={onAddChild}><Plus size={18} />{messages.report.addChild}</button>
         </aside>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Nunito, Bricolage_Grotesque } from 'next/font/google';
 import './globals.css';
+import './lumi.css';
 
 const nunito = Nunito({
   subsets: ['latin'],
