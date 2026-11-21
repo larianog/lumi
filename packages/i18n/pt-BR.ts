@@ -158,7 +158,7 @@ export const ptBR = {
     connected: 'Lumi está com você',
     transcript: 'Nossa conversa',
     waitingTranscript: 'Quando a conversa começar, as falas aparecem aqui.',
-    connectionError: 'Não foi possível chamar o Lumi agora. Você pode continuar a atividade por toque.',
+    connectionError: 'Lumi está indisponível agora.',
     configurationHint: 'Configure as credenciais da Agora e do LemonSlice para ativar a voz e o avatar ao vivo.',
     genericFailure: 'Espere só um pouquinho. Vamos tentar de novo.',
     agentGreeting: (name: string) => `Oi, ${name}! Eu sou o Lumi. O que vamos descobrir juntos hoje?`,
