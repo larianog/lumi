@@ -10,6 +10,7 @@
   "scripts": {
     "doctor": "node scripts/doctor.mjs",
     "dev": "next dev",
+    "dev:lan": "next dev --experimental-https -H 0.0.0.0",
     "build": "npm run typecheck && next build --webpack",
     "start": "next start",
     "lint": "eslint .",

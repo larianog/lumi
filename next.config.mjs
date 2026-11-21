@@ -6,6 +6,8 @@ const rootDir = dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  // Allow opening the dev server from other devices on the local network.
+  allowedDevOrigins: ['172.16.30.90', '172.16.*.*', '192.168.*.*', '10.*.*.*'],
   images: {
     unoptimized: true,
   },
