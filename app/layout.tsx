@@ -1,19 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Nunito, Bricolage_Grotesque } from 'next/font/google';
 import './globals.css';
 import './lumi.css';
-
-const nunito = Nunito({
-  subsets: ['latin'],
-  variable: '--font-nunito',
-  display: 'swap',
-});
-
-const bricolage = Bricolage_Grotesque({
-  subsets: ['latin'],
-  variable: '--font-bricolage',
-  display: 'swap',
-});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -52,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${nunito.variable} ${bricolage.variable}`}>
+    <html lang="pt-BR">
       <body>{children}</body>
     </html>
   );

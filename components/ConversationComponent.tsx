@@ -23,7 +23,8 @@ import {
 } from 'agora-agent-client-toolkit';
 import { AgentVisualizer } from 'agora-agent-uikit';
 import { MicButtonWithVisualizer } from 'agora-agent-uikit/rtc';
-import { DEFAULT_AGENT_UID } from '@/lib/agora';
+import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
+import { messages } from '@/packages/i18n';
 import {
   getCurrentInProgressMessage,
   getMessageList,
@@ -31,18 +32,10 @@ import {
   normalizeTimestampMs,
   normalizeTranscript,
 } from '@/lib/conversation';
-import { MicrophoneSelector } from './MicrophoneSelector';
 import {
   getConversationIssueSeverity,
   type ConnectionIssue,
 } from './ConversationErrorCard';
-import { ConnectionStatusPanel } from './ConnectionStatusPanel';
-import { QuickstartConversationLayout } from './QuickstartConversationLayout';
-import {
-  QuickstartPipelineMetrics,
-  type QuickstartAgentMetric,
-} from './QuickstartPipelineMetrics';
-import { QuickstartTranscriptPanel } from './QuickstartTranscriptPanel';
 import type { ConversationComponentProps } from '@/types/conversation';
 
 // Cap the displayed issues list to avoid overwhelming the UI during a cascade of errors.
@@ -100,12 +93,12 @@ export default function ConversationComponent({
   const remoteUsers = useRemoteUsers();
   const [isEnabled, setIsEnabled] = useState(true);
   const [isAgentConnected, setIsAgentConnected] = useState(false);
-  const [isConnectionDetailsOpen, setIsConnectionDetailsOpen] = useState(false);
 
   // Tracks granular RTC connection state for the status dot.
   // Agora states: DISCONNECTED | CONNECTING | CONNECTED | DISCONNECTING | RECONNECTING
   const [connectionState, setConnectionState] = useState<string>('CONNECTING');
   const agentUID = String(DEFAULT_AGENT_UID);
+  const avatarUID = String(DEFAULT_AVATAR_UID);
   const [joinedUID, setJoinedUID] = useState<UID>(0);
 
   // Transcript + agent state — managed with AgoraVoiceAI (see effect below).
@@ -113,7 +106,6 @@ export default function ConversationComponent({
     TranscriptHelperItem<Partial<UserTranscription | AgentTranscription>>[]
   >([]);
   const [agentState, setAgentState] = useState<AgentState | null>(null);
-  const [agentMetrics, setAgentMetrics] = useState<QuickstartAgentMetric[]>([]);
   const [connectionIssues, setConnectionIssues] = useState<ConnectionIssue[]>(
     [],
   );
@@ -131,12 +123,6 @@ export default function ConversationComponent({
     });
   }, []);
 
-  // Auto-open details panel as soon as a new issue is recorded.
-  useEffect(() => {
-    if (connectionIssues.length > 0) {
-      setIsConnectionDetailsOpen(true);
-    }
-  }, [connectionIssues.length]);
 
   // StrictMode guard: delay `useJoin`'s ready flag until after the fake-unmount
   // cycle completes. React StrictMode fires cleanup synchronously before any
@@ -238,9 +224,6 @@ export default function ConversationComponent({
         ai.on(AgoraVoiceAIEvents.AGENT_STATE_CHANGED, (_, event) =>
           setAgentState(event.state),
         );
-        ai.on(AgoraVoiceAIEvents.AGENT_METRICS, (_, metrics) => {
-          setAgentMetrics((prev) => [...prev, metrics].slice(-8));
-        });
         ai.on(AgoraVoiceAIEvents.MESSAGE_ERROR, (agentUserId, error) => {
           addConnectionIssue({
             id: `${Date.now()}-${agentUserId}-message-error-${error.code}`,
@@ -468,61 +451,81 @@ export default function ConversationComponent({
     onEndConversation();
   }, [onEndConversation]);
 
+  const avatarUser = remoteUsers.find((user) => user.uid.toString() === avatarUID);
+  const displayMessages = currentInProgressMessage
+    ? [...messageList, currentInProgressMessage]
+    : messageList;
+  const statusLabel =
+    visualizerState === 'listening'
+      ? messages.voice.listening
+      : visualizerState === 'analyzing'
+        ? messages.voice.thinking
+        : visualizerState === 'talking'
+          ? messages.voice.speaking
+          : visualizerState === 'ambient'
+            ? messages.voice.connected
+            : messages.voice.connecting;
+
   return (
-    <QuickstartConversationLayout
-      statusPanel={
-        <ConnectionStatusPanel
-          connectionState={connectionState}
-          connectionSeverity={connectionSeverity}
-          connectionIssues={connectionIssues}
-          isOpen={isConnectionDetailsOpen}
-          onToggle={() => setIsConnectionDetailsOpen((open) => !open)}
-        />
-      }
-      pipelineMetrics={<QuickstartPipelineMetrics metrics={agentMetrics} />}
-      transcriptPanel={
-        <QuickstartTranscriptPanel
-          messageList={messageList}
-          currentInProgressMessage={currentInProgressMessage}
-          agentUID={agentUID}
-        />
-      }
-      visualizer={
-        <div
-          className="relative flex h-full min-h-[20rem] w-full max-w-4xl items-center justify-center"
-          role="region"
-          aria-label="AI agent status visualization"
-        >
-          <AgentVisualizer state={visualizerState} size="lg" />
-          {remoteUsers.map((user) => (
-            <div key={user.uid} className="hidden">
-              <RemoteUser user={user} />
-            </div>
-          ))}
+    <div className="lumi-conversation">
+      <header className="conversation-header">
+        <div className="conversation-title">
+          <span className="conversation-title-icon">✦</span>
+          <div><strong>{messages.voice.title}</strong><small>{statusLabel}</small></div>
         </div>
-      }
-      controls={
+        <button className="conversation-end" onClick={handleEndConversation}>{messages.voice.end}</button>
+      </header>
+      <div className="conversation-stage">
         <div
-          className="mx-auto flex w-fit items-center gap-3 rounded-full border border-border bg-card/80 px-4 py-2 backdrop-blur-md"
-          role="group"
-          aria-label="Audio controls"
+          className="avatar-stage"
+          role="region"
+          aria-label={messages.accessibility.lumiMascot}
         >
-          <div className="conversation-mic-host flex items-center justify-center">
+          {avatarUser ? (
+            <div className="lumi-live-avatar"><RemoteUser user={avatarUser} /></div>
+          ) : (
+            <img className="lumi-avatar-fallback" src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} />
+          )}
+          {remoteUsers.filter((user) => user.uid.toString() !== avatarUID).map((user) => (
+            <div key={user.uid} className="hidden"><RemoteUser user={user} /></div>
+          ))}
+          <div className="agent-visualizer-shell"><AgentVisualizer state={visualizerState} size="lg" /></div>
+          <div className="conversation-controls" role="group" aria-label={messages.voice.title}>
+            <div className="conversation-mic-host">
             <MicButtonWithVisualizer
               isEnabled={isEnabled}
               setIsEnabled={setIsEnabled}
               track={localMicrophoneTrack}
               onToggle={handleMicToggle}
-              className="overflow-visible"
-              aria-label={isEnabled ? 'Mute microphone' : 'Unmute microphone'}
+              aria-label={isEnabled ? messages.voice.mute : messages.voice.unmute}
               enabledColor="hsl(var(--primary))"
               disabledColor="hsl(var(--destructive))"
             />
+            </div>
           </div>
-          <MicrophoneSelector localMicrophoneTrack={localMicrophoneTrack} />
         </div>
-      }
-      onEndConversation={handleEndConversation}
-    />
+        <aside className="conversation-transcript">
+          <h2>{messages.voice.transcript}</h2>
+          <small>{statusLabel}</small>
+          <div className="transcript-list">
+            {displayMessages.length === 0 ? (
+              <p className="transcript-empty">{messages.voice.waitingTranscript}</p>
+            ) : (
+              displayMessages.slice(-6).map((message, index) => (
+                <div
+                  className={`transcript-bubble ${String(message.uid) === agentUID ? 'agent' : 'user'}`}
+                  key={`${message.turn_id}-${index}`}
+                >
+                  {message.text}
+                </div>
+              ))
+            )}
+          </div>
+          {connectionSeverity !== 'normal' && connectionIssues[0] && (
+            <p className="connection-details">{connectionIssues[0].message}</p>
+          )}
+        </aside>
+      </div>
+    </div>
   );
 }

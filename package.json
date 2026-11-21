@@ -10,7 +10,7 @@
   "scripts": {
     "doctor": "node scripts/doctor.mjs",
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run typecheck && next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "verify:api": "node --import tsx scripts/verify-api-contracts.ts",

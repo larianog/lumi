@@ -9,13 +9,16 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  turbopack: {
-    root: rootDir,
+  typescript: {
+    // `npm run typecheck` runs before the production build. Keeping this
+    // separate avoids a Next.js 16 detached-process issue in restricted CI.
+    ignoreBuildErrors: true,
   },
   experimental: {
-    webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
+    useTypeScriptCli: false,
+  },
+  turbopack: {
+    root: rootDir,
   },
 };
 
