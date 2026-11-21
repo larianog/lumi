@@ -70,6 +70,7 @@
 
 - `NEXT_PUBLIC_AGORA_APP_ID` set for all required environments.
 - `NEXT_AGORA_APP_CERTIFICATE` set as server-side secret only.
+- `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` stored as GitHub repository secrets for the production deployment workflow.
 - Optional BYOK keys set only when related provider block is enabled.
 - Preview environments use non-production credentials.
 

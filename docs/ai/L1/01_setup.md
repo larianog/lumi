@@ -92,6 +92,8 @@ Vercel:
 - Requires environment vars configured per environment scope.
 - Keep `NEXT_AGORA_APP_CERTIFICATE` private server variable.
 - Use `pnpm run build` locally before pushing deployment changes.
+- `.github/workflows/deploy-vercel.yml` deploys to production on pushes to `main` using `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` GitHub repository secrets.
+- Avoid a second deployment from the Vercel Git integration when using the Actions workflow.
 
 ## Setup Change Checklist
 

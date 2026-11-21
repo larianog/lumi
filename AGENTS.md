@@ -46,6 +46,8 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - Deploy the repository as a single Next.js app.
 - Set `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE` in the deployment target.
 - Keep `NEXT_AGORA_APP_CERTIFICATE` server-side only.
+- `.github/workflows/deploy-vercel.yml` deploys production on pushes to `main` using GitHub repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
+- Avoid duplicate production deployments if the Vercel Git integration is also enabled.
 
 ## Routing / Ownership
 

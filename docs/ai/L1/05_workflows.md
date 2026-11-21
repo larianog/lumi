@@ -57,6 +57,13 @@ Bootstrap behavior:
 2. Confirm docs alignment (`README`, guides, `AGENTS`, `docs/ai`).
 3. Use conventional commit and branch naming.
 
+## Deploy to Vercel from GitHub Actions
+
+1. Link the Vercel project locally with `vercel link` to obtain `orgId` and `projectId` from `.vercel/project.json`.
+2. Set GitHub repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
+3. Set `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE` in the Vercel project's Production environment.
+4. Push to `main`; `.github/workflows/deploy-vercel.yml` runs `vercel deploy --prod`.
+
 ## Progressive Disclosure Doc Workflow
 
 - `generate docs`: create `docs/ai/` tree when absent.

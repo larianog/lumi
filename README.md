@@ -85,6 +85,16 @@ rg "^(NEXT_PUBLIC_AGORA_APP_ID|NEXT_AGORA_APP_CERTIFICATE)=" .env.local
 
 Copy those two values into Vercel Project Settings -> Environment Variables.
 
+To deploy production on every push to `main` through GitHub Actions, configure these repository secrets:
+
+| Secret | Value |
+| --- | --- |
+| `VERCEL_TOKEN` | A Vercel access token with access to the project. |
+| `VERCEL_ORG_ID` | The `orgId` from `.vercel/project.json` after running `vercel link` locally. |
+| `VERCEL_PROJECT_ID` | The `projectId` from the same file. |
+
+The [deployment workflow](.github/workflows/deploy-vercel.yml) runs `vercel deploy --prod` on each push to `main`. Keep the Agora variables in Vercel Project Settings so they are available to the production build and server routes. If the Vercel Git integration is also deploying this project on pushes, disable its automatic deployments to avoid a second production deployment.
+
 ### Environment variables
 
 Defined in [`env.local.example`](env.local.example).
