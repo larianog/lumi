@@ -2,11 +2,12 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CalendarDays, CheckCircle2, Plus, Star } from 'lucide-react';
+import { ArrowLeft, CalendarDays, CheckCircle2, FileText, Plus, Star } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import Brand from '@/components/Brand';
 import { messages } from '@/packages/i18n';
 import type { ActivityCompletion, Family } from '@/types/database';
+import type { StudyMaterialDto } from '@/types/materials';
 
 const profileColors = ['#eaf9bb', '#a8e6cf', '#d7c5f4', '#ffd79b', '#ffc9d6'];
 
@@ -14,6 +15,7 @@ export default function ReportPage() {
   const router = useRouter();
   const [family, setFamily] = useState<Family | null>(null);
   const [completions, setCompletions] = useState<ActivityCompletion[]>([]);
+  const [materials, setMaterials] = useState<StudyMaterialDto[]>([]);
   const [selectedChildId, setSelectedChildId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -22,20 +24,24 @@ export default function ReportPage() {
     let cancelled = false;
     const loadData = async () => {
       try {
-        const [familyResponse, progressResponse] = await Promise.all([
+        const [familyResponse, progressResponse, materialsResponse] = await Promise.all([
           fetch('/api/profiles', { cache: 'no-store' }),
           fetch('/api/activities?scope=family', { cache: 'no-store' }),
+          fetch('/api/materials?scope=family', { cache: 'no-store' }),
         ]);
-        if (!familyResponse.ok || !progressResponse.ok) {
-          if (!cancelled) setError(progressResponse.status === 403 ? 'Confirme a senha do responsável para abrir o relatório.' : 'Não foi possível carregar o relatório.');
+        if (!familyResponse.ok || !progressResponse.ok || !materialsResponse.ok) {
+          const adultAccessRequired = progressResponse.status === 403 || materialsResponse.status === 403;
+          if (!cancelled) setError(adultAccessRequired ? 'Confirme a senha do responsável para abrir o relatório.' : 'Não foi possível carregar o relatório.');
           return;
         }
         const familyData = await familyResponse.json() as { family: Family };
         const progressData = await progressResponse.json() as ActivityCompletion[];
+        const materialsData = await materialsResponse.json() as StudyMaterialDto[];
         const firstChild = familyData.family.profiles.find((profile) => profile.type === 'child');
         if (!cancelled) {
           setFamily(familyData.family);
           setCompletions(progressData);
+          setMaterials(materialsData);
           setSelectedChildId(firstChild?.id ?? '');
         }
       } finally {
@@ -50,6 +56,9 @@ export default function ReportPage() {
   const adultProfile = useMemo(() => family?.profiles.find((profile) => profile.type === 'adult') ?? null, [family]);
   const selectedChild = childProfiles.find((child) => child.id === selectedChildId) ?? null;
   const childCompletions = completions.filter((completion) => completion.profileId === selectedChildId);
+  const childMaterials = materials.filter((material) => material.profileId === selectedChildId);
+  const completedMaterials = childMaterials.filter((material) => material.completedAt);
+  const pendingMaterials = childMaterials.filter((material) => !material.completedAt && material.extractionStatus !== 'failed');
 
   if (loading) return <ReportState message={messages.common.loading} />;
   if (!family) return <ReportState message={error || 'Nenhuma família encontrada.'} action={() => router.push('/profiles')} />;
@@ -78,7 +87,7 @@ export default function ReportPage() {
         </aside>
         <div className="report-content">
           <div className="report-hero">
-            <div><span className="eyebrow">{selectedChild?.firstName}</span><strong>{childCompletions.length}</strong><p>{messages.report.completed}</p></div>
+            <div><span className="eyebrow">{selectedChild?.firstName}</span><strong>{childCompletions.length + completedMaterials.length}</strong><p>{messages.report.completed}</p><small>{pendingMaterials.length} {messages.report.pendingMaterials}</small></div>
             <Image src="/assets/lumi-avatar.png" alt="" width={180} height={200} />
           </div>
           <h2>{messages.report.recent}</h2>
@@ -90,6 +99,20 @@ export default function ReportPage() {
                 <span className="history-icon"><CheckCircle2 size={22} /></span>
                 <div><strong>{completion.activityTitle}</strong><small>{new Date(completion.completedAt).toLocaleDateString('pt-BR')}</small></div>
                 <Star size={19} fill="currentColor" />
+              </div>
+            ))}
+          </div>
+          <h2>{messages.report.materials}</h2>
+          <div className="history-list">
+            {childMaterials.length === 0 ? (
+              <div className="history-empty"><FileText size={28} /><p>{messages.report.noMaterials}</p></div>
+            ) : childMaterials.map((material) => (
+              <div className="history-item" key={material.id}>
+                <span className="history-icon"><FileText size={22} /></span>
+                <div><strong>{material.originalName}</strong><small>{new Date(material.createdAt).toLocaleDateString('pt-BR')}</small></div>
+                <span className={`report-material-status${material.completedAt ? ' is-complete' : ''}`}>
+                  {material.completedAt ? messages.materials.completedStatus : messages.materials.pendingStatus}
+                </span>
               </div>
             ))}
           </div>

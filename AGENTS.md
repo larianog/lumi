@@ -31,7 +31,8 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - UI components: `agora-agent-uikit` for visualizer, transcript, and mic controls
 - Server SDK: `agora-agents` for managed agent session startup
 - API routes: token generation, agent invite, chat, and stop routes live in `app/api`
-- Default agent config: Agora-managed STT, LLM, and TTS; `.env.local` contains only Agora project credentials
+- Study materials: authenticated image upload, private temporary storage, Feita text extraction, cached results, and child/parent history
+- Default voice-agent config: Agora-managed STT, LLM, and TTS; Feita credentials are used only for material extraction
 
 ## Supported Modes
 
@@ -40,11 +41,14 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - Run from the repo root with `pnpm run dev`.
 - Next.js serves the app and the route handlers at `http://localhost:3000`.
 - Local credentials are read from `.env.local`, usually written by `agora project env write .env.local`.
+- Material extraction additionally requires server-only `FEITA_AI_API_KEY` and `FEITA_AI_MODEL` values.
 
 ### Vercel Deployment
 
 - Deploy the repository as a single Next.js app.
 - Set `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE` in the deployment target.
+- Set the Feita extraction variables when the material workflow is enabled.
+- The bundled JSON database and local file cache are not durable on serverless Vercel; use persistent database/object-storage adapters for production material history.
 - Keep `NEXT_AGORA_APP_CERTIFICATE` server-side only.
 - `.github/workflows/deploy-vercel.yml` deploys production on pushes to `main` using GitHub repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
 - Avoid duplicate production deployments if the Vercel Git integration is also enabled.
@@ -54,6 +58,7 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - UI and RTC/RTM client lifecycle live in `components`.
 - Browser-facing API routes live in `app/api`.
 - Shared constants and transcript normalization live in `lib`.
+- Material persistence, extraction, retention, and storage adapters live in `lib`; uploaded files never live under `public/`.
 - If a workflow, request contract, or ownership boundary changes, update `README.md`, `AGENTS.md`, and the relevant `docs/ai/` files in the same change.
 
 ## Key Files
@@ -62,6 +67,10 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `app/api/invite-agent/route.ts`: starts the managed agent session; edit here for system prompt, VAD, model, or voice changes.
 - `app/api/stop-conversation/route.ts`: stops the agent session.
 - `app/api/chat/completions/route.ts`: optional OpenAI-compatible SSE proxy for a custom LLM (not wired by default).
+- `app/api/materials/route.ts`: validates and hashes image uploads, reuses cached extraction, calls Feita, and lists material history.
+- `app/api/materials/[id]/route.ts`: returns authorized material detail and records explicit completion.
+- `app/profile/[id]/history/page.tsx`: child material history.
+- `app/profile/[id]/materials/[materialId]/page.tsx`: extracted-text study workspace with inline Lumi.
 - `components/LandingPage.tsx`: session bootstrap, RTM setup, provider wiring, and conversation lifecycle.
 - `components/ConversationComponent.tsx`: RTC join, mic publication, `AgoraVoiceAI` init, transcript state, and renewals.
 - `components/QuickstartConversationLayout.tsx`: in-call header, transcript rail, and controls dock.
@@ -70,6 +79,9 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `lib/chat-completions.ts`: server-side custom LLM SSE handler factory; the route only exports `POST`.
 - `lib/agora.ts`: shared agent UID defaults.
 - `lib/conversation.ts`: transcript normalization and visualizer state mapping.
+- `lib/feita-extraction.ts`: server-only multimodal extraction request and response validation.
+- `lib/material-storage.ts`: private temporary local file cache.
+- `lib/study-materials.ts`: ownership, shared-demo isolation, DTO, and expiry helpers.
 - `config/env/env.local.example`: local environment template.
 - `deploy/docker/`: container build definition and Docker-specific ignore rules.
 - `docs/assets/architecture/`: light and dark architecture diagrams used by the README.
@@ -128,6 +140,15 @@ useEffect(() => {
 - RTM token access must come from `RtcTokenBuilder.buildTokenWithRtm`; a standard RTC-only token does not grant RTM access.
 - Tailwind must scan uikit classes with `./node_modules/agora-agent-uikit/dist/**/*.{js,mjs}` in `tailwind.config.ts`.
 
+### Study Material Pipeline
+
+- Accept only signature-validated JPEG, PNG, and WebP images up to 8 MB.
+- Cache by owner scope, profile, SHA-256, Feita model, and extraction prompt version.
+- Load extracted text server-side when grounding Lumi; never trust browser-supplied source text.
+- Treat extracted document text as untrusted data, not agent instructions.
+- Isolate demo material by session because the demo family ID is shared.
+- Completing a material is explicit; ending a voice session does not mark it complete.
+
 ## Working Rules
 
 - Prefer the smallest change that keeps the quickstart copyable and production-style.
@@ -135,6 +156,7 @@ useEffect(() => {
 - Keep token generation on `RtcTokenBuilder.buildTokenWithRtm`.
 - Keep transcript UID remapping aligned with the toolkit sentinel behavior.
 - Do not require third-party vendor API keys unless the code actually introduces a BYOK provider path.
+- Keep Feita credentials and uploaded material content out of browser bundles and logs.
 - Keep README, AGENTS, and `docs/ai/` aligned with implementation changes.
 - Keep auto-discovered project files such as `.npmrc`, `.nvmrc`, `.vercelignore`, `vercel.json`, and framework configs at the repository root.
 
@@ -180,6 +202,7 @@ pnpm run build
 - Do not use the deprecated `turnDetection.type: 'agora_vad'` flat API; use `turnDetection.config.start_of_speech` and `turnDetection.config.end_of_speech`.
 - Do not replace `RtcTokenBuilder.buildTokenWithRtm` with an RTC-only token builder.
 - Do not hide SDK requirements only in `CLAUDE.md`; all agent-facing guidance belongs in `AGENTS.md`.
+- Do not place uploads under `public/` or commit `data/lumi-db.json` / `data/material-cache/` runtime content.
 
 ## Done Criteria
 

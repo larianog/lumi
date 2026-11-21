@@ -505,6 +505,64 @@ async function verifyActivitiesRequireSession() {
   );
 }
 
+async function verifyMaterialsRequireSession() {
+  const { POST: uploadMaterial } = await import('../app/api/materials/route');
+  const request = new NextRequest('http://localhost:3000/api/materials', {
+    body: new FormData(),
+    method: 'POST',
+  });
+  const response = await uploadMaterial(request);
+
+  assert(
+    response.status === 401,
+    'POST /api/materials should require an authenticated family session',
+  );
+}
+
+async function verifyFeitaMaterialExtraction() {
+  const { extractTextFromMaterial } = await import('../lib/feita-extraction');
+  const originalApiKey = process.env.FEITA_AI_API_KEY;
+  const originalModel = process.env.FEITA_AI_MODEL;
+  const originalUrl = process.env.FEITA_AI_URL;
+  process.env.FEITA_AI_API_KEY = 'test-feita-key';
+  process.env.FEITA_AI_MODEL = 'test-vision-model';
+  process.env.FEITA_AI_URL = 'https://example.test/chat/completions';
+
+  let capturedUrl = '';
+  let capturedAuthorization = '';
+  let capturedBody: Record<string, unknown> | null = null;
+  const fakeFetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    capturedUrl = String(input);
+    capturedAuthorization = new Headers(init?.headers).get('authorization') ?? '';
+    capturedBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+    return Response.json({
+      choices: [{ message: { content: 'Título\nQuestão 1' } }],
+    });
+  }) as typeof fetch;
+
+  try {
+    const result = await extractTextFromMaterial(
+      Buffer.from([0x89, 0x50, 0x4e, 0x47]),
+      'image/png',
+      fakeFetch,
+    );
+
+    assert(capturedUrl === process.env.FEITA_AI_URL, 'Feita extraction should use the configured URL');
+    assert(capturedAuthorization === 'Bearer test-feita-key', 'Feita extraction should send the server API key');
+    const requestBody = capturedBody as Record<string, unknown> | null;
+    assert(requestBody?.model === 'test-vision-model', 'Feita extraction should use the configured model');
+    assert(JSON.stringify(requestBody?.messages).includes('data:image/png;base64,'), 'Feita extraction should send the image as multimodal content');
+    assert(result.text === 'Título\nQuestão 1', 'Feita extraction should return extracted text');
+  } finally {
+    if (originalApiKey === undefined) delete process.env.FEITA_AI_API_KEY;
+    else process.env.FEITA_AI_API_KEY = originalApiKey;
+    if (originalModel === undefined) delete process.env.FEITA_AI_MODEL;
+    else process.env.FEITA_AI_MODEL = originalModel;
+    if (originalUrl === undefined) delete process.env.FEITA_AI_URL;
+    else process.env.FEITA_AI_URL = originalUrl;
+  }
+}
+
 async function main() {
   await verifyGenerateAgoraTokenRoute();
   await verifyGenerateAgoraTokenReplacesZeroUid();
@@ -519,6 +577,8 @@ async function main() {
   await verifyLoginValidation();
   await verifyAdultAccessValidation();
   await verifyActivitiesRequireSession();
+  await verifyMaterialsRequireSession();
+  await verifyFeitaMaterialExtraction();
 
   console.log('API contract checks passed');
 }

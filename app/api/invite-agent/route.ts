@@ -12,6 +12,9 @@ import {
   OpenAI,
 } from 'agora-agents';
 import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
+import { getFamilyForSession, getStudyMaterial } from '@/lib/db';
+import { getSessionToken } from '@/lib/lumi-session';
+import { ownsStudyMaterial } from '@/lib/study-materials';
 import { messages } from '@/packages/i18n';
 import type { AgentResponse, ClientStartRequest } from '@/types/conversation';
 
@@ -29,9 +32,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'channel_name and requester_id are required' }, { status: 400 });
     }
 
-    const profileName = body.profile_name?.trim().slice(0, 40) || 'explorador';
-    const age = Math.min(10, Math.max(6, Number(body.age) || 8));
+    let profileName = body.profile_name?.trim().slice(0, 40) || 'explorador';
+    let age = Math.min(10, Math.max(6, Number(body.age) || 8));
     const activityTitle = body.activity_title?.trim().slice(0, 80) || 'uma descoberta livre';
+    let materialText: string | undefined;
+
+    if (body.material_id || body.profile_id) {
+      if (!body.material_id || !body.profile_id) {
+        return NextResponse.json({ error: 'profile_id and material_id must be provided together' }, { status: 400 });
+      }
+      const familyResult = await getFamilyForSession(getSessionToken(request));
+      if (!familyResult) {
+        return NextResponse.json({ error: 'Sessão não encontrada.' }, { status: 401 });
+      }
+      const material = await getStudyMaterial(body.material_id);
+      const profile = familyResult.family.profiles.find((candidate) => candidate.id === body.profile_id);
+      if (!material || !profile || material.profileId !== profile.id
+        || !ownsStudyMaterial(material, familyResult.family.id, familyResult.session)) {
+        return NextResponse.json({ error: 'Material não encontrado.' }, { status: 404 });
+      }
+      if (material.extractionStatus !== 'ready' || !material.extractedText || material.purgedAt) {
+        return NextResponse.json({ error: 'O material ainda não está disponível.' }, { status: 409 });
+      }
+      profileName = profile.firstName.slice(0, 40);
+      age = calculateAge(profile.birthDate);
+      materialText = material.extractedText.slice(0, 40_000);
+    }
+
     const greeting = messages.voice.agentGreeting(profileName);
 
     const client = new AgoraClient({
@@ -42,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     let agent = new Agent({
       client,
-      instructions: messages.voice.agentPrompt(profileName, age, activityTitle),
+      instructions: messages.voice.agentPrompt(profileName, age, activityTitle, materialText),
       greeting,
       failureMessage: messages.voice.genericFailure,
       maxHistory: 30,
@@ -123,4 +150,13 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+function calculateAge(birthDate: string) {
+  const today = new Date();
+  const birth = new Date(`${birthDate}T12:00:00`);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDifference = today.getMonth() - birth.getMonth();
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birth.getDate())) age -= 1;
+  return Math.min(17, Math.max(4, age));
 }

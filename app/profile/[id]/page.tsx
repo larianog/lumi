@@ -4,10 +4,10 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   BookOpen,
   Camera,
-  Check,
   FileCheck2,
   Flame,
   Gamepad2,
+  History,
   Library,
   LoaderCircle,
   Send,
@@ -21,6 +21,7 @@ import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
 import { messages } from '@/packages/i18n';
 import type { ActivityCompletion, Profile } from '@/types/database';
+import type { MaterialUploadResponse } from '@/types/materials';
 
 type ActivityId = 'school' | 'games' | 'stories' | 'suggest';
 
@@ -51,7 +52,8 @@ export default function ProfilePage() {
   const [completions, setCompletions] = useState<ActivityCompletion[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<ActivityId>('school');
   const [selectedMaterial, setSelectedMaterial] = useState<File | null>(null);
-  const [materialSent, setMaterialSent] = useState(false);
+  const [materialUploadState, setMaterialUploadState] = useState<'idle' | 'uploading'>('idle');
+  const [materialError, setMaterialError] = useState('');
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState('');
@@ -136,8 +138,30 @@ export default function ProfilePage() {
     const [file] = Array.from(event.currentTarget.files ?? []);
     if (!file) return;
     setSelectedMaterial(file);
-    setMaterialSent(false);
+    setMaterialUploadState('idle');
+    setMaterialError('');
     event.currentTarget.value = '';
+  };
+
+  const sendMaterial = async () => {
+    if (!selectedMaterial || materialUploadState === 'uploading') return;
+    setMaterialUploadState('uploading');
+    setMaterialError('');
+
+    try {
+      const formData = new FormData();
+      formData.set('profileId', profileId);
+      formData.set('file', selectedMaterial);
+      const response = await fetch('/api/materials', { method: 'POST', body: formData });
+      const payload = await response.json() as MaterialUploadResponse & { error?: string };
+      if (!response.ok || !payload.material?.id) {
+        throw new Error(payload.error || messages.home.materialError);
+      }
+      router.push(`/profile/${profileId}/materials/${payload.material.id}`);
+    } catch (error) {
+      setMaterialError(error instanceof Error ? error.message : messages.home.materialError);
+      setMaterialUploadState('idle');
+    }
   };
 
   const openCamera = () => {
@@ -170,7 +194,8 @@ export default function ProfilePage() {
       if (!blob) return;
       const photo = new File([blob], `material-${Date.now()}.jpg`, { type: 'image/jpeg' });
       setSelectedMaterial(photo);
-      setMaterialSent(false);
+      setMaterialUploadState('idle');
+      setMaterialError('');
       setCameraOpen(false);
     }, 'image/jpeg', 0.9);
   };
@@ -190,9 +215,14 @@ export default function ProfilePage() {
           <span><Flame size={18} />{streakCount} dias explorando</span>
           <span><Star size={18} fill="currentColor" />{starCount} estrelas</span>
         </div>
-        <button className="mini-profile" onClick={() => router.push('/profiles')}>
-          <span>{profile.firstName.slice(0, 1)}</span>{messages.home.switchProfile}
-        </button>
+        <div className="home-profile-actions">
+          <button className="home-history-button" onClick={() => router.push(`/profile/${profileId}/history`)}>
+            <History size={18} />{messages.home.history}
+          </button>
+          <button className="mini-profile" onClick={() => router.push('/profiles')}>
+            <span>{profile.firstName.slice(0, 1)}</span>{messages.home.switchProfile}
+          </button>
+        </div>
       </header>
       <div className="home-layout">
         <aside className="home-lumi">
@@ -235,7 +265,13 @@ export default function ProfilePage() {
                   <span><strong>{messages.home.takePicture}</strong><small>{messages.home.takePictureHint}</small></span>
                 </button>
               </div>
-              <input ref={fileInputRef} type="file" hidden onChange={selectMaterial} />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                onChange={selectMaterial}
+              />
               <input
                 ref={cameraInputRef}
                 type="file"
@@ -253,14 +289,17 @@ export default function ProfilePage() {
                   <button
                     className="study-send-button"
                     type="button"
-                    disabled={materialSent}
-                    onClick={() => setMaterialSent(true)}
+                    disabled={materialUploadState === 'uploading'}
+                    onClick={() => void sendMaterial()}
                   >
-                    {materialSent ? <Check size={19} /> : <Send size={19} />}
-                    {materialSent ? messages.home.sentFile : messages.home.sendFile}
+                    {materialUploadState === 'uploading'
+                      ? <LoaderCircle className="spin" size={19} />
+                      : <Send size={19} />}
+                    {materialUploadState === 'uploading' ? messages.home.extractingFile : messages.home.sendFile}
                   </button>
                 </div>
               )}
+              {materialError && <p className="study-source-error" role="alert">{materialError}</p>}
             </div>
           )}
         </div>

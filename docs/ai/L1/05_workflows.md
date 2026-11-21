@@ -51,6 +51,17 @@ Bootstrap behavior:
 3. Ensure `IN_PROGRESS` is separated from history, `INTERRUPTED` retained in history.
 4. Re-check [transcript_pipeline.md](L2/transcript_pipeline.md) for consistency.
 
+## Change Study Material Extraction
+
+1. Update provider request/prompt handling in `lib/feita-extraction.ts`.
+2. Increment `MATERIAL_EXTRACTION_PROMPT_VERSION` when extraction semantics change so stale text is not reused.
+3. Keep upload validation and authenticated ownership in `app/api/materials/route.ts`.
+4. Keep Lumi grounding server-side through optional `profile_id` + `material_id` fields on `/api/invite-agent`.
+5. Test first upload, cache hit, failure, expiry, demo isolation, completion, child history, and adult report.
+6. Run lint, typecheck, API contracts, and build.
+
+The bundled JSON database and `data/material-cache/` adapter are suitable for local or persistent-container development. Select durable database/private object storage adapters before serverless production deployment.
+
 ## Ship-Readiness Workflow
 
 1. Run `pnpm run verify`.
@@ -94,6 +105,8 @@ docker build -f deploy/docker/Dockerfile -t lumi-by-agora .
 3. Add/update contract verification in `scripts/verify-api-contracts.ts`.
 4. Run `pnpm run verify:api` and `pnpm run typecheck`.
 5. Update `README.md` and `docs/ai/L1/06_interfaces.md`.
+
+Material routes also require session ownership tests and must never expose storage keys or extracted content in list responses.
 
 ## Workflow: Modify Transcript UX
 
