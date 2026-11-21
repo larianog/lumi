@@ -30,10 +30,10 @@ agora project doctor --deep
 
 - `NEXT_PUBLIC_AGORA_APP_ID`: Agora project App ID.
 - `NEXT_AGORA_APP_CERTIFICATE`: Agora App Certificate (server only).
-- `FEITA_AI_API_KEY`: Feita gateway key for material text extraction (server only).
-- `FEITA_AI_MODEL`: multimodal model identifier; also participates in the extraction cache key.
+- `OPENAI_API_KEY`: OpenAI key for homework (material) analysis (server only).
+- `HOMEWORK_VISION_MODEL`: optional vision model (default `gpt-4.1-mini`); also participates in the extraction cache key.
 
-Optional material settings are `FEITA_AI_URL` (gateway default provided) and `LUMI_MATERIAL_RETENTION_HOURS` (168-hour default). The tracked template is `config/env/env.local.example`; agent behavior defaults live in code, and optional voice BYOK examples are documented later in the root README.
+Optional material setting: `LUMI_MATERIAL_RETENTION_HOURS` (168-hour default). The tracked template is `config/env/env.local.example`; agent behavior defaults live in code, and optional voice BYOK examples are documented later in the root README.
 
 ## Primary Commands
 
@@ -80,14 +80,14 @@ Requires env/project binding:
 | Transcript missing | RTM token capability missing | Token route implementation | Ensure `buildTokenWithRtm` remains unchanged |
 | `verify` fails at doctor | Project not bound | `agora project use` output | Re-bind project and rewrite `.env.local` |
 | Mic publishes but no agent response | Agent start failed | UI warning (`agentJoinError`) | Inspect `/api/invite-agent` response |
-| Material extraction fails | Feita env/model or unsupported image | `/api/materials` response | Check Feita variables and use JPEG/PNG/WebP under 8 MB |
+| Material extraction fails | `OPENAI_API_KEY`/model or unsupported image | `/api/materials` response | Check OpenAI variable and use JPEG/PNG/WebP or PDF up to 10 MB |
 
 ## Local-Only vs Deploy-Specific
 
 Local:
 
 - Uses `.env.local` created by `agora project env write`.
-- Add the Feita variables after the Agora CLI writes the file; the CLI does not manage them.
+- Add the OpenAI variable after the Agora CLI writes the file; the CLI does not manage them.
 - Uses the default Next.js Turbopack development server via `next dev`.
 - Best for flow debugging and transcript behavior checks.
 

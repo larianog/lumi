@@ -36,6 +36,9 @@ export function toStudyMaterialDto(
     purgedAt: material.purgedAt,
     completedAt: material.completedAt,
     extractedText: includeExtractedText ? material.extractedText : undefined,
+    title: material.analysis?.title,
+    subject: material.analysis?.subject,
+    questionCount: material.analysis?.questions.length,
     storageKey: material.storageKey,
   };
 }

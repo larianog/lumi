@@ -53,7 +53,7 @@ Bootstrap behavior:
 
 ## Change Study Material Extraction
 
-1. Update provider request/prompt handling in `lib/feita-extraction.ts`.
+1. Update provider request/prompt handling in `lib/material-extraction.ts`.
 2. Increment `MATERIAL_EXTRACTION_PROMPT_VERSION` when extraction semantics change so stale text is not reused.
 3. Keep upload validation and authenticated ownership in `app/api/materials/route.ts`.
 4. Keep Lumi grounding server-side through optional `profile_id` + `material_id` fields on `/api/invite-agent`.

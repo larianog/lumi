@@ -6,8 +6,8 @@
 
 1. `app/profile/[id]/page.tsx` sends `profileId` and an image as multipart form data to `POST /api/materials`.
 2. The route authenticates the family session, confirms a child profile, caps the image at 8 MB, and validates JPEG/PNG/WebP signatures.
-3. The server computes SHA-256 and atomically reserves a material keyed by owner scope, profile, hash, `FEITA_AI_MODEL`, and `MATERIAL_EXTRACTION_PROMPT_VERSION`.
-4. A fresh processing or ready record is reused. Otherwise `lib/material-storage.ts` stores private bytes and `lib/feita-extraction.ts` sends a base64 image plus extraction-only prompt to Feita.
+3. The server computes SHA-256 and atomically reserves a material keyed by owner scope, profile, hash, `HOMEWORK_VISION_MODEL`, and `MATERIAL_EXTRACTION_PROMPT_VERSION`.
+4. A fresh processing or ready record is reused. Otherwise `lib/material-storage.ts` stores private bytes and `lib/material-extraction.ts` sends a base64 image plus extraction-only prompt to OpenAI.
 5. The record becomes `ready` with extracted text or `failed` with a bounded error code.
 6. `/profile/[id]/materials/[materialId]` polls processing state, displays retained text, and starts inline Lumi.
 7. `LumiVoiceAgent` sends only `profile_id` and `material_id`; `/api/invite-agent` reloads authorized text and delimits it as untrusted reference material.
@@ -38,3 +38,12 @@ The JSON database and `data/material-cache/` adapter support local or persistent
 - `pnpm run verify:api`
 - `pnpm run build`
 - Manual: first upload, cache hit, provider failure, completion, child history, adult report, demo isolation, mobile layout, and grounded voice response.
+
+## Homework tutoring mode
+
+- Uploads require recent adult access (`POST /api/adult-access`; `GET` reports `{ verified }`) and accept JPEG/PNG/WebP or PDF up to 10 MB, plus an optional `literacyLevel` (`pre_reader` | `emergent` | `fluent`, defaulted from age). The literacy level is part of the cache key.
+- `lib/material-extraction.ts` calls the OpenAI vision model with a strict JSON Schema and stores two things: `extractedText` (child-safe transcript: title, instructions, questions) and `analysis` (server-only: visual elements, skill, expected answer, steps, graded hints). `readable=false` fails the material with code `UNREADABLE` and returns `422`.
+- DTOs expose only `title`, `subject`, and `questionCount` from the analysis; `analysis` and expected answers never reach the browser.
+- `invite-agent` uses `messages.voice.homeworkPrompt` (step-by-step tutoring that never gives the final answer, adapted to literacy level) and `homeworkGreeting` when the material has an `analysis`; older text-only materials keep `agentPrompt`.
+- The browser downsizes photos to 1600 px JPEG on a white background before upload (`lib/prepare-upload.ts`); transparent PNGs otherwise become unreadable black images.
+

@@ -44,7 +44,7 @@ const agent = new Agent({
 })
   .withStt(new DeepgramSTT({ model: 'nova-3', language: 'en' }))
   .withLlm(new OpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-4.1-mini',
     greetingMessage: GREETING,
     failureMessage: 'Please wait a moment.',
     maxHistory: 15,
@@ -85,7 +85,7 @@ const agentId = await session.start();
 
 ### Change the prompt
 
-Edit `ADA_PROMPT`. Keep it under the LLM's context window — `gpt-4o-mini` handles thousands of tokens but very long prompts amplify latency.
+Edit `ADA_PROMPT`. Keep it under the LLM's context window — `gpt-4.1-mini` handles thousands of tokens but very long prompts amplify latency.
 
 ### Change the greeting
 

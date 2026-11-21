@@ -81,10 +81,9 @@ Required:
 
 - `NEXT_PUBLIC_AGORA_APP_ID`
 - `NEXT_AGORA_APP_CERTIFICATE`
-- `FEITA_AI_API_KEY`
-- `FEITA_AI_MODEL`
+- `OPENAI_API_KEY`
 
-Optional material settings are `FEITA_AI_URL` and `LUMI_MATERIAL_RETENTION_HOURS`. Optional voice BYOK snippets use additional variables only when explicitly enabled.
+Optional material settings are `HOMEWORK_VISION_MODEL` (default `gpt-4.1-mini`) and `LUMI_MATERIAL_RETENTION_HOURS`. Optional voice BYOK snippets use additional variables only when explicitly enabled.
 
 ## Test Coverage for Interfaces
 

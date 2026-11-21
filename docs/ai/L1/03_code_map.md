@@ -26,7 +26,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `invite-agent/route.ts`: validates input/env, configures and starts agent session.
 - `stop-conversation/route.ts`: stops agent and handles idempotent already-stopping cases.
 - `chat/completions/route.ts`: optional OpenAI-compatible SSE proxy for custom LLM path.
-- `materials/route.ts`: upload validation, cache reservation, Feita extraction, and child/family lists.
+- `materials/route.ts`: upload validation, cache reservation, OpenAI analysis, and child/family lists.
 - `materials/[id]/route.ts`: authorized detail and explicit completion.
 
 ## Client Ownership (`components`)
@@ -45,7 +45,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `chat-completions.ts`: server-side custom LLM SSE handler factory, shared by the route and contract tests.
 - `agora.ts`: default constants (`DEFAULT_AGENT_UID`).
 - `conversation.ts`: transcript normalization, spacing cleanup, timestamp normalization, visualizer state mapping.
-- `feita-extraction.ts`: Feita request, extraction prompt, timeout, and response parsing.
+- `material-extraction.ts`: OpenAI request, extraction prompt, timeout, and response parsing.
 - `material-storage.ts`: private temporary local file storage.
 - `study-materials.ts`: ownership, DTO, demo isolation, and expiry cleanup.
 

@@ -121,7 +121,7 @@ export default function MaterialStudyPageClient({
             <LumiVoiceAgent
               profileName={profile.firstName}
               age={calculateAge(profile.birthDate)}
-              activityTitle={material.originalName}
+              activityTitle={material.title ?? material.originalName}
               profileId={profileId}
               materialId={material.id}
               autoStart
