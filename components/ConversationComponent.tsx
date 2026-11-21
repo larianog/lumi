@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import AgoraRTC, {
   useRTCClient,
@@ -88,11 +89,24 @@ export default function ConversationComponent({
   rtmClient,
   onTokenWillExpire,
   onEndConversation,
+  variant = 'full',
+  onRetryMicrophone,
 }: ConversationComponentProps) {
   const client = useRTCClient();
   const remoteUsers = useRemoteUsers();
   const [isEnabled, setIsEnabled] = useState(true);
   const [isAgentConnected, setIsAgentConnected] = useState(false);
+
+  // Browsers block audio playback until the user interacts with the page
+  // (e.g. when the profile URL is opened directly). The SDK resumes playback
+  // on the next user gesture, so we only need to ask for a tap.
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  useEffect(() => {
+    AgoraRTC.onAutoplayFailed = () => setAutoplayBlocked(true);
+    return () => {
+      AgoraRTC.onAutoplayFailed = undefined;
+    };
+  }, []);
 
   // Tracks granular RTC connection state for the status dot.
   // Agora states: DISCONNECTED | CONNECTING | CONNECTED | DISCONNECTING | RECONNECTING
@@ -158,7 +172,7 @@ export default function ConversationComponent({
   // synchronously before the timeout, so only the real second mount's timer fires.
   // Do NOT pass `isEnabled` — that ties track lifetime to mute state and breaks the Web Audio
   // graph inside MicButtonWithVisualizer. Mute uses track.setEnabled() only.
-  const { localMicrophoneTrack } = useLocalMicrophoneTrack(isReady);
+  const { localMicrophoneTrack, error: microphoneError } = useLocalMicrophoneTrack(isReady);
 
   // ENABLE_AUDIO_PTS is a module-level SDK parameter (not on the client instance).
   // It must be set before publishing audio for transcript timing to be accurate.
@@ -466,8 +480,60 @@ export default function ConversationComponent({
             ? messages.voice.connected
             : messages.voice.connecting;
 
+  const voiceWarnings = (
+    <>
+      {microphoneError && (
+        <div className="voice-warning" role="alert">
+          <p>{messages.voice.microphoneBlocked}</p>
+          <button className="button button-primary" onClick={() => (onRetryMicrophone ? onRetryMicrophone() : window.location.reload())}>
+            {messages.voice.retry}
+          </button>
+        </div>
+      )}
+      {!microphoneError && autoplayBlocked && (
+        <button className="voice-warning" onClick={() => setAutoplayBlocked(false)}>
+          {messages.voice.tapToHear}
+        </button>
+      )}
+    </>
+  );
+
+  // Hidden players keep the agent's audio flowing while only the avatar is shown.
+  const hiddenRemoteAudio = remoteUsers
+    .filter((user) => user.uid.toString() !== avatarUID)
+    .map((user) => (
+      <div key={user.uid} className="hidden"><RemoteUser user={user} /></div>
+    ));
+
+  if (variant === 'inline') {
+    return (
+      <div className="lumi-inline" role="region" aria-label={messages.voice.title}>
+        {voiceWarnings}
+        {avatarUser ? (
+          <div className="lumi-inline-avatar"><RemoteUser user={avatarUser} /></div>
+        ) : (
+          <Image className="lumi-inline-fallback" src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={480} height={520} priority />
+        )}
+        {hiddenRemoteAudio}
+        <div className="lumi-inline-controls">
+          <MicButtonWithVisualizer
+            isEnabled={isEnabled}
+            setIsEnabled={setIsEnabled}
+            track={localMicrophoneTrack}
+            onToggle={handleMicToggle}
+            aria-label={isEnabled ? messages.voice.mute : messages.voice.unmute}
+            enabledColor="hsl(var(--primary))"
+            disabledColor="hsl(var(--destructive))"
+          />
+          <span className="lumi-inline-status" aria-live="polite">{statusLabel}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="lumi-conversation">
+      {voiceWarnings}
       <header className="conversation-header">
         <div className="conversation-title">
           <span className="conversation-title-icon">✦</span>
@@ -486,9 +552,7 @@ export default function ConversationComponent({
           ) : (
             <img className="lumi-avatar-fallback" src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} />
           )}
-          {remoteUsers.filter((user) => user.uid.toString() !== avatarUID).map((user) => (
-            <div key={user.uid} className="hidden"><RemoteUser user={user} /></div>
-          ))}
+          {hiddenRemoteAudio}
           <div className="agent-visualizer-shell"><AgentVisualizer state={visualizerState} size="lg" /></div>
           <div className="conversation-controls" role="group" aria-label={messages.voice.title}>
             <div className="conversation-mic-host">

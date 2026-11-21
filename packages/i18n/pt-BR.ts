@@ -60,7 +60,6 @@ export const ptBR = {
     streak: '2 dias explorando',
     stars: '120 estrelas',
     switchProfile: 'Trocar perfil',
-    talkToLumi: 'Conversar com o Lumi',
   },
   activities: {
     school: {
@@ -132,6 +131,9 @@ export const ptBR = {
     start: 'Falar com o Lumi',
     starting: 'Chamando o Lumi...',
     end: 'Encerrar conversa',
+    tapToHear: 'Toque aqui para ouvir o Lumi',
+    microphoneBlocked: 'O Lumi ainda não consegue te ouvir. Toque no botão abaixo e permita o uso do microfone.',
+    retry: 'Ativar microfone',
     mute: 'Silenciar microfone',
     unmute: 'Ativar microfone',
     listening: 'Lumi está ouvindo',

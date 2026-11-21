@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import { BookOpen, Flame, Gamepad2, Library, Mic, Star, WandSparkles } from 'lucide-react';
+import { BookOpen, Flame, Gamepad2, Library, Star, WandSparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
@@ -34,7 +33,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [completions, setCompletions] = useState<ActivityCompletion[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<ActivityId>('school');
-  const [voiceOpen, setVoiceOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -89,10 +87,14 @@ export default function ProfilePage() {
       <div className="home-layout">
         <aside className="home-lumi">
           <div className="lumi-halo" />
-          <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={480} height={520} priority />
-          <button className="button voice-cta" onClick={() => setVoiceOpen(true)}>
-            <Mic size={20} />{messages.home.talkToLumi}
-          </button>
+          {/* Lumi greets the child as soon as the profile screen opens. */}
+          <LumiVoiceAgent
+            profileName={profile.firstName}
+            age={calculateAge(profile.birthDate)}
+            activityTitle={messages.activities[selectedActivity].title}
+            autoStart
+            variant="inline"
+          />
         </aside>
         <div className="activity-menu">
           <span className="eyebrow">{messages.home.greeting(profile.firstName)}</span>
@@ -112,14 +114,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {voiceOpen && (
-        <LumiVoiceAgent
-          profileName={profile.firstName}
-          age={calculateAge(profile.birthDate)}
-          activityTitle={messages.activities[selectedActivity].title}
-          onClose={() => setVoiceOpen(false)}
-        />
-      )}
     </section>
   );
 }

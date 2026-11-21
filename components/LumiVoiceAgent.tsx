@@ -39,10 +39,21 @@ type LumiVoiceAgentProps = {
   profileName: string;
   age: number;
   activityTitle: string;
-  onClose: () => void;
+  /** Start the session on mount instead of waiting for the "start" button. */
+  autoStart?: boolean;
+  /** `modal` = full-screen dialog; `inline` = avatar embedded in the page. */
+  variant?: 'modal' | 'inline';
+  onClose?: () => void;
 };
 
-export default function LumiVoiceAgent({ profileName, age, activityTitle, onClose }: LumiVoiceAgentProps) {
+export default function LumiVoiceAgent({
+  profileName,
+  age,
+  activityTitle,
+  autoStart = false,
+  variant = 'modal',
+  onClose = () => {},
+}: LumiVoiceAgentProps) {
   const [showConversation, setShowConversation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +65,10 @@ export default function LumiVoiceAgent({ profileName, age, activityTitle, onClos
     import('agora-rtc-react').catch(() => {});
     import('agora-rtm').catch(() => {});
   }, []);
+
+  // True once the component has really unmounted. Reset on (re)mount so the
+  // StrictMode simulated unmount does not count.
+  const unmountedRef = useRef(false);
 
   const handleStartConversation = async () => {
     setIsLoading(true);
@@ -103,6 +118,13 @@ export default function LumiVoiceAgent({ profileName, age, activityTitle, onClos
         })(),
       ]);
 
+      // The page was left while connecting: release what was just created
+      // instead of leaving an orphan RTM client (and agent) logged in.
+      if (unmountedRef.current) {
+        stopSession(agentData?.agent_id, rtm);
+        return;
+      }
+
       setRtmClient(rtm);
       setAgoraData({ ...responseData, agentId: agentData?.agent_id });
       setShowConversation(true);
@@ -113,6 +135,32 @@ export default function LumiVoiceAgent({ profileName, age, activityTitle, onClos
       setIsLoading(false);
     }
   };
+
+  // The ref survives React StrictMode's simulated remount, so only one
+  // agent session is started per mount.
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    void handleStartConversation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
+  }, [autoStart]);
+
+  // Stop the agent and leave RTM when the page unmounts (e.g. the child opens
+  // an activity), so no agent keeps running in an empty channel.
+  const sessionRef = useRef<{ agentId?: string; rtm: RTMClient | null }>({ rtm: null });
+  useEffect(() => {
+    sessionRef.current = { agentId: agoraData?.agentId, rtm: rtmClient };
+  }, [agoraData, rtmClient]);
+  useEffect(() => {
+    unmountedRef.current = false;
+    return () => {
+      unmountedRef.current = true;
+      const { agentId, rtm } = sessionRef.current;
+      sessionRef.current = { rtm: null };
+      stopSession(agentId, rtm);
+    };
+  }, []);
 
   const handleTokenWillExpire = useCallback(
     async (uid: string): Promise<AgoraRenewalTokens> => {
@@ -129,7 +177,22 @@ export default function LumiVoiceAgent({ profileName, age, activityTitle, onClos
     [agoraData],
   );
 
+  // Safari and embedded browsers deny microphone access requested without a
+  // user gesture (we auto-start on page load). Asking again inside the tap
+  // grants permission; remounting the conversation then recreates the track.
+  const [microphoneAttempt, setMicrophoneAttempt] = useState(0);
+  const handleRetryMicrophone = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+    } catch (permissionError) {
+      console.error('Microphone permission still denied:', permissionError);
+    }
+    setMicrophoneAttempt((attempt) => attempt + 1);
+  }, []);
+
   const handleEndConversation = useCallback(async () => {
+    sessionRef.current = { rtm: null }; // stopped here, skip the unmount cleanup
     if (agoraData?.agentId) {
       try {
         await fetch('/api/stop-conversation', {
@@ -146,6 +209,33 @@ export default function LumiVoiceAgent({ profileName, age, activityTitle, onClos
     setShowConversation(false);
     onClose();
   }, [agoraData, onClose, rtmClient]);
+
+  if (variant === 'inline') {
+    return (
+      <div className="lumi-inline-host">
+        {showConversation && agoraData && rtmClient ? (
+          <Suspense fallback={<LumiInlinePlaceholder status={messages.voice.starting} />}>
+            <ErrorBoundary>
+              {agentJoinError && <div className="voice-warning">{messages.voice.connectionError}</div>}
+              <AgoraProvider>
+                <ConversationComponent
+                  key={microphoneAttempt}
+                  onRetryMicrophone={handleRetryMicrophone}
+                  agoraData={agoraData}
+                  rtmClient={rtmClient}
+                  onTokenWillExpire={handleTokenWillExpire}
+                  onEndConversation={handleEndConversation}
+                  variant="inline"
+                />
+              </AgoraProvider>
+            </ErrorBoundary>
+          </Suspense>
+        ) : (
+          <LumiInlinePlaceholder status={error ?? messages.voice.starting} />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="voice-modal" role="dialog" aria-modal="true" aria-label={messages.voice.title}>
@@ -168,6 +258,8 @@ export default function LumiVoiceAgent({ profileName, age, activityTitle, onClos
             {agentJoinError && <div className="voice-warning">{messages.voice.connectionError}</div>}
             <AgoraProvider>
               <ConversationComponent
+                key={microphoneAttempt}
+                onRetryMicrophone={handleRetryMicrophone}
                 agoraData={agoraData}
                 rtmClient={rtmClient}
                 onTokenWillExpire={handleTokenWillExpire}
@@ -179,6 +271,37 @@ export default function LumiVoiceAgent({ profileName, age, activityTitle, onClos
       ) : (
         <p className="form-error">{messages.voice.connectionError}</p>
       )}
+    </div>
+  );
+}
+
+/** Stop the agent and log the RTM client out. Safe to call with partial data. */
+function stopSession(agentId: string | undefined, rtm: RTMClient | null) {
+  if (agentId) {
+    void fetch('/api/stop-conversation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agent_id: agentId }),
+      keepalive: true,
+    }).catch(() => {});
+  }
+  void rtm?.logout().catch(() => {});
+}
+
+function LumiInlinePlaceholder({ status }: { status: string }) {
+  return (
+    <div className="lumi-inline">
+      <Image
+        className="lumi-inline-fallback"
+        src="/assets/lumi-avatar.png"
+        alt={messages.accessibility.lumiMascot}
+        width={480}
+        height={520}
+        priority
+      />
+      <div className="lumi-inline-controls">
+        <span className="lumi-inline-status" aria-live="polite">{status}</span>
+      </div>
     </div>
   );
 }
