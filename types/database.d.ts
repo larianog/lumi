@@ -34,6 +34,34 @@ export type ActivityCompletion = {
 
 export type StudyMaterialExtractionStatus = 'processing' | 'ready' | 'failed';
 
+/** How well the child reads on their own; chosen by the parent on upload. */
+export type LiteracyLevel = 'pre_reader' | 'emergent' | 'fluent';
+
+export type HomeworkQuestion = {
+  number: string;
+  /** Faithful transcription of the question. */
+  statement: string;
+  /** Pictures, diagrams or layout the child needs (e.g. "5 maçãs desenhadas"). */
+  visualElements: string;
+  skill: string;
+  /** Server-only: lets Lumi check answers. Never sent to the browser. */
+  expectedAnswer: string;
+  steps: string[];
+  hints: string[];
+};
+
+/** Tutor-ready reading of a worksheet, produced by the vision model. */
+export type HomeworkAnalysis = {
+  readable: boolean;
+  unreadableReason: string;
+  title: string;
+  subject: string;
+  estimatedGrade: string;
+  generalInstructions: string;
+  questions: HomeworkQuestion[];
+  notesForTutor: string;
+};
+
 export type StudyMaterial = {
   id: string;
   familyId: string;
@@ -45,7 +73,11 @@ export type StudyMaterial = {
   size: number;
   sha256: string;
   storageKey?: string;
+  /** Child-safe transcription (instructions + questions, no answers). Shown in the UI. */
   extractedText?: string;
+  /** Server-only tutoring brief with expected answers. Never exposed in DTOs. */
+  analysis?: HomeworkAnalysis;
+  literacyLevel?: LiteracyLevel;
   extractionStatus: StudyMaterialExtractionStatus;
   extractionModel: string;
   promptVersion: string;

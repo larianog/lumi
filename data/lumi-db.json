@@ -1,7 +1,435 @@
 {
-  "families": [],
+  "families": [
+    {
+      "id": "390e9fac-3c1e-4fc2-a8ac-999a004f1aa3",
+      "phone": "27995103483",
+      "normalizedPhone": "27995103483",
+      "profiles": [
+        {
+          "id": "ba841dbf-9dd2-4919-a624-68d1b4a0e1fd",
+          "type": "child",
+          "firstName": "willian",
+          "lastName": "grillo",
+          "birthDate": "1999-11-25",
+          "avatar": 0,
+          "createdAt": "2026-11-21T22:35:45.080Z"
+        },
+        {
+          "id": "051c9e4e-42af-49e1-b18a-988069d00c32",
+          "type": "child",
+          "firstName": "Willian",
+          "lastName": "Grillo",
+          "birthDate": "1999-11-25",
+          "avatar": 1,
+          "createdAt": "2026-11-21T22:35:58.821Z"
+        }
+      ],
+      "createdAt": "2026-11-21T22:35:45.118Z",
+      "passwordHash": "60092d674e94f8d65136cda0b78d8be4f78f2671d346be2dc99412cefe9e92f37dd6a6dccea8eed529ec4cbe4273d99a4209a2901a29c42abeab898a44121a67",
+      "passwordSalt": "e6b45bf696499c89bb05812f80a30f40"
+    }
+  ],
   "completions": [],
   "materials": [
+    {
+      "id": "fc18ff1c-c5a6-4694-b882-d91c35c05a14",
+      "familyId": "390e9fac-3c1e-4fc2-a8ac-999a004f1aa3",
+      "profileId": "051c9e4e-42af-49e1-b18a-988069d00c32",
+      "originalName": "OFICINA DE REFORÇO 3º ANO - MATERIAIS PEDAGÓGICOS.pdf",
+      "mimeType": "application/pdf",
+      "size": 2610129,
+      "sha256": "18391eb03b5b7c2036a41212e5b3c4cf8e44b908ab0324c83452dd6b19438f3d",
+      "literacyLevel": "fluent",
+      "extractionModel": "gpt-4.1-mini",
+      "promptVersion": "material-tutor-v2",
+      "expiresAt": "2026-11-28T22:42:55.441Z",
+      "extractionStatus": "ready",
+      "createdAt": "2026-11-21T22:42:55.442Z",
+      "updatedAt": "2026-11-21T22:43:35.200Z",
+      "storageKey": "fc18ff1c-c5a6-4694-b882-d91c35c05a14.pdf",
+      "extractedText": "Oficina de Reforço Escolar - 3º ano - Língua Portuguesa e Matemática\nInstruções gerais não especificadas, atividades de reforço escolar para o 3º ano do Ensino Fundamental.\n1) Leia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate.\n2) Classifique as palavras do quadro de acordo com o número de sílabas.\n3) Complete as palavras com g ou j, reescreva-as e ligue-as ao seu respectivo desenho: jiboia, gelatina, pajé, girino, girassol.\n4) Organize as letras fora de ordem para formar palavras: sandália, pilha, espantalho, família, orelha, milho.\n5) Complete as palavras com x ou ch, pinte os círculos de acordo com a legenda e ilustre como no exemplo.\n6) Encontre as palavras no caça-palavras e complete o quadro com as palavras encontradas e acrescente mais três palavras de acordo com o grupo: lh, ch, nh.\n7) Complete o quadro com o feminino das palavras masculinas: cão, boi, leão, bode, carneiro, cavalo, elefante, rei, príncipe, compadre, padrasto, padrinho, ator, autor, anão, irmão.\n8) Leia a fábula 'A lebre e a tartaruga' e responda: a) Quais os personagens da fábula? b) Onde se passa a história? c) Qual é a moral da história?\n9) Escreva o significado das palavras homônimas: abril, abriu, mau, mal, calda, cauda. Use uma das palavras para completar as frases dadas.\n10) Resolva os problemas matemáticos dados: soma, subtração, multiplicação e interpretação de números.",
+      "analysis": {
+        "readable": true,
+        "unreadableReason": "",
+        "title": "Oficina de Reforço Escolar - 3º ano - Língua Portuguesa e Matemática",
+        "subject": "Língua Portuguesa e Matemática",
+        "estimatedGrade": "3º ano do Ensino Fundamental",
+        "generalInstructions": "Instruções gerais não especificadas, atividades de reforço escolar para o 3º ano do Ensino Fundamental.",
+        "notesForTutor": "Material básico de reforço escolar para 3º ano, com exercícios de alfabetização, ortografia, interpretação de texto, gramática e matemática básica. A criança de 26 anos pode usar este material para revisão ou reforço de conceitos básicos. Adaptar a abordagem para maior autonomia e reflexão crítica, incentivando a autoavaliação e aprofundamento dos temas.",
+        "questions": [
+          {
+            "number": "1",
+            "statement": "Leia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate.",
+            "visualElements": "Imagens de figuras para nomear: dado, lobo, bolo, índio, janela, mamão, elefante, papagaio, abacaxi, carro.",
+            "skill": "ordem alfabética e classificação silábica",
+            "expectedAnswer": "1. abacaxi; 2. amora; 3. batata; 4. bolo; 5. carambola; 6. carro; 7. cebola; 8. damasco; 9. elefante; 10. espinafre; 11. figo; 12. goiaba; 13. hortelã; 14. inhame; 15. jaca; 16. janela; 17. kiwi; 18. limão; 19. manga; 20. mel; 21. melão; 22. nabo; 23. ovos; 24. papagaio; 25. pepino; 26. quiabo; 27. ",
+            "steps": [
+              "Leia todas as palavras com atenção.",
+              "Identifique a primeira letra de cada palavra.",
+              "Organize as palavras começando pela letra A até a letra Z.",
+              "Para palavras que começam com a mesma letra, observe a segunda letra.",
+              "Continue até ordenar todas as palavras."
+            ],
+            "hints": [
+              "Comece pelas palavras que iniciam com a letra A.",
+              "Compare as primeiras letras das palavras para ordenar.",
+              "Se duas palavras começam com a mesma letra, compare a segunda letra."
+            ]
+          },
+          {
+            "number": "2",
+            "statement": "Classifique as palavras do quadro de acordo com o número de sílabas.",
+            "visualElements": "Quadro com as palavras: pilha, batedeira, chaveiro, gula, nó, primeiro, caneleira, pombo, céu, padaria, pai, limpeza, mão, caminhoneiro, sol, rampa, cozinha, travessura, quitanda, calda.",
+            "skill": "classificação silábica",
+            "expectedAnswer": "Monossílaba: nó, céu, pai, mão, sol; Dissílaba: pilha, gula, pombo, rampa, calda; Trissílaba: chaveiro, primeiro, padaria, limpeza, cozinha, quitanda; Polissílaba: batedeira, caneleira, caminhoneiro, travessura.",
+            "steps": [
+              "Leia cada palavra atentamente.",
+              "Separe cada palavra em sílabas.",
+              "Conte o número de sílabas de cada palavra.",
+              "Classifique as palavras em monossílabas, dissílabas, trissílabas ou polissílabas.",
+              "Preencha o quadro com as palavras classificadas."
+            ],
+            "hints": [
+              "Lembre-se que monossílabas têm uma sílaba.",
+              "Dissílabas têm duas sílabas.",
+              "Trissílabas têm três sílabas."
+            ]
+          },
+          {
+            "number": "3",
+            "statement": "Complete as palavras com g ou j, reescreva-as e ligue-as ao seu respectivo desenho: jiboia, gelatina, pajé, girino, girassol.",
+            "visualElements": "Desenhos de uma jiboia, gelatina, pajé, girino e girassol.",
+            "skill": "ortografia: uso de g ou j",
+            "expectedAnswer": "jiboia; gelatina; pajé; girino; girassol.",
+            "steps": [
+              "Leia cada palavra incompleta.",
+              "Identifique se a palavra leva g ou j.",
+              "Complete a palavra corretamente.",
+              "Reescreva a palavra completa.",
+              "Ligue a palavra ao desenho correspondente."
+            ],
+            "hints": [
+              "Lembre-se das regras de ortografia para g e j.",
+              "Observe o som da palavra.",
+              "Pense em palavras semelhantes."
+            ]
+          },
+          {
+            "number": "4",
+            "statement": "Organize as letras fora de ordem para formar palavras: sandália, pilha, espantalho, família, orelha, milho.",
+            "visualElements": "Nenhum desenho específico além das palavras para formar.",
+            "skill": "ortografia: l ou lh",
+            "expectedAnswer": "a) sandália; b) pilha; c) espantalho; d) família; e) orelha; f) milho.",
+            "steps": [
+              "Leia as letras embaralhadas.",
+              "Tente formar uma palavra conhecida.",
+              "Verifique se a palavra está correta.",
+              "Escreva a palavra formada.",
+              "Repita para todas as palavras."
+            ],
+            "hints": [
+              "Procure identificar sílabas conhecidas.",
+              "Pense em palavras relacionadas ao tema.",
+              "Use o contexto para ajudar."
+            ]
+          },
+          {
+            "number": "5",
+            "statement": "Complete as palavras com x ou ch, pinte os círculos de acordo com a legenda e ilustre como no exemplo.",
+            "visualElements": "Palavras incompletas e círculos para pintar: chocolate, chapéu, rochedo, chave, feixe, lixeira, cachaça, xampu.",
+            "skill": "ortografia: x ou ch",
+            "expectedAnswer": "chocolate, chapéu, rochedo, chave, feixe, lixeira, cachaça, xampu.",
+            "steps": [
+              "Leia cada palavra incompleta.",
+              "Decida se a palavra leva x ou ch.",
+              "Complete a palavra corretamente.",
+              "Pinte os círculos conforme a legenda: verde para ch, azul para x.",
+              "Ilustre as palavras conforme o exemplo."
+            ],
+            "hints": [
+              "Lembre-se das regras para o uso de ch e x.",
+              "Observe o som da palavra.",
+              "Pense em palavras semelhantes."
+            ]
+          },
+          {
+            "number": "6",
+            "statement": "Encontre as palavras no caça-palavras e complete o quadro com as palavras encontradas e acrescente mais três palavras de acordo com o grupo: lh, ch, nh.",
+            "visualElements": "Caça-palavras com palavras: malha, colchão, palhaço, chuteira, arranha, galinha, patinho, piolho, lancheira.",
+            "skill": "ortografia: lh, ch, nh",
+            "expectedAnswer": "Grupo do lh: malha, piolho, palhaço, mais três palavras pessoais; Grupo do ch: chuteira, colchão, lancheira, mais três palavras pessoais; Grupo do nh: patinho, arranha, galinha, mais três palavras pessoais.",
+            "steps": [
+              "Encontre as palavras com lh, ch e nh no caça-palavras.",
+              "Pinte os círculos correspondentes.",
+              "Escreva as palavras encontradas no quadro.",
+              "Acrescente mais três palavras para cada grupo.",
+              "Separe as palavras em sílabas e escreva novamente."
+            ],
+            "hints": [
+              "Procure por sequências lh, ch e nh.",
+              "Use cores diferentes para cada grupo.",
+              "Leia as palavras encontradas."
+            ]
+          },
+          {
+            "number": "7",
+            "statement": "Complete o quadro com o feminino das palavras masculinas: cão, boi, leão, bode, carneiro, cavalo, elefante, rei, príncipe, compadre, padrasto, padrinho, ator, autor, anão, irmão.",
+            "visualElements": "Nenhum desenho específico, quadro para completar.",
+            "skill": "masculino e feminino dos substantivos",
+            "expectedAnswer": "cão - cadela; boi - vaca; leão - leoa; bode - cabra; carneiro - ovelha; cavalo - égua; elefante - elefanta; rei - rainha; príncipe - princesa; compadre - comadre; padrasto - madrasta; padrinho - madrinha; ator - atriz; autor - autora; anão - anã; irmão - irmã.",
+            "steps": [
+              "Leia a palavra masculina.",
+              "Pense na forma feminina correspondente.",
+              "Escreva a forma feminina no quadro.",
+              "Repita para todas as palavras.",
+              "Revise para garantir que todas estão corretas."
+            ],
+            "hints": [
+              "Lembre-se das terminações femininas comuns.",
+              "Use o artigo a para ajudar a identificar o feminino.",
+              "Consulte palavras semelhantes."
+            ]
+          },
+          {
+            "number": "8",
+            "statement": "Leia a fábula 'A lebre e a tartaruga' e responda: a) Quais os personagens da fábula? b) Onde se passa a história? c) Qual é a moral da história?",
+            "visualElements": "Ilustração da lebre e da tartaruga.",
+            "skill": "interpretação de texto",
+            "expectedAnswer": "a) A lebre e a tartaruga; b) Na floresta; c) Devagar se vai ao longe.",
+            "steps": [
+              "Leia a fábula atentamente.",
+              "Identifique os personagens principais.",
+              "Localize o cenário da história.",
+              "Reflita sobre a mensagem ou moral da fábula.",
+              "Responda às perguntas com base no texto."
+            ],
+            "hints": [
+              "Procure nomes de personagens no texto.",
+              "Busque frases que indiquem o local da história.",
+              "Pense no ensinamento da fábula."
+            ]
+          },
+          {
+            "number": "9",
+            "statement": "Escreva o significado das palavras homônimas: abril, abriu, mau, mal, calda, cauda. Use uma das palavras para completar as frases dadas.",
+            "visualElements": "Nenhum desenho específico.",
+            "skill": "vocabulário e uso de homônimos",
+            "expectedAnswer": "abril - mês do ano; abriu - passado do verbo abrir; mau - que prejudica; mal - que não está bem; calda - mistura para doce; cauda - parte traseira de animal. Frases: mau - O lobo mau comeu a vovozinha; mal - Vovozinha passou mal; abril - mês do aniversário; abriu - Giovana abriu a porta; cauda - cor",
+            "steps": [
+              "Leia o significado de cada palavra.",
+              "Entenda a diferença entre as palavras homônimas.",
+              "Leia as frases incompletas.",
+              "Escolha a palavra correta para cada frase.",
+              "Complete as frases com as palavras escolhidas."
+            ],
+            "hints": [
+              "Observe o contexto das frases.",
+              "Lembre-se do significado de cada palavra.",
+              "Pense na pronúncia e escrita."
+            ]
+          },
+          {
+            "number": "10",
+            "statement": "Resolva os problemas matemáticos dados: soma, subtração, multiplicação e interpretação de números.",
+            "visualElements": "Tabela para cálculos e problemas escritos.",
+            "skill": "matemática básica: operações e problemas",
+            "expectedAnswer": "1) 298 - 137 = 161 selos; 2) 9 cachorros x 4 patas = 36 patas; 3) 2 álbuns x 24 fotos = 48 fotos; 4) 3 dúzias = 36 selos; 5) 3 ingressos x R$15,00 = R$45,00; 6) 7 estojos x 6 lápis = 42 lápis; 7) 8 bombons x R$3,00 = R$24,00; 8) Bianca tem 4 bonecas, Bianca tem o triplo = 12 bonecas.",
+            "steps": [
+              "Leia cada problema com atenção.",
+              "Identifique a operação matemática necessária.",
+              "Realize a operação passo a passo.",
+              "Escreva o resultado final.",
+              "Revise para garantir que o cálculo está correto."
+            ],
+            "hints": [
+              "Leia os números com atenção.",
+              "Identifique se é soma, subtração, multiplicação ou divisão.",
+              "Use a tabuada para multiplicações."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "b031cc2f-6897-488d-83eb-d77b9bdd716d",
+      "familyId": "390e9fac-3c1e-4fc2-a8ac-999a004f1aa3",
+      "profileId": "051c9e4e-42af-49e1-b18a-988069d00c32",
+      "originalName": "OFICINA DE REFORÇO 3º ANO - MATERIAIS PEDAGÓGICOS.pdf",
+      "mimeType": "application/pdf",
+      "size": 2610129,
+      "sha256": "18391eb03b5b7c2036a41212e5b3c4cf8e44b908ab0324c83452dd6b19438f3d",
+      "literacyLevel": "fluent",
+      "extractionModel": "gpt-4o-mini",
+      "promptVersion": "material-tutor-v1",
+      "expiresAt": "2026-11-28T22:36:18.966Z",
+      "extractionStatus": "failed",
+      "createdAt": "2026-11-21T22:36:18.966Z",
+      "updatedAt": "2026-11-21T22:36:53.178Z",
+      "storageKey": "b031cc2f-6897-488d-83eb-d77b9bdd716d.pdf",
+      "errorCode": "UNREADABLE"
+    },
+    {
+      "id": "6cc73f32-fa77-4ae2-8c46-632d0ec72faa",
+      "familyId": "demo-family",
+      "profileId": "demo-lia",
+      "demoSessionId": "47daa4da-2738-418e-aa1b-66d8d9f4ea92",
+      "originalName": "licao.pdf.png",
+      "mimeType": "image/png",
+      "size": 44056,
+      "sha256": "a3469930fc1c1a77b46837959922a9769b689d7eb526160c191ccbe3c1b6d76b",
+      "literacyLevel": "pre_reader",
+      "extractionModel": "gpt-4o-mini",
+      "promptVersion": "material-tutor-v1",
+      "expiresAt": "2026-11-28T22:31:36.545Z",
+      "extractionStatus": "ready",
+      "createdAt": "2026-11-21T22:31:36.545Z",
+      "updatedAt": "2026-11-21T22:31:43.274Z",
+      "storageKey": "6cc73f32-fa77-4ae2-8c46-632d0ec72faa.png",
+      "extractedText": "Continhas de Matemática\nResolva as continhas:\n1) 3 + 4 = ____\n2) 6 - 2 = ____\n3) João tem 5 balas e ganhou mais 3. Quantas balas ele tem agora? ____",
+      "analysis": {
+        "readable": true,
+        "unreadableReason": "",
+        "title": "Continhas de Matemática",
+        "subject": "Matemática",
+        "estimatedGrade": "1º ano",
+        "generalInstructions": "Resolva as continhas:",
+        "notesForTutor": "A criança pode ter dificuldades com a leitura e a compreensão das operações. É importante usar objetos concretos para ajudar na visualização das operações.",
+        "questions": [
+          {
+            "number": "1",
+            "statement": "3 + 4 = ____",
+            "visualElements": "",
+            "skill": "adição",
+            "expectedAnswer": "7",
+            "steps": [
+              "Conte 3 dedos.",
+              "Depois, conte mais 4 dedos.",
+              "Quantos dedos você tem agora?"
+            ],
+            "hints": [
+              "Lembre-se de contar os dedos um a um.",
+              "Você pode usar brinquedos para ajudar a contar.",
+              "Se precisar, desenhe os números."
+            ]
+          },
+          {
+            "number": "2",
+            "statement": "6 - 2 = ____",
+            "visualElements": "",
+            "skill": "subtração",
+            "expectedAnswer": "4",
+            "steps": [
+              "Conte 6 objetos.",
+              "Tire 2 objetos.",
+              "Quantos objetos sobraram?"
+            ],
+            "hints": [
+              "Use lápis ou pedrinhas para contar.",
+              "Lembre-se de que subtrair é tirar.",
+              "Desenhe os objetos se precisar."
+            ]
+          },
+          {
+            "number": "3",
+            "statement": "João tem 5 balas e ganhou mais 3. Quantas balas ele tem agora? ____",
+            "visualElements": "",
+            "skill": "adição",
+            "expectedAnswer": "8",
+            "steps": [
+              "Conte 5 balas.",
+              "Depois, conte mais 3 balas.",
+              "Quantas balas no total?"
+            ],
+            "hints": [
+              "Você pode usar balas de verdade para contar.",
+              "Lembre-se de somar as balas que ele já tinha com as que ganhou.",
+              "Desenhe as balas se precisar."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "445a51fd-247b-4b7c-bea3-41d2701dc14a",
+      "familyId": "demo-family",
+      "profileId": "demo-lia",
+      "demoSessionId": "47daa4da-2738-418e-aa1b-66d8d9f4ea92",
+      "originalName": "licao.pdf",
+      "mimeType": "application/pdf",
+      "size": 916,
+      "sha256": "7682d14ad580b8bed4751bf2bf5517737a6bbafd8b0f1b7b02f3839d1f349862",
+      "literacyLevel": "emergent",
+      "extractionModel": "gpt-4o-mini",
+      "promptVersion": "material-tutor-v1",
+      "expiresAt": "2026-11-28T22:31:26.694Z",
+      "extractionStatus": "ready",
+      "createdAt": "2026-11-21T22:31:26.694Z",
+      "updatedAt": "2026-11-21T22:31:36.430Z",
+      "storageKey": "445a51fd-247b-4b7c-bea3-41d2701dc14a.pdf",
+      "extractedText": "Contas de Matemática\nResolva as continhas:\n1) 3 + 4 = ____\n2) 6 - 2 = ____\n3) João tem 5 balas e ganhou mais 3. Quantas balas ele tem agora? ____",
+      "analysis": {
+        "readable": true,
+        "unreadableReason": "",
+        "title": "Contas de Matemática",
+        "subject": "Matemática",
+        "estimatedGrade": "1º ano",
+        "generalInstructions": "Resolva as continhas:",
+        "notesForTutor": "A criança pode ter dificuldades com a subtração e a interpretação do problema. É importante incentivá-la a contar com os dedos se necessário.",
+        "questions": [
+          {
+            "number": "1",
+            "statement": "3 + 4 = ____",
+            "visualElements": "",
+            "skill": "adição simples",
+            "expectedAnswer": "7",
+            "steps": [
+              "Conte 3 com os dedos.",
+              "Depois conte mais 4.",
+              "Quantos dedos você tem agora?"
+            ],
+            "hints": [
+              "Lembre-se que a adição é juntar.",
+              "Você pode usar os dedos para contar.",
+              "Tente contar em voz alta."
+            ]
+          },
+          {
+            "number": "2",
+            "statement": "6 - 2 = ____",
+            "visualElements": "",
+            "skill": "subtração simples",
+            "expectedAnswer": "4",
+            "steps": [
+              "Comece com 6 dedos.",
+              "Tire 2 dedos.",
+              "Quantos dedos sobraram?"
+            ],
+            "hints": [
+              "Subtração é tirar.",
+              "Conte os dedos que você tem.",
+              "Tente fazer a conta em voz alta."
+            ]
+          },
+          {
+            "number": "3",
+            "statement": "João tem 5 balas e ganhou mais 3. Quantas balas ele tem agora? ____",
+            "visualElements": "",
+            "skill": "adição em contexto",
+            "expectedAnswer": "8",
+            "steps": [
+              "Conte as 5 balas que João já tem.",
+              "Depois adicione as 3 balas que ele ganhou.",
+              "Quantas balas João tem no total?"
+            ],
+            "hints": [
+              "Pense em juntar as balas.",
+              "Você pode desenhar as balas para ajudar.",
+              "Conte as balas uma a uma."
+            ]
+          }
+        ]
+      }
+    },
     {
       "id": "aff6c1a0-f135-46a7-8c8e-c6d2263acb1f",
       "familyId": "demo-family",
@@ -125,6 +553,24 @@
       "isDemo": true,
       "createdAt": "2026-11-21T21:34:53.329Z",
       "expiresAt": "2026-12-21T21:34:53.329Z"
+    },
+    {
+      "id": "47daa4da-2738-418e-aa1b-66d8d9f4ea92",
+      "tokenHash": "586cc33b37c80580f731203baa9bbc986a071333cb173324c7a498ab6c8d0e53",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-21T22:31:26.624Z",
+      "expiresAt": "2026-12-21T22:31:26.624Z",
+      "adultVerifiedUntil": "2026-11-21T22:46:26.673Z"
+    },
+    {
+      "id": "24315277-708b-407e-ab4e-9da6dbfe03e4",
+      "tokenHash": "0ab1bb4bce656ee2afa21c0a28f2afab9c7f73f74d8e048dce74c405012179ff",
+      "familyId": "390e9fac-3c1e-4fc2-a8ac-999a004f1aa3",
+      "isDemo": false,
+      "createdAt": "2026-11-21T22:35:45.119Z",
+      "expiresAt": "2026-12-21T22:35:45.119Z",
+      "adultVerifiedUntil": "2026-11-21T22:51:18.837Z"
     }
   ],
   "version": 3

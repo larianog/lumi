@@ -41,7 +41,7 @@ This base recipe provides a copyable browser voice-agent starter with:
 - server-side token, invite, stop, and optional custom LLM routes
 - managed default STT, LLM, and TTS provider configuration
 - pre-call, in-call, transcript, metrics, and connection-status UI
-- authenticated study-material upload, cached Feita extraction, child history, and adult-visible completion
+- authenticated study-material upload, cached OpenAI analysis, child history, and adult-visible completion
 
 ## Baseline Implementation Guidance
 
@@ -52,7 +52,7 @@ Do not recreate Agora ConvoAI integration from memory. Provider schemas, SDK bui
 ## Extension Points
 
 - `api.routes`: add browser-facing routes under `app/api`, with shared request/response types in `types/conversation.ts` when the client consumes them.
-- `api.material-extraction`: change Feita request/prompt behavior in `lib/feita-extraction.ts`; bump the prompt version when semantics change.
+- `api.material-extraction`: change OpenAI request/prompt behavior in `lib/material-extraction.ts`; bump the prompt version when semantics change.
 - `persistence.material-storage`: replace `lib/material-storage.ts` and JSON material persistence with durable private adapters for production deployment.
 - `prompts.system`: edit `ADA_PROMPT` and `GREETING` in `app/api/invite-agent/route.ts`.
 - `pipeline.providers`: adjust the `DeepgramSTT`, `OpenAI`, and `MiniMaxTTS` builder chain, or enable the commented BYOK blocks.
@@ -73,7 +73,7 @@ Do not recreate Agora ConvoAI integration from memory. Provider schemas, SDK bui
 - `POST /api/invite-agent` accepts `{ requester_id, channel_name }` and returns the agent id/state payload.
 - `POST /api/stop-conversation` accepts `{ agent_id }` and treats already-stopping sessions as success.
 - Required env vars are `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE`.
-- Material extraction additionally requires server-only `FEITA_AI_API_KEY` and `FEITA_AI_MODEL`.
+- Material extraction additionally requires server-only `OPENAI_API_KEY`.
 - `POST/GET /api/materials` and `GET/PATCH /api/materials/[id]` own material ingestion, history, detail, and completion contracts.
 - `components/LandingPage.tsx` owns pre-call bootstrap and RTM client lifecycle.
 - `components/ConversationComponent.tsx` owns joined-session RTC/toolkit lifecycle.

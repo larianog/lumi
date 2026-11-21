@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdultAccess } from '@/lib/db';
+import { hasAdultAccess, verifyAdultAccess } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
 
 export const runtime = 'nodejs';
+
+/** Whether the family password was confirmed recently (lets the UI skip asking again). */
+export async function GET(request: NextRequest) {
+  try {
+    return NextResponse.json({ verified: await hasAdultAccess(getSessionToken(request)) });
+  } catch (error) {
+    console.error('Error checking adult access:', error);
+    return NextResponse.json({ verified: false });
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

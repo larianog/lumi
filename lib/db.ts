@@ -9,6 +9,7 @@ import type {
   FamilyRecord,
   Profile,
   SessionRecord,
+  HomeworkAnalysis,
   StudyMaterial,
 } from '@/types/database';
 
@@ -324,6 +325,7 @@ export async function reserveStudyMaterial(input: StudyMaterialReservation) {
       && material.sha256 === input.sha256
       && material.extractionModel === input.extractionModel
       && material.promptVersion === input.promptVersion
+      && material.literacyLevel === input.literacyLevel
       && material.extractionStatus !== 'failed'
       && Date.parse(material.expiresAt) > nowMs
       && (material.extractionStatus === 'ready' || Date.parse(material.updatedAt) > nowMs - 2 * 60 * 1000),
@@ -347,12 +349,14 @@ export async function markStudyMaterialReady(
   id: string,
   storageKey: string,
   extractedText: string,
+  analysis?: HomeworkAnalysis,
 ) {
   return updateDb((db) => {
     const material = db.materials.find((candidate) => candidate.id === id);
     if (!material) throw new Error('MATERIAL_NOT_FOUND');
     material.storageKey = storageKey;
     material.extractedText = extractedText;
+    material.analysis = analysis;
     material.extractionStatus = 'ready';
     material.errorCode = undefined;
     material.updatedAt = new Date().toISOString();
@@ -421,6 +425,7 @@ export async function purgeExpiredStudyMaterials() {
       if (material.storageKey) storageKeys.push(material.storageKey);
       material.storageKey = undefined;
       material.extractedText = undefined;
+      material.analysis = undefined;
       material.purgedAt = purgedAt;
       material.updatedAt = purgedAt;
     }

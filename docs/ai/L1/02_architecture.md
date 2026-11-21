@@ -28,7 +28,7 @@ Next.js API routes
   -> agora-token (RtcTokenBuilder.buildTokenWithRtm)
   -> agora-agents (start/stop managed agent)
   -> private material cache + JSON metadata
-  -> Feita multimodal extraction gateway
+  -> OpenAI vision analysis (structured homework brief)
 
 Agora Cloud
   -> Agent session (Deepgram STT + OpenAI LLM + MiniMax TTS by default)
@@ -56,7 +56,7 @@ Agora Cloud
 - RTC transport and mic: `ConversationComponent` + `agora-rtc-react` hooks.
 - Transcript + agent state: `AgoraVoiceAI` events mapped through `lib/conversation.ts`.
 - Metrics and connection issues: `AGENT_METRICS`, `MESSAGE_ERROR`, `SAL_STATUS`, RTM fallback parsing.
-- Study material: `lib/db.ts` metadata/completion state, `lib/material-storage.ts` temporary bytes, and Feita-extracted text.
+- Study material: `lib/db.ts` metadata/completion state, `lib/material-storage.ts` temporary bytes, and the child-safe transcript plus a server-only tutoring analysis.
 
 ## External Dependencies
 
@@ -64,7 +64,7 @@ Agora Cloud
 - `agora-rtm` for data channel.
 - `agora-agent-client-toolkit` and `agora-agent-uikit` for conversation logic/UI.
 - `agora-agents` for managed agent lifecycle.
-- Feita OpenAI-compatible gateway for image-to-text extraction.
+- OpenAI vision model (AI SDK, Responses API) for structured homework analysis of images and PDFs.
 
 ## Deployment Modes
 
@@ -74,7 +74,7 @@ Agora Cloud
 ## Data and Control Boundaries
 
 - Browser never sees the app certificate; only receives signed short-lived tokens.
-- Browser never sees the Feita key or a private storage path.
+- Browser never sees the OpenAI key or a private storage path.
 - Agent lifecycle control (`start`, `stop`) is server-routed.
 - Transcript/state/metrics are data-plane RTM events from agent to browser.
 - UI control-plane actions (start/end, renew) originate in `LandingPage`.
@@ -84,7 +84,7 @@ Agora Cloud
 
 1. The profile page sends an authenticated multipart image upload.
 2. The server validates the signature/size, hashes the bytes, and reserves a material record.
-3. An unexpired match for owner/profile/hash/model/prompt is reused; otherwise the private file is stored and Feita extracts text.
+3. An unexpired match for owner/profile/hash/model/prompt is reused; otherwise the private file is stored and OpenAI extracts text.
 4. The study page displays the text and starts Lumi with server-loaded material context.
 5. The child explicitly marks completion; child history and adult report read the same record.
 6. File and text content expire lazily while metadata and completion state remain.

@@ -9,13 +9,17 @@ import {
   markStudyMaterialReady,
   reserveStudyMaterial,
 } from '@/lib/db';
+import { calculateAge } from '@/lib/age';
 import {
-  extractTextFromMaterial,
-  getFeitaModel,
+  analyzeMaterial,
+  defaultLiteracyLevel,
+  getExtractionModel,
+  LITERACY_LEVELS,
   MATERIAL_EXTRACTION_PROMPT_VERSION,
   MaterialExtractionError,
-} from '@/lib/feita-extraction';
+} from '@/lib/material-extraction';
 import { getSessionToken } from '@/lib/lumi-session';
+import type { LiteracyLevel } from '@/types/database';
 import { storeMaterialFile, SUPPORTED_MATERIAL_MIME_TYPES } from '@/lib/material-storage';
 import {
   cleanupExpiredStudyMaterialContent,
@@ -24,8 +28,10 @@ import {
 } from '@/lib/study-materials';
 
 export const runtime = 'nodejs';
+// Vision analysis of a multi-page PDF can take a while.
+export const maxDuration = 60;
 
-const MAX_MATERIAL_SIZE_BYTES = 8 * 1024 * 1024;
+const MAX_MATERIAL_SIZE_BYTES = 10 * 1024 * 1024;
 const DEFAULT_RETENTION_HOURS = 24 * 7;
 
 function retentionHours() {
@@ -38,7 +44,10 @@ function safeFileName(name: string) {
   return name.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 160) || 'material';
 }
 
-function matchesImageSignature(bytes: Buffer, mimeType: string) {
+function matchesFileSignature(bytes: Buffer, mimeType: string) {
+  if (mimeType === 'application/pdf') {
+    return bytes.length >= 5 && bytes.subarray(0, 5).toString('ascii') === '%PDF-';
+  }
   if (mimeType === 'image/jpeg') {
     return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
   }
@@ -89,15 +98,22 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   let reservedMaterialId: string | undefined;
   let storageKey: string | undefined;
+  let uploadedPdf = false;
 
   try {
     await cleanupExpiredStudyMaterialContent();
-    const result = await getFamilyForSession(getSessionToken(request));
+    const token = getSessionToken(request);
+    const result = await getFamilyForSession(token);
     if (!result) return NextResponse.json({ error: 'Sessão não encontrada.' }, { status: 401 });
+    // Homework is sent by a parent: require the family password (15-minute window).
+    if (!(await hasAdultAccess(token))) {
+      return NextResponse.json({ error: 'Confirme a senha do responsável.' }, { status: 403 });
+    }
 
     const formData = await request.formData();
     const profileId = formData.get('profileId');
     const file = formData.get('file');
+    const requestedLiteracy = formData.get('literacyLevel');
     if (typeof profileId !== 'string' || !(file instanceof File)) {
       return NextResponse.json({ error: 'Envie um perfil e um arquivo.' }, { status: 400 });
     }
@@ -106,19 +122,26 @@ export async function POST(request: NextRequest) {
     if (!profile || profile.type !== 'child') {
       return NextResponse.json({ error: 'Perfil infantil não encontrado.' }, { status: 404 });
     }
+    if (requestedLiteracy !== null
+      && (typeof requestedLiteracy !== 'string' || !LITERACY_LEVELS.includes(requestedLiteracy as LiteracyLevel))) {
+      return NextResponse.json({ error: 'Escolha como a criança lê hoje.' }, { status: 400 });
+    }
     if (!SUPPORTED_MATERIAL_MIME_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Use uma imagem JPG, PNG ou WebP.' }, { status: 415 });
+      return NextResponse.json({ error: 'Use uma foto (JPG, PNG, WebP) ou um PDF.' }, { status: 415 });
     }
     if (file.size <= 0 || file.size > MAX_MATERIAL_SIZE_BYTES) {
-      return NextResponse.json({ error: 'A imagem deve ter no máximo 8 MB.' }, { status: 413 });
+      return NextResponse.json({ error: 'O arquivo deve ter no máximo 10 MB.' }, { status: 413 });
     }
 
+    uploadedPdf = file.type === 'application/pdf';
     const bytes = Buffer.from(await file.arrayBuffer());
-    if (!matchesImageSignature(bytes, file.type)) {
+    if (!matchesFileSignature(bytes, file.type)) {
       return NextResponse.json({ error: 'O conteúdo do arquivo não corresponde ao formato informado.' }, { status: 415 });
     }
 
-    const model = getFeitaModel();
+    const age = calculateAge(profile.birthDate);
+    const literacyLevel = (requestedLiteracy as LiteracyLevel | null) ?? defaultLiteracyLevel(age);
+    const model = getExtractionModel();
     const sha256 = createHash('sha256').update(bytes).digest('hex');
     const now = Date.now();
     const reservation = await reserveStudyMaterial({
@@ -130,6 +153,7 @@ export async function POST(request: NextRequest) {
       mimeType: file.type,
       size: file.size,
       sha256,
+      literacyLevel,
       extractionModel: model,
       promptVersion: MATERIAL_EXTRACTION_PROMPT_VERSION,
       expiresAt: new Date(now + retentionHours() * 60 * 60 * 1000).toISOString(),
@@ -144,8 +168,13 @@ export async function POST(request: NextRequest) {
     }
 
     storageKey = await storeMaterialFile(reservation.material.id, file.type, bytes);
-    const extraction = await extractTextFromMaterial(bytes, file.type);
-    const material = await markStudyMaterialReady(reservation.material.id, storageKey, extraction.text);
+    const extraction = await analyzeMaterial(bytes, file.type, { age, literacyLevel });
+    const material = await markStudyMaterialReady(
+      reservation.material.id,
+      storageKey,
+      extraction.text,
+      extraction.analysis,
+    );
     return NextResponse.json({
       material: toStudyMaterialDto(material, true),
       cached: false,
@@ -157,19 +186,18 @@ export async function POST(request: NextRequest) {
     }
 
     if (error instanceof MaterialExtractionError) {
-      const status = error.code === 'CONFIGURATION'
-        ? 500
-        : error.code === 'TIMEOUT'
-          ? 504
-          : error.code === 'EMPTY_RESPONSE'
-            ? 422
-            : 502;
-      return NextResponse.json({
-        error: error.code === 'EMPTY_RESPONSE'
-          ? 'Não encontramos texto legível nessa imagem.'
-          : 'Não foi possível extrair o texto agora. Tente novamente.',
-        materialId: reservedMaterialId,
-      }, { status });
+      const responses: Record<MaterialExtractionError['code'], [number, string]> = {
+        CONFIGURATION: [503, 'A leitura de lições ainda não foi configurada (OPENAI_API_KEY).'],
+        TIMEOUT: [504, 'A leitura demorou demais. Tente uma foto menor ou menos páginas.'],
+        UNREADABLE: [422, uploadedPdf
+          ? `${error.message} Se for uma apostila, envie só as páginas da lição (um PDF de poucas páginas ou uma foto).`
+          : error.message],
+        EMPTY_RESPONSE: [422, 'Não encontrei questões nessa atividade. Tente uma foto mais nítida.'],
+        PROVIDER: [502, 'Não foi possível ler a atividade agora. Tente novamente.'],
+      };
+      if (error.code === 'CONFIGURATION') console.error('Material analysis is not configured:', error.message);
+      const [status, message] = responses[error.code];
+      return NextResponse.json({ error: message, materialId: reservedMaterialId }, { status });
     }
 
     console.error('Error processing study material:', error);

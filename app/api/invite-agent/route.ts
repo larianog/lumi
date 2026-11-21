@@ -14,7 +14,9 @@ import {
 import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
 import { getFamilyForSession, getStudyMaterial } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
+import { defaultLiteracyLevel, formatHomeworkBrief } from '@/lib/material-extraction';
 import { ownsStudyMaterial } from '@/lib/study-materials';
+import type { HomeworkAnalysis, LiteracyLevel } from '@/types/database';
 import { messages } from '@/packages/i18n';
 import type { AgentResponse, ClientStartRequest } from '@/types/conversation';
 
@@ -36,6 +38,7 @@ export async function POST(request: NextRequest) {
     let age = Math.min(10, Math.max(6, Number(body.age) || 8));
     const activityTitle = body.activity_title?.trim().slice(0, 80) || 'uma descoberta livre';
     let materialText: string | undefined;
+    let homework: { analysis: HomeworkAnalysis; literacyLevel: LiteracyLevel } | undefined;
 
     if (body.material_id || body.profile_id) {
       if (!body.material_id || !body.profile_id) {
@@ -57,9 +60,26 @@ export async function POST(request: NextRequest) {
       profileName = profile.firstName.slice(0, 40);
       age = calculateAge(profile.birthDate);
       materialText = material.extractedText.slice(0, 40_000);
+      // Materials analyzed for tutoring carry a server-only brief (with answers).
+      if (material.analysis) {
+        homework = {
+          analysis: material.analysis,
+          literacyLevel: material.literacyLevel ?? defaultLiteracyLevel(age),
+        };
+      }
     }
 
-    const greeting = messages.voice.agentGreeting(profileName);
+    const greeting = homework
+      ? messages.voice.homeworkGreeting(profileName, homework.analysis.title)
+      : messages.voice.agentGreeting(profileName);
+    const instructions = homework
+      ? messages.voice.homeworkPrompt(
+          profileName,
+          age,
+          homework.literacyLevel,
+          formatHomeworkBrief(homework.analysis),
+        )
+      : messages.voice.agentPrompt(profileName, age, activityTitle, materialText);
 
     const client = new AgoraClient({
       area: Area.US,
@@ -69,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     let agent = new Agent({
       client,
-      instructions: messages.voice.agentPrompt(profileName, age, activityTitle, materialText),
+      instructions,
       greeting,
       failureMessage: messages.voice.genericFailure,
       maxHistory: 30,
