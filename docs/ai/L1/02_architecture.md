@@ -52,6 +52,14 @@ Agora Cloud
 
 ## External Dependencies
 
+The additive `/playground/lumi-animation` route owns a separate CSS Module and local motion state. Its live-test dialog creates RTM first, then calls `/api/playground/lumi-animation` and mounts the existing `ConversationComponent` with a separate RTC provider. It reuses token/stop endpoints. Pending invites are allowed to return their agent ID before cleanup stops the session, including cancellation during startup. Explicit stop failures remain visible for retry. Main app bootstrap and invite defaults are unchanged.
+
+The lab defaults to browser-local video states. `LumiVideoStates` owns object URLs and persistent video elements, plays only the selected clip, pauses when hidden, and releases URLs on replacement/removal/unmount. Reduced motion pauses autoplay; manual play or simulation enables an in-memory override until reload or a system preference change. Stop simulation pauses its video too. Manual one-shot clips return to idle on completion. Conversation simulation snapshots a timed sequence of loaded, error-free clips, skipping missing states; completion pauses on available idle or the last displayed state. Removing/replacing a clip cancels the sequence. Real Agora events are not connected to these videos. The Lemon Slice configuration check only runs when its tab is selected.
+
+Bundled clips come from `BUNDLED_LUMI_VIDEO_CLIPS` and static `public/assets/lumi/states/` assets. The supplied speaking MP4 is selected initially. Local uploads override defaults in memory, and reset/reload restores the bundled source. Only blob URLs are revoked; static asset URLs persist. Playback checks already-loaded media after hydration in addition to listening for `loadeddata`.
+
+WebP selections use `LumiWebPClip`, an unoptimized image instead of a video element. It decodes a static first-frame preview via canvas (up to 1024 px), preserves alpha, and uses a fresh blob URL for each play/replay. Paused, hidden, and reduced-motion-blocked WebP uses the still preview; all temporary URLs and pending loads are cleaned up. Speed/repeat count are native file settings; video speed is disabled and manual WebP has no ended-to-idle transition. Ready/error callbacks guard against stale source URLs, and valid WebP participates in the existing timed simulation.
+
 - `agora-rtc-react` / `agora-rtc-sdk-ng` for media transport.
 - `agora-rtm` for data channel.
 - `agora-agent-client-toolkit` and `agora-agent-uikit` for conversation logic/UI.

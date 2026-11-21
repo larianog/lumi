@@ -18,6 +18,8 @@
 
 ## L1 — Summaries
 
+Review scope on 2026-11-21 includes the additive `/playground/lumi-animation` lab, local video/WebP state workflow with a bundled speaking clip, simulation that skips unavailable states, manual playback under reduced motion, and isolated optional Lemon Slice API. Main Lumi routes and provider defaults remain unchanged.
+
 The Audience column helps agents prioritise: **Use** = consuming the repo behavior, **Maintain** = changing internals.
 
 | File | Purpose | Audience |

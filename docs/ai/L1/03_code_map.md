@@ -39,6 +39,14 @@ types/               Shared TypeScript route/component contracts
 
 ## Validation and Tooling
 
+- `app/playground/lumi-animation/page.tsx` + `components/playground/`: separate animation lab, CSS Module, local motion states, and live-test dialog.
+- `lib/lumi-animation.ts`: bounded prompt validation and presets; no main-app defaults are imported from it.
+- `components/playground/LumiVideoStates.tsx` + `lib/lumi-video-states.ts`: local clips, playback lifecycle, state sequence, and exported production manifest. `docs/lumi-video-states.md` documents the asset brief and future Agora event mapping.
+- `public/assets/lumi/states/speaking.mp4`: bundled, muted speaking loop; `BUNDLED_LUMI_VIDEO_CLIPS` maps its URL and file metadata. Local overrides can restore this default without changing the asset.
+- `components/playground/LumiWebPClip.tsx`: browser-local static/animated WebP playback, first-frame pause preview, replay URL lifecycle, and reduced-motion/hidden playback handling.
+- `app/api/playground/lumi-animation/route.ts`: configuration status and isolated live-test session creation.
+- `scripts/verify-lumi-animation.ts`: live-test request validation, provider serialization, missing credentials, and sanitized failures, called by `verify:api` with mocked session startup.
+
 - `scripts/verify-api-contracts.ts`: imports route handlers and validates contract behavior.
 - `scripts/doctor.mjs`: local setup checks consumed by `pnpm run doctor`.
 - `tailwind.config.ts`: includes `agora-agent-uikit` dist classes in content scan.

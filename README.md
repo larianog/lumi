@@ -145,6 +145,30 @@ The browser fetches a combined RTC + RTM token (`buildTokenWithRtm`) from this a
 
 ## How It Works
 
+### Lumi animation playground
+
+Open [http://localhost:3000/playground/lumi-animation](http://localhost:3000/playground/lumi-animation) after `pnpm run dev`.
+This standalone lab adds no navigation or styling changes to the main Lumi experience.
+
+- **Vídeos por estado (default):** opens on **Falando** with the supplied 8-second clip at `public/assets/lumi/states/speaking.mp4`, looping and muted. This original clip has a pink background. Load local WebM/MP4/MOV overrides for any state, preview loops and one-shot actions, pause/replay, inspect backgrounds, and simulate a conversation without API calls. Local overrides stay in page memory across playground tabs; reload restores bundled defaults. A speaking override can also be reset with **Restaurar vídeo padrão**. The remaining states await videos. See the [Lumi video production guide](docs/lumi-video-states.md) for the six-state brief and alpha formats.
+- **Local 2D:** preview breathing, listening, thinking, speaking and celebration body motions; adjust intensity/speed, pause, play a sequence and compare with the original image. This is a silent motion study, not lip sync or a prediction of Lemon Slice output. Device reduced-motion preferences are respected.
+- **Lemon Slice:** compare the current prompt with `Mais presente` and `Expressiva`, edit speaking/idle prompts, choose an aspect ratio, then explicitly start a real test conversation. Each test uses its own `lumi-animation-*` channel and ends when its dialog closes. Tests consume Agora/Lemon Slice account usage.
+- **Exportar ajustes:** download the local motion values and Lemon Slice parameters as JSON. Exporting does not apply anything to the main app.
+
+Local preview needs no credentials. Live tests require the existing Agora variables plus the optional server-only `NEXT_LEMONSLICE_API_KEY` in `.env.local`; restart the server after changing it. No key is entered in the browser. The separate `/api/playground/lumi-animation` route uses the existing Lumi image and a fixed test greeting for comparisons. It leaves `/api/invite-agent` unchanged.
+
+Video states are currently simulated, not wired to real Agora state events. Ordinary MP4 does not automatically provide a transparent background; deliver WebM with alpha and an HEVC-alpha variant for compatible Safari devices. The player does not remove backgrounds or convert formats. Clips are muted; the speaking loop is not phoneme lip sync. The video workflow avoids avatar-provider generation, while any future voice session still has its own costs.
+
+In video mode, reduced-motion preferences pause automatic playback but keep **Simular conversa** and manual playback available. Clicking either explicitly enables playback for the current page; reload or a change in the system preference resets that choice. **Parar simulação** stops both the sequence and the current video.
+
+The simulation includes only states with loaded, playable clips. With the bundled asset alone, it starts directly on **Falando** and skips **Saudação** and the other missing states. On completion it pauses on **Repouso** if available, otherwise on the last displayed state.
+
+The same tab also accepts static or animated **WebP**, including alpha transparency, up to 40 MB. WebP participates in the state simulation. Pausing or hiding it displays a still first-frame preview; resuming/restarting plays from the beginning. WebP speed and repeat count come from the file, so the video speed control is disabled for it. Manual WebP playback does not automatically return to idle on completion; use state selection or the timed simulation. These files stay browser-local too. See [Google's WebP documentation](https://developers.google.com/speed/webp/faq).
+
+Start with `Mais presente`, repeat the same spoken phrase, then wait silently to observe idle behavior. Motion prompts are suggestions, so evaluate the actual video; they do not guarantee individual gestures. See the [Agora Lemon Slice guide](https://docs.agora.io/en/ai/platform/models/avatar/lemonslice) and [Lemon Slice plugin parameter guidance](https://docs.livekit.io/agents/models/avatar/plugins/lemonslice/). `pnpm run verify:api` includes the playground route contracts without creating real sessions.
+
+### Main conversation
+
 1. The browser requests an RTC + RTM token from `/api/generate-agora-token`.
 2. The backend invites an Agora cloud agent with `/api/invite-agent`.
 3. The browser joins the channel and publishes mic audio.

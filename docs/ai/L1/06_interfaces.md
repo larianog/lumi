@@ -49,6 +49,13 @@ Responses:
 
 Optional SSE proxy path (not default runtime path). Requires `NEXT_LLM_API_KEY` and `NEXT_LLM_URL` when used.
 
+### `/api/playground/lumi-animation`
+
+- `GET`: uncached `{ configured: boolean }` for the three live-test credentials; never returns keys.
+- `POST`: `{ requester_id, channel_name, animation: { speakingPrompt, idlePrompt, aspectRatio } }`. UID must be a nonzero uint32 string distinct from agent/avatar UIDs; channel must start with `lumi-animation-` and have 1–48 alphanumeric/hyphen suffix characters. Prompts must be nonblank and at most 1600 characters each; aspect ratio is `2x3`, `9x16`, or `1x1`. Only the repository Lumi image is used.
+- Success: `{ agent_id, create_ts, state: 'RUNNING' }`. Invalid JSON/fields: `400`; body over 8000 characters: `413`; absent server credentials: `503`; provider failure: sanitized `502`.
+- Reuses the existing token and stop contracts; all main-app contracts remain unchanged.
+
 ## Event/Data Interfaces
 
 - RTM transcript/state/metrics/errors consumed through `AgoraVoiceAI` event emitter.
@@ -69,6 +76,8 @@ This is the complete base `.env.local` contract. The optional BYOK route and pro
 - `scripts/verify-api-contracts.ts` asserts token generation, input validation, env failures, and SSE framing cases.
 
 ## Shared Client-Side Interfaces
+
+The playground file selector accepts WebP/WebM/MP4/MOV up to 40 MB. `LumiVideoClip` represents both images and videos; file extension selects the renderer, and the browser validates decoding. `videoProductionManifest` exports `suggestedWebp` alongside existing video paths; it contains no local file bytes or blob URLs.
 
 From `types/conversation.ts` (high-use):
 

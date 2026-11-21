@@ -15,6 +15,12 @@ If start fails, run `agora project doctor --deep`.
 
 ## Change Agent Behavior
 
+For motion experiments only, visit `/playground/lumi-animation`. Compare `Atual`, `Mais presente`, and `Expressiva` using the same phrase and a silent interval. Live tests require optional server-only Lemon Slice credentials and consume provider usage. Close each test before changing prompts. Export downloads a JSON recipe; it does not update the main agent. Local controls simulate body motion only, without audio or lip sync. Run `pnpm run verify:api` for the added endpoint and `pnpm run verify` before shipping.
+
+For prerecorded animations, use the default **Vídeos por estado** tab, which opens on the supplied speaking MP4 (8 seconds, pink background), muted and looping. Import local overrides, inspect backgrounds, and simulate a conversation without paid sessions. Simulation skips states without loaded, playable clips, so the bundled setup starts on speaking without greeting. Completion pauses on available idle or the last displayed state. Local overrides are memory-only; reset/reload restores bundled defaults. To ship another default, add its asset under `public/assets/lumi/states/` and register its metadata in `BUNDLED_LUMI_VIDEO_CLIPS`. Produce remaining assets using [the video brief](../../lumi-video-states.md); the exported manifest is a production guide rather than a video archive.
+
+The same upload control also accepts WebP (static/animated, with optional alpha), up to 40 MB. WebP joins the timed state simulation; pause displays its first frame and resume/replay restarts it. Speed and repeats come from the file, with no automatic manual ended-to-idle transition. See the video brief for these format-specific controls.
+
 Target file: `app/api/invite-agent/route.ts`.
 
 Typical edits:

@@ -455,6 +455,8 @@ async function main() {
   await verifyInviteAgentSuccess();
   await verifyStopConversationValidation();
   await verifyStopConversationSuccess();
+  const { verifyLumiAnimation } = await import('./verify-lumi-animation');
+  await verifyLumiAnimation();
 
   console.log('API contract checks passed');
 }

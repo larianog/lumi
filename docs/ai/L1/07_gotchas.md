@@ -4,6 +4,14 @@
 
 ## Critical Runtime Pitfalls
 
+- Playground Local 2D is a body-motion study, not Lemon Slice output or phoneme lip sync. Motion prompts influence generated video without guaranteeing gestures. Watch both speech and idle intervals in real sessions.
+- Closing the playground during startup must collect a late invite's agent ID and stop it. Do not abort the invite response and lose that ID. RTM failure prevents inviting an agent; explicit stop failure keeps a retry available.
+- All playground CSS stays in its CSS Module. No playground-specific rules belong in the global Lumi stylesheet.
+- Video states are a local simulation, not real Agora state binding. MP4 container support does not imply alpha support; the player neither removes backgrounds nor converts codecs. Keep an image fallback for missing/unsupported clips, mute all videos, pause hidden elements, and revoke object URLs after use. Replacing/removing a clip must ignore late events from the old URL.
+- Do not disable the video simulation/play buttons for `prefers-reduced-motion`. Suppress autoplay, explain the paused state, and let a user click enable playback for that page. Reset this override when the system preference changes or the page reloads; stopping simulation must pause playback as well.
+- Do not start video simulation with a fixed greeting or finish on a missing idle clip. Build the sequence from loaded, error-free clips; without other assets, simulate speaking alone and finish paused on that state.
+- WebP is rendered as an image, not `<video>`. Native animated images have no video pause/rate/ended controls. Use the static first-frame preview while paused or hidden, restart with a fresh blob URL, and keep the speed control disabled. WebP repeat counts remain file-defined; manual playback does not automatically return to idle. Do not optimize away animation or leave an animated image visible under reduced motion without an explicit play request.
+
 - Using RTC-only token generation breaks RTM login and transcript/state events.
 - Removing `isReady` guard can trigger StrictMode double-initialization and duplicate/missing tracks.
 - Manual `client.leave()` conflicts with `useJoin` cleanup contract.

@@ -58,6 +58,16 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 
 ## Key Files
 
+- `app/playground/lumi-animation/page.tsx`: additive animation lab; leave the main route/navigation intact when experimenting.
+- `components/playground/`: local motion preview, scoped CSS, and isolated Lemon Slice test-session bootstrap. The existing `ConversationComponent` retains RTC hook ownership.
+- `app/api/playground/lumi-animation/route.ts`: optional live-test route with validated prompts, a fixed local image, and separate `lumi-animation-*` channels. Requires server-only `NEXT_LEMONSLICE_API_KEY` plus Agora credentials; it does not change the base environment contract.
+- `lib/lumi-animation.ts`: experiment presets and validation. Changes here do not apply to the production invite route. `scripts/verify-lumi-animation.ts` runs through `verify:api`.
+- `components/playground/LumiVideoStates.tsx` + `lib/lumi-video-states.ts`: default local video-state lab, six-state production brief, and in-memory file selection. Only the active state plays; hidden tabs pause playback. No voice sessions or uploads occur in this mode. Follow `docs/lumi-video-states.md` for alpha formats and the future event integration boundary.
+- `public/assets/lumi/states/speaking.mp4`: supplied speaking clip (8 seconds, pink background), registered in `BUNDLED_LUMI_VIDEO_CLIPS`. The lab opens on speaking, muted and looping; local replacements are temporary and can restore the bundled default. Preserve file metadata in that registry when replacing assets.
+- In video mode, reduced motion blocks autoplay only: keep manual play and **Simular conversa** enabled. A deliberate click enables motion for this page; reset that override on system preference changes or reload. Stopping the simulation pauses its video too.
+- Video simulation snapshots only loaded, error-free clips when starting; skip missing states, including greeting. Finish paused on idle if available, otherwise on the last displayed state. Removing/replacing a clip cancels the sequence.
+- The same file input accepts static/animated WebP. `LumiWebPClip` renders it as an unoptimized image, shows a static first frame when paused/hidden/reduced-motion blocked, and allocates/revokes a new blob URL per replay. WebP speed/repeats come from the file; disable video speed for it. Manual WebP has no ended-to-idle event; timed simulation still switches states.
+
 - `app/api/generate-agora-token/route.ts`: issues RTC + RTM tokens for the browser user.
 - `app/api/invite-agent/route.ts`: starts the managed agent session; edit here for system prompt, VAD, model, or voice changes.
 - `app/api/stop-conversation/route.ts`: stops the agent session.

@@ -50,6 +50,8 @@ Do not recreate Agora ConvoAI integration from memory. Provider schemas, SDK bui
 - `pipeline.providers`: adjust the `DeepgramSTT`, `OpenAI`, and `MiniMaxTTS` builder chain, or enable the commented BYOK blocks.
 - `ui.conversation`: customize `QuickstartPreCallCard`, `QuickstartConversationLayout`, `QuickstartTranscriptPanel`, and `QuickstartPipelineMetrics`.
 
+The optional `/playground/lumi-animation` is an additive experiment using `api.routes` and UI composition. It reuses the existing conversation lifecycle hooks without changing main-app routes or defaults. Its optional server-only Lemon Slice key is outside the base required environment contract; local motion preview needs no credentials.
+
 ## Invariants
 
 - Keep `RtcTokenBuilder.buildTokenWithRtm` for RTM-capable tokens.

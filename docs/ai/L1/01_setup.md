@@ -60,6 +60,8 @@ Requires env/project binding:
 
 ## Local Run Notes
 
+- `/playground/lumi-animation` provides a credential-free local motion study. Optional live tests require server-only `NEXT_LEMONSLICE_API_KEY` alongside the two Agora variables; restart dev after changing env. The base required env contract stays unchanged.
+
 - App + API routes run at `http://localhost:3000`.
 - Session starts from `QuickstartPreCallCard` (`Try it now`) and bootstraps token + RTM + invite flow.
 - If transcript or agent join fails, first run `agora project doctor --deep`.
