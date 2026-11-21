@@ -1,0 +1,14 @@
+{
+  "perguntas": [
+    "Que objeto é esse?",
+    "Qual é esse objeto?",
+    "O que é isso?",
+    "Como se chama esse objeto?"
+  ],
+  "resposta": "gato",
+  "aceita": ["gatinho", "gata"],
+  "alias": ["gatu"],
+  "imagem": "🐱",
+  "lang": "pt-BR",
+  "avatar_img": ""
+}
