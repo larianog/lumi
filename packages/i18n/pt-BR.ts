@@ -69,7 +69,6 @@ export const ptBR = {
       emergent: 'Lê com ajuda',
       fluent: 'Lê sozinha',
     },
-    parentPassword: 'Só o responsável pode enviar lições. Digite a senha da família.',
     sendFile: 'Enviar arquivo',
     sentFile: 'Arquivo enviado',
     extractingFile: 'O Lumi está lendo a lição...',

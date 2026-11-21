@@ -4,7 +4,6 @@ import {
   getFamilyForSession,
   getStudyMaterialsByFamily,
   getStudyMaterialsByProfile,
-  hasAdultAccess,
   markStudyMaterialFailed,
   markStudyMaterialReady,
   reserveStudyMaterial,
@@ -105,10 +104,6 @@ export async function POST(request: NextRequest) {
     const token = getSessionToken(request);
     const result = await getFamilyForSession(token);
     if (!result) return NextResponse.json({ error: 'Sessão não encontrada.' }, { status: 401 });
-    // Homework is sent by a parent: require the family password (15-minute window).
-    if (!(await hasAdultAccess(token))) {
-      return NextResponse.json({ error: 'Confirme a senha do responsável.' }, { status: 403 });
-    }
 
     const formData = await request.formData();
     const profileId = formData.get('profileId');
@@ -174,6 +169,7 @@ export async function POST(request: NextRequest) {
       storageKey,
       extraction.text,
       extraction.analysis,
+      extraction.analysis?.isDidactic,
     );
     return NextResponse.json({
       material: toStudyMaterialDto(material, true),
