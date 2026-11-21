@@ -36,6 +36,7 @@ export function toStudyMaterialDto(
     purgedAt: material.purgedAt,
     completedAt: material.completedAt,
     extractedText: includeExtractedText ? material.extractedText : undefined,
+    storageKey: material.storageKey,
   };
 }
 

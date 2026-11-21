@@ -14,6 +14,7 @@ export type StudyMaterialDto = {
   purgedAt?: string;
   completedAt?: string;
   extractedText?: string;
+  storageKey?: string;
 };
 
 export type MaterialUploadResponse = {
