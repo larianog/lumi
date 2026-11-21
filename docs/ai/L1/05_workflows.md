@@ -70,6 +70,14 @@ Bootstrap behavior:
 3. Set `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE` in the Vercel project's Production environment.
 4. Push to `main`; `.github/workflows/deploy-vercel.yml` runs `vercel deploy --prod`.
 
+## Build the Container Image
+
+The Dockerfile and its Dockerfile-specific ignore rules are colocated under `deploy/docker/`. Keep the repository root as the build context:
+
+```bash
+docker build -f deploy/docker/Dockerfile -t lumi-by-agora .
+```
+
 ## Progressive Disclosure Doc Workflow
 
 - `generate docs`: create `docs/ai/` tree when absent.
@@ -106,7 +114,7 @@ Bootstrap behavior:
 1. Uncomment relevant provider block in invite route.
 2. Add the provider variables shown in the lower README BYOK section to your local environment.
 3. Keep default no-key path intact for baseline quickstart behavior.
-4. Keep provider variables out of `env.local.example`; they are not part of the base contract.
+4. Keep provider variables out of `config/env/env.local.example`; they are not part of the base contract.
 5. Re-run `pnpm run verify` before shipping.
 
 ## Workflow: Docs Refresh After Runtime Changes

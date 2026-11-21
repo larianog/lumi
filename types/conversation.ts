@@ -35,4 +35,8 @@ export interface ConversationComponentProps {
   rtmClient: RTMClient;
   onTokenWillExpire: (uid: string) => Promise<AgoraRenewalTokens>;
   onEndConversation: () => void;
+  /** `full` = in-call layout with header and transcript; `inline` = avatar + mic only. */
+  variant?: 'full' | 'inline';
+  /** Called from a user tap after microphone access was denied. */
+  onRetryMicrophone?: () => void;
 }

@@ -4,4 +4,6 @@ README.md
 .gitignore
 .DS_Store
 node_modules
-*.log 
+config
+deploy
+*.log

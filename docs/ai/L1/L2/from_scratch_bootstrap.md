@@ -12,7 +12,7 @@ Why: provider schemas, SDK builder fields, token behavior, and RTM event details
 
 | Need | Read First | Deep Detail | Source Reference |
 | --- | --- | --- | --- |
-| Project setup, commands, env vars | [../01_setup.md](../01_setup.md) | [../05_workflows.md](../05_workflows.md) | `package.json`, `env.local.example` |
+| Project setup, commands, env vars | [../01_setup.md](../01_setup.md) | [../05_workflows.md](../05_workflows.md) | `package.json`, `config/env/env.local.example` |
 | End-to-end architecture and data flow | [../02_architecture.md](../02_architecture.md) | [conversation_lifecycle.md](conversation_lifecycle.md) | `components/LandingPage.tsx`, `components/ConversationComponent.tsx` |
 | File/module responsibilities | [../03_code_map.md](../03_code_map.md) | none | `app/api`, `components`, `lib`, `types` |
 | API payloads and response shapes | [../06_interfaces.md](../06_interfaces.md) | [token_model.md](token_model.md), [invite_agent_config.md](invite_agent_config.md) | `app/api/*/route.ts`, `types/conversation.ts` |
@@ -26,7 +26,7 @@ Why: provider schemas, SDK builder fields, token behavior, and RTM event details
 Implement these pieces in order:
 
 1. Create a Next.js App Router project with React, TypeScript, Tailwind, and the Agora dependencies from `package.json`.
-2. Add `env.local.example` with only `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE`; keep optional BYOK examples in the README and source comments.
+2. Add `config/env/env.local.example` with only `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE`; keep optional BYOK examples in the README and source comments.
 3. Implement `GET /api/generate-agora-token` with `RtcTokenBuilder.buildTokenWithRtm`; return `{ token, uid, channel }` and replace invalid or zero UIDs.
 4. Implement `POST /api/invite-agent` with `AgoraClient`, `Agent`, managed `DeepgramSTT`, `OpenAI`, `MiniMaxTTS`, RTM enabled, metrics enabled, and `{ requester_id, channel_name }` input.
 5. Implement `POST /api/stop-conversation` with idempotent already-stopping/not-found handling.

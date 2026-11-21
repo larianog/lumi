@@ -80,7 +80,9 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `lib/chat-completions.ts`: server-side custom LLM SSE handler factory; the route only exports `POST`.
 - `lib/agora.ts`: shared agent UID defaults.
 - `lib/conversation.ts`: transcript normalization and visualizer state mapping.
-- `env.local.example`: local environment template.
+- `config/env/env.local.example`: local environment template.
+- `deploy/docker/`: container build definition and Docker-specific ignore rules.
+- `docs/assets/architecture/`: light and dark architecture diagrams used by the README.
 - `scripts/verify-api-contracts.ts`: route contract verification.
 
 ## Patterns
@@ -144,6 +146,7 @@ useEffect(() => {
 - Keep transcript UID remapping aligned with the toolkit sentinel behavior.
 - Do not require third-party vendor API keys unless the code actually introduces a BYOK provider path.
 - Keep README, AGENTS, and `docs/ai/` aligned with implementation changes.
+- Keep auto-discovered project files such as `.npmrc`, `.nvmrc`, `.vercelignore`, `vercel.json`, and framework configs at the repository root.
 
 ## Commands
 
