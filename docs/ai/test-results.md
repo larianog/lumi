@@ -30,7 +30,7 @@ Repo: AgoraIO-Conversational-AI/agent-quickstart-nextjs
 | # | Question | Answer Correct? | Files Read | Level Loaded | Result |
 | - | -------- | --------------- | ---------- | ------------ | ------ |
 | 1 | How do I install dependencies, bind env, and build this project? | Yes | `AGENTS.md`, `README.md`, L0, `01_setup`, `05_workflows`, `package.json` | L0+L1 | Pass |
-| 2 | What environment variables are required for the base quickstart? | Yes | `README.md`, `env.local.example`, `01_setup`, `06_interfaces`, `RECIPE.md` | L1+Recipe | Pass |
+| 2 | What environment variables are required for the base quickstart? | Yes | `README.md`, `config/env/env.local.example`, `01_setup`, `06_interfaces`, `RECIPE.md` | L1+Recipe | Pass |
 
 ### Test & Run
 
@@ -42,8 +42,8 @@ Repo: AgoraIO-Conversational-AI/agent-quickstart-nextjs
 
 | # | Question | Answer Correct? | Files Read | Level Loaded | Result |
 | - | -------- | --------------- | ---------- | ------------ | ------ |
-| 4 | What branch and commit conventions apply? | Yes | `AGENTS.md`, `CONTRIBUTING.md`, `04_conventions`, `05_workflows` | L1 | Pass |
-| 8 | What docs must change when a workflow, interface, or recipe stable contract changes? | Yes | `AGENTS.md`, `CONTRIBUTING.md`, L0, `RECIPE.md`, `01_setup`, `04_conventions`, `05_workflows`, `06_interfaces`, `07_gotchas` | L1+Recipe | Pass |
+| 4 | What branch and commit conventions apply? | Yes | `AGENTS.md`, `docs/CONTRIBUTING.md`, `04_conventions`, `05_workflows` | L1 | Pass |
+| 8 | What docs must change when a workflow, interface, or recipe stable contract changes? | Yes | `AGENTS.md`, `docs/CONTRIBUTING.md`, L0, `RECIPE.md`, `01_setup`, `04_conventions`, `05_workflows`, `06_interfaces`, `07_gotchas` | L1+Recipe | Pass |
 
 ### Development
 
@@ -75,4 +75,4 @@ Retested: 2026-05-28
 | Finding | Source checked | Docs changed | Result | Notes |
 | ------- | -------------- | ------------ | ------ | ----- |
 | Recipe needed official-baseline guidance without bloating `RECIPE.md` | `docs/ai/RECIPE.md`, `docs/ai/L1/03_code_map.md`, `docs/ai/L1/05_workflows.md`, `docs/ai/L1/L2/_index.md` | `docs/ai/RECIPE.md`, `docs/ai/L1/L2/from_scratch_bootstrap.md`, L1 links, L2 index | Pass | `RECIPE.md` now links to a dedicated L2 bootstrap doc; new links resolve and the L2 starts with the required callout. |
-| Old human guide docs were removed as obsolete artifacts | `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/ai/L1/*`, `docs/ai/L1/L2/from_scratch_bootstrap.md` | Removed obsolete guide files; redirected references to `RECIPE.md`, L1, and L2 docs | Pass | No stale guide references remain; markdown links resolve. |
+| Old human guide docs were removed as obsolete artifacts | `README.md`, `AGENTS.md`, `docs/CONTRIBUTING.md`, `docs/ai/L1/*`, `docs/ai/L1/L2/from_scratch_bootstrap.md` | Removed obsolete guide files; redirected references to `RECIPE.md`, L1, and L2 docs | Pass | No stale guide references remain; markdown links resolve. |

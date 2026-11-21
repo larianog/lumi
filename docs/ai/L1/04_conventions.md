@@ -78,7 +78,7 @@ When changing workflow/contracts/ownership in `components` or `app/api`, update:
 - Keep scope small and copyable for quickstart consumers.
 - Include doc updates in same change when workflow/contracts are touched.
 - Use present-tense lowercase conventional commit descriptions.
-- Avoid adding hidden requirements not represented in `env.local.example` and README.
+- Avoid adding hidden requirements not represented in `config/env/env.local.example` and README.
 
 ## Related Deep Dives
 

@@ -31,7 +31,7 @@ agora project doctor --deep
 - `NEXT_PUBLIC_AGORA_APP_ID`: Agora project App ID.
 - `NEXT_AGORA_APP_CERTIFICATE`: Agora App Certificate (server only).
 
-The base `.env.local` contract contains only these Agora credentials. Agent behavior defaults live in code, and optional BYOK examples are documented later in the root README.
+The base `.env.local` contract contains only these Agora credentials. The tracked template is `config/env/env.local.example`; agent behavior defaults live in code, and optional BYOK examples are documented later in the root README.
 
 ## Primary Commands
 
@@ -100,7 +100,7 @@ Vercel:
 When setup docs/config change:
 
 1. Update `README.md` environment/commands sections.
-2. Update `env.local.example` if variable set changes.
+2. Update `config/env/env.local.example` if variable set changes.
 3. Update `docs/ai/L1/01_setup.md` and `L0_repo_card.md` `Last Reviewed`.
 4. Run at least `pnpm run typecheck` and `pnpm run verify:api`.
 

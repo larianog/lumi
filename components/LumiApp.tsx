@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { BookOpen, LoaderCircle, LogIn, Sparkles, Star, UserPlus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { messages } from '@/packages/i18n';
 import Brand from './Brand';
 
@@ -11,6 +11,17 @@ export default function LumiApp() {
   const router = useRouter();
   const [demoLoading, setDemoLoading] = useState(false);
   const [demoError, setDemoError] = useState('');
+  const [forestReady, setForestReady] = useState(false);
+  const [mascotReady, setMascotReady] = useState(false);
+  const [introFinished, setIntroFinished] = useState(false);
+  const artworkReady = forestReady && mascotReady;
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Bound the wait so stalled artwork cannot block the welcome actions.
+    const timeout = window.setTimeout(() => setIntroFinished(true), reducedMotion ? 0 : 4500);
+    return () => window.clearTimeout(timeout);
+  }, []);
 
   const enterDemo = async () => {
     setDemoLoading(true);
@@ -33,8 +44,39 @@ export default function LumiApp() {
 
   return (
     <main className="lumi-app">
-      <section className="welcome-screen">
-        <div className="welcome-copy">
+      <section className="welcome-screen" data-intro={!introFinished || undefined}>
+        <div className="welcome-art" aria-hidden="true">
+          <Image
+            className="welcome-forest"
+            src="/assets/forest-learning-bg.png"
+            alt=""
+            fill
+            loading="eager"
+            fetchPriority="high"
+            data-ready={forestReady}
+            onLoad={() => setForestReady(true)}
+            onError={() => setForestReady(true)}
+          />
+          <div className="welcome-orbit orbit-one" />
+          <div className="welcome-orbit orbit-two" />
+          <div className="welcome-mascot">
+            <Image
+              src="/assets/lumi-avatar.png"
+              alt=""
+              width={1199}
+              height={1312}
+              loading="eager"
+              fetchPriority="high"
+              data-ready={artworkReady}
+              onLoad={() => setMascotReady(true)}
+              onError={() => setMascotReady(true)}
+              onAnimationEnd={() => setIntroFinished(true)}
+            />
+            <div className="floating-card star-card"><Star size={20} fill="currentColor" />+20</div>
+            <div className="floating-card discovery-card"><BookOpen size={20} />Nova descoberta!</div>
+          </div>
+        </div>
+        <div className="welcome-copy" inert={!introFinished}>
           <Brand size="large" priority />
           <span className="eyebrow">{messages.welcome.eyebrow}</span>
           <h1>{messages.welcome.title}</h1>
@@ -59,15 +101,8 @@ export default function LumiApp() {
               {demoLoading ? messages.common.loading : messages.welcome.demo}
               <span>{messages.welcome.demoHint}</span>
             </button>
-            {demoError && <p className="welcome-error">{demoError}</p>}
+            {demoError && <p className="welcome-error" role="alert">{demoError}</p>}
           </div>
-        </div>
-        <div className="welcome-art" aria-hidden="true">
-          <div className="welcome-orbit orbit-one" />
-          <div className="welcome-orbit orbit-two" />
-          <Image src="/assets/lumi-avatar.png" alt="" width={650} height={710} priority />
-          <div className="floating-card card-top"><Star size={20} fill="currentColor" />+20</div>
-          <div className="floating-card card-bottom"><BookOpen size={20} />Nova descoberta!</div>
         </div>
       </section>
     </main>
