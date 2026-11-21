@@ -1,238 +1,34 @@
 'use client';
 
 import Image from 'next/image';
-import {
-  ArrowLeft,
-  BookOpen,
-  CalendarDays,
-  CheckCircle2,
-  Flame,
-  Gamepad2,
-  Library,
-  LockKeyhole,
-  LogIn,
-  Mic,
-  Plus,
-  ShieldCheck,
-  Sparkles,
-  Star,
-  UserPlus,
-  WandSparkles,
-} from 'lucide-react';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { BookOpen, LoaderCircle, LogIn, Sparkles, Star, UserPlus } from 'lucide-react';
+import { useState } from 'react';
 import { messages } from '@/packages/i18n';
-import LumiVoiceAgent from './LumiVoiceAgent';
-
-type Screen = 'welcome' | 'profile-form' | 'profile-picker' | 'home' | 'activity' | 'report';
-type ProfileType = 'adult' | 'child';
-type ActivityId = 'school' | 'games' | 'stories' | 'suggest';
-
-type Profile = {
-  id: string;
-  type: ProfileType;
-  firstName: string;
-  lastName: string;
-  birthDate: string;
-  avatar: number;
-};
-
-type Family = {
-  phone: string;
-  password: string;
-  profiles: Profile[];
-};
-
-type Completion = {
-  id: string;
-  profileId: string;
-  activityId: ActivityId;
-  activityTitle: string;
-  completedAt: string;
-};
-
-type ProfileForm = {
-  type: ProfileType;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  password: string;
-  birthDate: string;
-};
-
-const FAMILY_STORAGE_KEY = 'lumi.family.v1';
-const COMPLETIONS_STORAGE_KEY = 'lumi.completions.v1';
-
-const emptyForm: ProfileForm = {
-  type: 'adult',
-  firstName: '',
-  lastName: '',
-  phone: '',
-  password: '',
-  birthDate: '',
-};
-
-const demoFamily: Family = {
-  phone: '(11) 99999-2026',
-  password: 'lumi123',
-  profiles: [
-    { id: 'demo-adult', type: 'adult', firstName: 'Marina', lastName: 'Silva', birthDate: '1991-04-18', avatar: 0 },
-    { id: 'demo-lia', type: 'child', firstName: 'Lia', lastName: 'Silva', birthDate: '2018-08-12', avatar: 1 },
-    { id: 'demo-caio', type: 'child', firstName: 'Caio', lastName: 'Silva', birthDate: '2016-03-03', avatar: 2 },
-  ],
-};
-
-const activities: Array<{ id: ActivityId; icon: typeof BookOpen; accent: string }> = [
-  { id: 'school', icon: BookOpen, accent: 'mint' },
-  { id: 'games', icon: Gamepad2, accent: 'violet' },
-  { id: 'stories', icon: Library, accent: 'sun' },
-  { id: 'suggest', icon: WandSparkles, accent: 'rose' },
-];
-
-const profileColors = ['#eaf9bb', '#a8e6cf', '#d7c5f4', '#ffd79b', '#ffc9d6'];
-
-function calculateAge(birthDate: string) {
-  const today = new Date();
-  const birth = new Date(`${birthDate}T12:00:00`);
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDifference = today.getMonth() - birth.getMonth();
-  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birth.getDate())) age -= 1;
-  return Math.max(age, 0);
-}
-
-function safeParse<T>(value: string | null, fallback: T): T {
-  if (!value) return fallback;
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return fallback;
-  }
-}
+import Brand from './Brand';
 
 export default function LumiApp() {
-  const [screen, setScreen] = useState<Screen>('welcome');
-  const [authMode, setAuthMode] = useState<'signup' | 'signin'>('signup');
-  const [family, setFamily] = useState<Family | null>(null);
-  const [form, setForm] = useState<ProfileForm>(emptyForm);
-  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
-  const [selectedActivity, setSelectedActivity] = useState<ActivityId>('school');
-  const [completions, setCompletions] = useState<Completion[]>([]);
-  const [isDemo, setIsDemo] = useState(false);
-  const [formError, setFormError] = useState('');
-  const [adultPasswordOpen, setAdultPasswordOpen] = useState(false);
-  const [adultPassword, setAdultPassword] = useState('');
-  const [adultPasswordError, setAdultPasswordError] = useState('');
+  const router = useRouter();
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoError, setDemoError] = useState('');
 
-  useEffect(() => {
-    setFamily(safeParse<Family | null>(window.localStorage.getItem(FAMILY_STORAGE_KEY), null));
-    setCompletions(safeParse<Completion[]>(window.localStorage.getItem(COMPLETIONS_STORAGE_KEY), []));
-  }, []);
+  const enterDemo = async () => {
+    setDemoLoading(true);
+    setDemoError('');
 
-  useEffect(() => {
-    window.localStorage.setItem(COMPLETIONS_STORAGE_KEY, JSON.stringify(completions));
-  }, [completions]);
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ demo: true }),
+      });
 
-  const activeProfile = family?.profiles.find((profile) => profile.id === activeProfileId) ?? null;
-  const childProfiles = family?.profiles.filter((profile) => profile.type === 'child') ?? [];
-  const adultProfile = family?.profiles.find((profile) => profile.type === 'adult') ?? null;
-
-  const openSignup = (type: ProfileType = 'adult') => {
-    setAuthMode('signup');
-    setForm({
-      ...emptyForm,
-      type,
-      phone: family?.phone ?? '',
-      password: family?.password ?? '',
-    });
-    setFormError('');
-    setScreen('profile-form');
-  };
-
-  const openSignIn = () => {
-    setAuthMode('signin');
-    setForm(emptyForm);
-    setFormError('');
-    setScreen('profile-form');
-  };
-
-  const enterDemo = () => {
-    setFamily(demoFamily);
-    setIsDemo(true);
-    setScreen('profile-picker');
-  };
-
-  const submitProfile = (event: FormEvent) => {
-    event.preventDefault();
-    setFormError('');
-
-    if (authMode === 'signin') {
-      const storedFamily = safeParse<Family | null>(window.localStorage.getItem(FAMILY_STORAGE_KEY), null);
-      if (!storedFamily || storedFamily.phone !== form.phone || storedFamily.password !== form.password) {
-        setFormError(messages.auth.invalidLogin);
-        return;
-      }
-      setFamily(storedFamily);
-      setIsDemo(false);
-      setScreen('profile-picker');
-      return;
+      if (!response.ok) throw new Error('Demo login failed');
+      router.push('/profiles');
+    } catch {
+      setDemoError('Não foi possível abrir a demo agora. Tente novamente.');
+      setDemoLoading(false);
     }
-
-    if (!form.firstName || !form.lastName || !form.phone || !form.password || !form.birthDate) {
-      setFormError(messages.auth.required);
-      return;
-    }
-
-    const newProfile: Profile = {
-      id: crypto.randomUUID(),
-      type: form.type,
-      firstName: form.firstName.trim(),
-      lastName: form.lastName.trim(),
-      birthDate: form.birthDate,
-      avatar: family?.profiles.length ?? 0,
-    };
-    const nextFamily: Family = family
-      ? { ...family, profiles: [...family.profiles, newProfile] }
-      : { phone: form.phone, password: form.password, profiles: [newProfile] };
-
-    setFamily(nextFamily);
-    setIsDemo(false);
-    window.localStorage.setItem(FAMILY_STORAGE_KEY, JSON.stringify(nextFamily));
-    setScreen('profile-picker');
-  };
-
-  const selectProfile = (profile: Profile) => {
-    if (profile.type === 'adult') {
-      setAdultPasswordOpen(true);
-      setAdultPassword('');
-      setAdultPasswordError('');
-      return;
-    }
-    setActiveProfileId(profile.id);
-    setScreen('home');
-  };
-
-  const openAdultArea = (event: FormEvent) => {
-    event.preventDefault();
-    if (adultPassword !== family?.password) {
-      setAdultPasswordError(messages.profiles.passwordError);
-      return;
-    }
-    setAdultPasswordOpen(false);
-    setScreen('report');
-  };
-
-  const completeActivity = (activityId: ActivityId) => {
-    if (!activeProfile) return;
-    const activityTitle = messages.activities[activityId].title;
-    setCompletions((current) => [
-      {
-        id: crypto.randomUUID(),
-        profileId: activeProfile.id,
-        activityId,
-        activityTitle,
-        completedAt: new Date().toISOString(),
-      },
-      ...current,
-    ]);
   };
 
   return (
