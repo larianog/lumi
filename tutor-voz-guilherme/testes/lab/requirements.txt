@@ -1,0 +1,4 @@
+agora-agents==2.15.0
+fastapi
+uvicorn[standard]
+python-dotenv

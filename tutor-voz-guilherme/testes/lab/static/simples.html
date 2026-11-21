@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atividade por voz</title>
+<style>
+  :root { --bg:#fff; --fg:#1b1b1f; --mut:#6b6b76; --line:#e2e2e8; --acc:#2f6fed; --ok:#1a8f4c; --mid:#b7791f; --bad:#c0392b; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#141418; --fg:#f2f2f5; --mut:#9a9aa6; --line:#2c2c34; --acc:#6c9bff; --ok:#46c27a; --mid:#e0b04a; --bad:#ef7766; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,sans-serif; padding:24px 16px; }
+  main { max-width:980px; margin:0 auto; text-align:center; }
+  /* Duas colunas: avatar de um lado, exercício do outro (em tela estreita, empilha) */
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; min-height:70vh; }
+  .cols.invertido .avatar { order:2; }
+  @media (max-width:760px) { .cols { grid-template-columns:1fr; gap:20px; min-height:0; } .cols.invertido .avatar { order:0; } }
+  #countdown { font-size:88px; font-weight:800; line-height:1.15; min-height:104px; color:var(--acc); }
+  #countdown.fale { font-size:40px; color:var(--ok); padding-top:26px; }
+  #countdown.tick { animation:tick .5s ease-out; }
+  @keyframes tick { from { transform:scale(1.5); opacity:.3; } to { transform:scale(1); opacity:1; } }
+  #stage { width:min(100%,360px); aspect-ratio:1/1; margin:0 auto 16px; border-radius:16px; background:var(--line); overflow:hidden; display:grid; place-items:center; color:var(--mut); font-size:13px; padding:8px; }
+  #stage.hide { display:none; }
+  /* Mascote 2D animado pelo volume da voz (sem fornecedor de avatar) */
+  #mascot { position:relative; width:min(100%,360px); aspect-ratio:1/1; margin:0 auto 16px; border-radius:16px; overflow:hidden; transform-origin:50% 92%; will-change:transform; }
+  #mascot.hide { display:none; }
+  #mascot img { width:100%; height:100%; display:block; }
+  #mascot .glow { position:absolute; width:30%; aspect-ratio:1; border-radius:50%; transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(255,246,170,.95), rgba(255,246,170,0) 68%); mix-blend-mode:screen; opacity:0; pointer-events:none; }
+  #mascot .glow.l { left:32.8%; top:14.3%; } #mascot .glow.r { left:66.8%; top:14.3%; }
+  #mascot .mouth { position:absolute; left:49.6%; top:45.2%; width:7.5%; height:.8%; transform:translate(-50%,-50%); background:#2b1620; border-radius:50%; overflow:hidden; pointer-events:none; }
+  #mascot .mouth::after { content:""; position:absolute; left:18%; right:18%; bottom:-10%; height:55%; background:#d9728a; border-radius:50%; }
+  #pergunta { font-size:26px; font-weight:700; line-height:1.25; margin:8px 0 14px; }
+  #img { max-width:260px; max-height:200px; border-radius:12px; display:none; margin:0 auto 16px; }
+  #btn { width:120px; height:120px; border-radius:50%; border:0; background:var(--acc); color:#fff; font:600 18px system-ui; cursor:pointer; }
+  #btn.on { background:var(--bad); }
+  #btn:disabled { opacity:.5; cursor:wait; }
+  #status { margin:12px 0 28px; color:var(--mut); min-height:24px; }
+  #label { color:var(--mut); font-size:14px; }
+  #heard { font-size:42px; font-weight:700; line-height:1.15; min-height:52px; word-break:break-word; }
+  #heard.live { color:var(--mut); font-weight:500; }
+  #verdict { font-size:24px; font-weight:700; min-height:36px; margin-top:6px; }
+  #verdict.correct { color:var(--ok); } #verdict.close { color:var(--mid); } #verdict.wrong { color:var(--bad); }
+  #why { color:var(--mut); font-size:13px; min-height:20px; }
+  #agentSaid { color:var(--mut); font-size:13px; min-height:20px; margin-top:4px; }
+  #agentSaid.alerta { color:var(--bad); font-weight:600; }
+  #btnNext { margin-top:10px; background:none; border:1px solid var(--line); color:var(--mut); border-radius:999px; padding:4px 14px; font:inherit; font-size:14px; cursor:pointer; }
+  #btnNext:hover { color:var(--fg); border-color:var(--mut); }
+  #err { color:var(--bad); margin-top:14px; }
+  details { margin-top:36px; text-align:left; border-top:1px solid var(--line); padding-top:12px; }
+  summary { cursor:pointer; color:var(--mut); font-size:14px; }
+  label.f { display:block; font-size:13px; color:var(--mut); margin:10px 0 2px; }
+  input, select { width:100%; font:inherit; padding:6px 8px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #hist { margin-top:14px; font-size:14px; color:var(--mut); }
+  #hist div { padding:3px 0; border-top:1px solid var(--line); }
+</style>
+</head>
+<body>
+<main>
+  <div class="cols" id="cols">
+    <section class="avatar">
+      <div id="mascot" class="hide"><img id="mascotImg" src="/mascote" alt="Lumi"><i class="glow l"></i><i class="glow r"></i><i class="mouth"></i></div>
+      <div id="stage" class="hide">avatar</div>
+    </section>
+
+    <section class="exercise">
+      <div id="pergunta">…</div>
+      <div id="emoji" style="font-size:96px;line-height:1.1;display:none;margin-bottom:6px"></div>
+      <img id="img" alt="">
+      <div id="countdown"></div>
+
+      <button id="btn">Falar</button>
+      <div><button id="btnNext" type="button">Outro objeto ▶</button></div>
+      <div id="status">Aperte e responda.</div>
+
+      <div id="label">Ele entendeu:</div>
+      <div id="heard">…</div>
+      <div id="verdict"></div>
+      <div id="why"></div>
+      <div id="agentSaid" title="O que o agente escreveu (para diagnosticar a língua)"></div>
+      <div id="err"></div>
+    </section>
+  </div>
+
+  <details>
+    <summary>Atividade (normalmente vem de fora)</summary>
+    <label class="f">Conjunto de teste (escolhe objeto, imagem, resposta e apelidos de uma vez)</label>
+    <select id="f_preset"></select>
+    <label class="f">Perguntas (separe por | ; o agente sorteia uma e muda ao repetir)</label><input id="f_perguntas">
+    <div class="row2">
+      <div><label class="f">Resposta esperada</label><input id="f_resposta"></div>
+      <div><label class="f">Outras respostas certas (vírgula)</label><input id="f_aceita"></div>
+    </div>
+    <label class="f">Como o ASR costuma escrever errado (vírgula)</label><input id="f_alias">
+    <label class="f">URL da imagem da atividade</label><input id="f_imagem">
+    <label class="f">URL da imagem do personagem (avatar)</label><input id="f_avatar_img">
+    <label class="f">Idioma da fala</label>
+    <select id="f_lang"><option value="pt-BR">Português</option><option value="en-US">Inglês</option><option value="multi">Os dois</option></select>
+    <div class="row2" style="margin-top:12px"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="f_avatar" style="width:auto"> Usar avatar</label><span id="avatarNote" style="font-size:13px;color:var(--mut)"></span></div>
+    <div id="hist"></div>
+  </details>
+</main>
+
+<script src="/static/matcher.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/agora-rtc-sdk-ng@4.24.9/AgoraRTC_N-production.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/agora-rtm-sdk@2.3.0/agora-rtm.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const list = (s) => String(s || "").split(",").map((x) => x.trim()).filter(Boolean);
+
+let CFG, rtc, mic, rtm, agentId, channel, on = false;
+let ACT = { pergunta: "", perguntas: [], resposta: "", aceita: [], alias: [], imagem: "", lang: "pt-BR", avatar_img: "" };
+let perguntaAtual = "";    // a variação de pergunta que está sendo usada agora
+const turns = new Map(); // turno -> { results: [], seen:Set }
+let done = false;          // true quando a criança acertou (a conversa vai encerrar)
+let lastActivity = 0;      // última vez que alguém falou (criança ou agente)
+let repeatTimer = null, concludeTimer = null;
+const REPEAT_MS = 10000;   // repete a pergunta após 10 s de silêncio
+
+/* ---------- 1. A atividade que vem de fora ----------
+   Três jeitos de entregar, em ordem de prioridade:
+   a) na URL:   /?pergunta=Qual o objeto?&resposta=bola&aceita=bolas&alias=bol,bou&imagem=https://...&lang=pt-BR
+   b) pelo servidor:  POST /api/atividade  (a página lê GET /api/atividade ao abrir)
+   c) pelo código da página que embute esta:  window.setAtividade({...})   */
+function setAtividade(a) {
+  const asList = (v, atual) => (v === undefined ? atual : Array.isArray(v) ? v : list(v));
+  const asPerguntas = (v) => (Array.isArray(v) ? v : String(v).split("|")).map((x) => String(x).trim()).filter(Boolean);
+  ACT = { ...ACT, ...a, aceita: asList(a.aceita, ACT.aceita), alias: asList(a.alias, ACT.alias) };
+  // perguntas: lista de variações. Se só vier "pergunta", a lista é essa única pergunta.
+  if (a.perguntas !== undefined) ACT.perguntas = asPerguntas(a.perguntas);
+  else if (a.pergunta !== undefined) ACT.perguntas = asPerguntas(a.pergunta);
+  ACT.pergunta = ACT.perguntas[0] || "";
+  perguntaAtual = ACT.pergunta;
+  $("pergunta").textContent = perguntaAtual || "…";
+  // "imagem" pode ser uma URL (http, /, data:) ou um emoji/texto curto mostrado grande (ex.: ⚽)
+  const img = $("img"), emoji = $("emoji");
+  const isUrl = /^(https?:|\/|data:)/i.test(ACT.imagem || "");
+  if (ACT.imagem && isUrl) { img.src = ACT.imagem; img.style.display = "block"; } else { img.removeAttribute("src"); img.style.display = "none"; }
+  if (ACT.imagem && !isUrl) { emoji.textContent = ACT.imagem; emoji.style.display = "block"; } else { emoji.style.display = "none"; }
+  $("f_perguntas").value = ACT.perguntas.join(" | "); $("f_resposta").value = ACT.resposta;
+  $("f_aceita").value = ACT.aceita.join(", "); $("f_alias").value = ACT.alias.join(", ");
+  $("f_imagem").value = ACT.imagem; $("f_avatar_img").value = ACT.avatar_img; $("f_lang").value = ACT.lang;
+  turns.clear(); $("verdict").textContent = ""; $("verdict").className = ""; $("why").textContent = ""; $("heard").textContent = "…";
+  avatarCheck();
+}
+window.setAtividade = setAtividade;
+for (const id of ["perguntas","resposta","aceita","alias","imagem","avatar_img","lang"]) {
+  $("f_" + id).addEventListener("change", () => setAtividade({ [id]: $("f_" + id).value }));
+}
+
+/* ---------- Conjuntos de teste: objeto + imagem + resposta + apelidos do ASR ---------- */
+const PRESETS = [
+  { nome: "bola",     imagem: "⚽", resposta: "bola",     aceita: ["bolas", "bolinha"],          alias: ["bol", "bou"] },
+  { nome: "cachorro", imagem: "🐶", resposta: "cachorro", aceita: ["cachorrinho", "cão", "cao"], alias: ["cachoro", "cachorra"] },
+  { nome: "gato",     imagem: "🐱", resposta: "gato",     aceita: ["gatinho", "gata"],           alias: [] },
+  { nome: "carro",    imagem: "🚗", resposta: "carro",    aceita: ["carrinho"],                  alias: ["caro"] },
+  { nome: "maçã",     imagem: "🍎", resposta: "maçã",     aceita: ["maçãs", "maca"],             alias: [] },
+  { nome: "banana",   imagem: "🍌", resposta: "banana",   aceita: ["bananas", "bananinha"],      alias: [] },
+  { nome: "casa",     imagem: "🏠", resposta: "casa",     aceita: ["casinha"],                   alias: [] },
+  { nome: "livro",    imagem: "📖", resposta: "livro",    aceita: ["livrinho", "livros"],        alias: [] },
+];
+let presetIdx = 0;
+PRESETS.forEach((p, i) => { const o = document.createElement("option"); o.value = i; o.textContent = `${p.imagem}  ${p.nome}`; $("f_preset").appendChild(o); });
+function applyPreset(i) {
+  presetIdx = ((i % PRESETS.length) + PRESETS.length) % PRESETS.length;
+  const { imagem, resposta, aceita, alias } = PRESETS[presetIdx];
+  $("f_preset").value = presetIdx;
+  setAtividade({ imagem, resposta, aceita, alias });
+}
+$("f_preset").addEventListener("change", () => applyPreset(Number($("f_preset").value)));
+
+/* ---------- 2. Comparar a fala com a resposta esperada ---------- */
+const VERDICT = { correct: "✅ Acertou!", close: "🟡 Quase! Tenta de novo", wrong: "❌ Não foi dessa vez", silence: "…" };
+
+function evaluate(turnId, text) {
+  if (!ACT.resposta) return;
+  let t = turns.get(turnId);
+  if (!t) { t = { results: [], seen: new Set() }; turns.set(turnId, t); }
+  if (t.seen.has(text)) return;
+  t.seen.add(text);
+  t.results.push(Matcher.compare(text, { target: ACT.resposta, accept: ACT.aceita, asrAliases: ACT.alias }));
+  const r = Matcher.best(t.results);
+  $("verdict").textContent = VERDICT[r.status];
+  $("verdict").className = r.status;
+  $("why").textContent = `esperado: "${ACT.resposta}" · ouvido: "${t.results.map((x) => x.heard).join(" / ")}" · ${r.how}`;
+  const row = document.createElement("div");
+  row.textContent = `${VERDICT[r.status]} — ouvi "${text}" (esperado "${ACT.resposta}")`;
+  $("hist").prepend(row);
+  // quem embute a página recebe o resultado
+  const payload = { tipo: "resultado", pergunta: perguntaAtual, esperado: ACT.resposta, ouvido: text, status: r.status, score: r.score, como: r.how };
+  window.dispatchEvent(new CustomEvent("resultado", { detail: payload }));
+  try { parent !== window && parent.postMessage(payload, "*"); } catch {}
+}
+
+/* ---------- Mascote 2D: a boca acompanha o volume da voz do agente ----------
+   Sem fornecedor de avatar: lê o volume da faixa de áudio do agente e mexe boca, antenas e corpo. */
+let agentAudio = null;          // faixa de áudio do agente (Agora RTC)
+let vol = 0;                    // volume suavizado, 0..1
+const mascot = $("mascot");
+const mouth = mascot.querySelector(".mouth");
+const glows = mascot.querySelectorAll(".glow");
+
+// window.__fakeVol serve só para testar a animação sem microfone.
+const rawVolume = () => (typeof window.__fakeVol === "number" ? window.__fakeVol : agentAudio?.getVolumeLevel?.() ?? 0);
+
+function showMascot(on) { mascot.classList.toggle("hide", !on || !mascotLoaded); }
+let mascotLoaded = false;
+$("mascotImg").addEventListener("load", () => { mascotLoaded = true; showMascot(true); });
+$("mascotImg").addEventListener("error", () => { mascotLoaded = false; showMascot(false); });
+if ($("mascotImg").complete && $("mascotImg").naturalWidth > 0) { mascotLoaded = true; showMascot(true); } // imagem já em cache
+
+function animate(now) {
+  const raw = rawVolume();
+  vol += (raw > vol ? 0.55 : 0.14) * (raw - vol);            // abre rápido, fecha devagar
+  const open = Math.min(1, vol * 3);                           // 0 = fechada, 1 = bem aberta
+  mouth.style.opacity = open > 0.07 ? 1 : 0;                   // fechada: só o sorriso original da imagem
+  mouth.style.height = (0.8 + open * 4.9) + "%";
+  mouth.style.width = (7.5 + open * 3.2) + "%";
+  const pulse = 0.18 + 0.1 * Math.sin(now / 700);              // antenas "respirando" quando parado
+  for (const g of glows) g.style.opacity = Math.min(1, pulse + open * 0.8);
+  const bob = Math.sin(now / 650) * 2.2 - open * 3;            // balanço leve; sobe um pouco ao falar
+  mascot.style.transform = `translateY(${bob}px) scale(${1 + open * 0.025})`;
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+/* ---------- 3. Conversa com o agente da Agora ---------- */
+async function api(path, body) {
+  const res = await fetch(path, { method: body ? "POST" : "GET", headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || res.status);
+  return data;
+}
+const setStatus = (t) => ($("status").textContent = t);
+const showErr = (t) => ($("err").textContent = t || "");
+
+// A resposta esperada vem de fora (ACT) e é entregue ao agente da Agora nas instruções da sessão.
+// É o agente que diz, em voz alta, se a criança acertou. A tela mostra o veredito do comparador ao lado.
+function instrucoes() {
+  const r = ACT.resposta;
+  const outras = ACT.aceita.length ? ` Também valem como certas: ${ACT.aceita.join(", ")}.` : "";
+  const parecidas = ACT.alias.length ? ` O reconhecimento de voz erra com crianças, então estas falas também contam como a resposta certa: ${ACT.alias.join(", ")}.` : "";
+  const ingles = /^en/i.test(ACT.lang);
+  const lingua = ingles
+    ? `Fale em português do Brasil. Só o nome do objeto pode ser dito em inglês.`
+    : `Fale SEMPRE e SOMENTE em português do Brasil. Se a transcrição vier em outra língua (inglês, espanhol...) ou com palavras estranhas, não troque de língua: responda em português e peça para ela repetir.`;
+  return `Você é o Lumi, um mascote simpático que conversa com uma criança pequena. ${lingua}\n` +
+    `A atividade: a criança olha uma imagem na tela e diz o nome do objeto. A pergunta é feita pela página, de jeitos diferentes (por exemplo: ${ACT.perguntas.join(" / ")}). Você NÃO faz a pergunta.\n` +
+    `A resposta certa é "${r}".${outras}${parecidas}\n` +
+    `Depois de cada fala da criança, responda com UMA frase curta (no máximo 12 palavras), natural e calorosa, como uma pessoa falando com uma criança: use "pra" e "tá" quando combinar, nada de frase de robô. ` +
+    `Varie as palavras a cada vez e nunca repita a mesma frase duas vezes seguidas.\n` +
+    `Comece SEMPRE a resposta com uma destas marcas entre colchetes. A marca não é falada, mas é obrigatória:\n` +
+    `- [CERTO] se a criança disse a resposta certa. Diga o nome do objeto com artigo. Exemplos: "Isso aí! É a bola, parabéns!", "Uau, acertou! É a bola mesmo!", "Muito bem! Era a bola!"\n` +
+    `- [QUASE] se falou algo muito parecido, mas não claro. Exemplos: "Quase! Tá pertinho, tenta de novo?", "Hmm, quase lá! Fala mais uma vez pra mim?"\n` +
+    `- [ERRADO] se falou outra coisa. Exemplos: "Ops, esse não é. Olha de novo pra imagem e tenta outra vez!", "Hmm, não foi esse. Vamos tentar de novo?"\n` +
+    `- [REPETIR] se não deu pra entender. Exemplos: "Não escutei direito. Pode falar de novo?"\n` +
+    `Nunca diga a resposta certa quando ela errar e não dê dicas. Só diga o nome do objeto quando ela acertar.`;
+}
+
+// Sorteia uma das variações da pergunta, diferente da última usada.
+function proximaPergunta() {
+  const lista = ACT.perguntas.length ? ACT.perguntas : [ACT.pergunta];
+  const outras = lista.filter((p) => p !== perguntaAtual);
+  const pool = outras.length ? outras : lista;
+  perguntaAtual = pool[Math.floor(Math.random() * pool.length)];
+  $("pergunta").textContent = perguntaAtual;
+  return perguntaAtual;
+}
+
+function avatarOk() { return !!(CFG && CFG.avatarReady && (CFG.mascotFile || ACT.avatar_img)); }
+function avatarCheck() {
+  const box = $("f_avatar");
+  const ok = avatarOk();
+  box.disabled = !ok;
+  if (!ok) box.checked = false;
+  $("avatarNote").textContent = ok ? "" : !CFG?.avatarReady ? "falta LEMONSLICE_API_KEY no .env" : "falta a imagem do personagem";
+}
+
+function onMessage(e) {
+  let p;
+  try { p = JSON.parse(typeof e.message === "string" ? e.message : new TextDecoder().decode(e.message)); } catch { return; }
+  const kind = p.object || p.event_type;
+  if (kind === "user.transcription") {
+    lastActivity = Date.now();
+    $("heard").textContent = p.text || "…";
+    $("heard").classList.toggle("live", !p.final);
+    if (p.final && p.text) { evaluate(p.turn_id, p.text); onUserFinal(); }
+  } else if (kind === "assistant.transcription") {
+    lastActivity = Date.now();
+    const ended = p.turn_status === 1 || p.turn_status === "END";
+    if (ended && agentEndCb) { const f = agentEndCb; agentEndCb = null; f(); }   // o agente terminou de falar
+    // O agente começa cada resposta com uma marca escondida da voz: [CERTO], [QUASE], [ERRADO] ou [REPETIR].
+    const raw = p.text || "";
+    const marca = ((raw.match(/\[(CERTO|QUASE|ERRADO|REPETIR)\]/i) || [])[1] || "").toUpperCase();
+    mostrarAgente(raw, marca, ended);
+    // Acertou: a marca [CERTO]. Se ele esqueceu a marca, aceita frases típicas de acerto (só ao terminar de falar).
+    const pareceAcerto = !marca && ended && /isso aí|isso mesmo|muito bem|parab[ée]ns|acertou/i.test(raw);
+    if (!done && (marca === "CERTO" || pareceAcerto)) conclude();
+  } else if (kind === "message.error") {
+    showErr(`Erro do agente (${p.module || "?"}): ${p.message || p.code || ""}`);
+  }
+}
+
+// Mostra o que o agente ESCREVEU (sem as marcas). Serve para diagnosticar: se o texto está em português mas a voz
+// soa estrangeira, o problema é a voz (TTS); se o texto já está em inglês, o problema é o que o agente entendeu.
+const pareceIngles = (t) => /\b(the|you|your|is|are|what|thank|thanks|please|hello|great|good job|try again|let's|it's|that's)\b/i.test(t);
+function mostrarAgente(raw, marca, ended) {
+  const limpo = raw.replace(/\[[^\]]*\]/g, "").replace(/\s+/g, " ").trim();
+  if (!limpo) return;
+  const alerta = !/^en/i.test(ACT.lang) && pareceIngles(limpo);
+  const el = $("agentSaid");
+  el.textContent = `🤖 ${limpo}${marca ? `  [${marca}]` : ""}${alerta ? "  ⚠️ parece inglês" : ""}`;
+  el.classList.toggle("alerta", alerta);
+  if (ended) {
+    const row = document.createElement("div");
+    row.textContent = `🤖 ${limpo}${marca ? ` [${marca}]` : ""}${alerta ? " ⚠️ parece inglês" : ""}`;
+    $("hist").prepend(row);
+  }
+}
+
+// ---- Acertou: para de ouvir, deixa o agente terminar a frase e encerra ----
+function conclude() {
+  if (done) return;
+  done = true; phase = "done";
+  clearRound();
+  setMic(false);                                          // para de ouvir imediatamente
+  showCount("✅");
+  $("btn").disabled = true;
+  setStatus("✅ Acertou! Parei de ouvir.");
+  // Só encerra depois que o "Isso mesmo! É bola!" terminou de TOCAR no navegador (senão a frase é cortada).
+  clearTimeout(concludeTimer);
+  afterAgentSpeaks(() => setTimeout(finish, 1200), 4500);
+  concludeTimer = setTimeout(finish, 14000);              // segurança
+}
+async function finish() {
+  clearTimeout(concludeTimer);
+  await end();
+  $("btn").textContent = "Jogar de novo";
+  setStatus("✅ Acertou! Conversa encerrada.");
+}
+
+/* ---------- Ritmo da rodada ----------
+   perguntando (microfone fechado) → contagem 3, 2, 1 → ouvindo (microfone aberto) → criança fala
+   → julgando (microfone fechado, agente responde) → contagem de novo ... até acertar.
+   Se ninguém falar por 10 s enquanto ouve, o agente repete a pergunta e a contagem recomeça. */
+let phase = "idle";                       // idle | asking | countdown | listening | judging | done
+let agentEndCb = null, askWait = null, countTimer = null;
+const COUNT_FROM = 3;
+
+const setMic = (aberto) => { try { mic?.setEnabled(aberto); } catch {} };
+function showCount(text, fale) {
+  const c = $("countdown");
+  c.textContent = text;
+  c.classList.toggle("fale", !!fale);
+  c.classList.remove("tick"); void c.offsetWidth; if (text && !fale) c.classList.add("tick"); // reinicia o "pulo" do número
+}
+function clearRound() { clearInterval(askWait); clearInterval(countTimer); clearInterval(repeatTimer); agentEndCb = null; }
+
+// Espera o agente terminar de falar: pelo aviso de fim de fala, ou quando o volume cai, ou em 9 s.
+function afterAgentSpeaks(next, maxWaitMs = 9000) {
+  clearInterval(askWait);
+  let heardVoice = false, quietSince = 0, called = false;
+  const t0 = Date.now();
+  const go = () => { if (called) return; called = true; clearInterval(askWait); agentEndCb = null; next(); };
+  agentEndCb = () => setTimeout(go, 500);
+  askWait = setInterval(() => {
+    const v = rawVolume();
+    if (v > 0.03) { heardVoice = true; quietSince = 0; }
+    else if (heardVoice) { quietSince = quietSince || Date.now(); if (Date.now() - quietSince > 900) go(); }
+    if (Date.now() - t0 > maxWaitMs) go();
+  }, 150);
+}
+
+function startAsking(textToSpeak) {
+  if (done) return;
+  clearRound(); phase = "asking"; setMic(false); showCount("");
+  setStatus("🔊 Escute a pergunta…");
+  if (textToSpeak && agentId) api("/api/speak", { agentId, text: textToSpeak }).catch((e) => showErr("Não consegui repetir a pergunta: " + e.message));
+  afterAgentSpeaks(startCountdown);
+}
+
+function startCountdown() {
+  if (done || !on) return;
+  clearRound(); phase = "countdown"; setMic(false);
+  let n = COUNT_FROM;
+  setStatus("Prepare-se…"); showCount(String(n));
+  countTimer = setInterval(() => {
+    n--;
+    if (n > 0) showCount(String(n)); else { clearInterval(countTimer); startListening(); }
+  }, 1000);
+}
+
+function startListening() {
+  if (done || !on) return;
+  phase = "listening"; setMic(true);
+  showCount("🎤 Fale!", true); setStatus("Pode falar!");
+  lastActivity = Date.now();
+  clearInterval(repeatTimer);
+  repeatTimer = setInterval(() => {                          // 10 s sem ninguém falar → repete a pergunta
+    if (phase !== "listening" || done) return;
+    if (Date.now() - lastActivity >= REPEAT_MS) startAsking(proximaPergunta());
+  }, 500);
+}
+
+function onUserFinal() {                                      // a criança terminou de falar: fecha o microfone e espera o agente
+  if (done || phase === "judging") { if (phase === "judging") afterAgentSpeaks(startCountdown); return; }
+  clearRound(); phase = "judging"; setMic(false); showCount("");
+  setStatus("Pensando…");
+  afterAgentSpeaks(startCountdown);
+}
+
+// O Chrome pode bloquear o som de uma página que abriu sozinha até alguém tocar nela.
+// Se bloquear, a pergunta só é falada depois do toque, para não perder o começo da frase.
+let autoplayBlocked = false, unlockResolve = null, audioReadyResolve = null, audioReadyP = Promise.resolve();
+AgoraRTC.onAudioAutoplayFailed = () => {
+  autoplayBlocked = true;
+  setStatus("🔈 Toque na tela para ouvir o Lumi");
+  const liberar = () => {
+    document.removeEventListener("click", liberar);
+    autoplayBlocked = false; setStatus("Preparando…");
+    unlockResolve?.();
+  };
+  document.addEventListener("click", liberar);
+};
+
+// Espera o som do agente estar pronto e tocando; só então o agente fala a pergunta (completa, do começo).
+async function primeiraPergunta() {
+  await Promise.race([audioReadyP, new Promise((r) => setTimeout(r, 6000))]);
+  await new Promise((r) => setTimeout(r, 800));                          // dá tempo de o áudio começar a tocar
+  if (autoplayBlocked) await new Promise((res) => { unlockResolve = res; });   // espera o toque na tela
+  await new Promise((r) => setTimeout(r, 300));
+  if (on && !done) startAsking(proximaPergunta());
+}
+
+async function begin() {
+  $("btn").disabled = true; showErr(""); setStatus("conectando…");
+  done = false; clearTimeout(concludeTimer); setAtividade({});   // nova rodada: limpa o veredito anterior
+  try {
+    if (!ACT.pergunta) throw new Error("Sem pergunta: informe a atividade (veja 'Atividade' abaixo).");
+    channel = "ativ-" + Math.random().toString(36).slice(2, 8);
+    const { token } = await api("/api/token", { channel, uid: CFG.userUid });
+    const useAvatar = $("f_avatar").checked && avatarOk();
+
+    audioReadyP = new Promise((r) => (audioReadyResolve = r)); autoplayBlocked = false; unlockResolve = null;
+    rtc = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+    rtc.on("user-published", async (user, type) => {
+      await rtc.subscribe(user, type);
+      if (type === "audio") { user.audioTrack.play(); agentAudio = user.audioTrack; audioReadyResolve?.(); }
+      if (type === "video") { $("stage").textContent = ""; $("stage").classList.remove("hide"); user.videoTrack.play($("stage")); showMascot(false); }
+    });
+    await rtc.join(CFG.appId, channel, token, CFG.userUid);
+    mic = await AgoraRTC.createMicrophoneAudioTrack({ AEC: true, ANS: true, AGC: true });
+    mic.setEnabled(false);                       // começa fechado: só abre depois da contagem
+    await rtc.publish(mic);
+
+    rtm = new AgoraRTM.RTM(CFG.appId, String(CFG.userUid));
+    rtm.addEventListener("message", onMessage);
+    await rtm.login({ token });
+    await rtm.subscribe(channel);
+
+    if (useAvatar) { $("stage").textContent = "carregando avatar…"; $("stage").classList.remove("hide"); showMascot(false); }
+    const settings = {
+      ...CFG.defaults,
+      asr: "deepgram-nova-3", asr_language: ACT.lang, eos_mode: "vad", silence_ms: 1200,
+      vision: false, sal: false, idle_timeout: 60,
+      instructions: instrucoes(), greeting: "",          // começa calado: a pergunta sai por primeiraPergunta()
+      tts_speed: Number(new URLSearchParams(location.search).get("velocidade")) || CFG.defaults.tts_speed,
+      tts_voice: new URLSearchParams(location.search).get("voz") || CFG.defaults.tts_voice,   // ex.: ?voz=shimmer
+      avatar: useAvatar, avatar_image_url: ACT.avatar_img || "", avatar_aspect: "1x1", // a imagem do mascote é quadrada
+    };
+    const r = await api("/api/start", { channel, settings });
+    agentId = r.agentId; on = true;
+    $("btn").textContent = "Parar"; $("btn").classList.add("on");
+    // Quando o som estiver pronto, o agente fala a pergunta; ao terminar, vem a contagem 3, 2, 1 e o microfone abre.
+    phase = "asking"; setStatus("Preparando…");
+    primeiraPergunta();
+  } catch (err) {
+    showErr("Não deu certo: " + err.message);
+    await cleanup(); setStatus("Aperte e responda.");
+    $("stage").classList.add("hide"); agentAudio = null; showMascot(true);
+  }
+  $("btn").disabled = false;
+}
+
+async function cleanup() {
+  try { mic?.stop(); mic?.close(); } catch {}
+  try { await rtc?.leave(); } catch {}
+  try { await rtm?.logout(); } catch {}
+  mic = rtc = rtm = null;
+}
+
+async function end() {
+  clearRound(); phase = "idle"; showCount("");
+  $("btn").disabled = true;
+  try { if (agentId) await api("/api/stop", { agentId }); } catch (err) { showErr("Falha ao parar: " + err.message); }
+  agentId = null; on = false;
+  await cleanup();
+  $("btn").textContent = "Falar"; $("btn").classList.remove("on"); $("btn").disabled = false;
+  $("stage").classList.add("hide"); agentAudio = null; showMascot(true);
+  setStatus("Parado. Aperte para tentar de novo.");
+}
+
+$("btn").onclick = () => (on ? end() : begin());
+// "Outro objeto": passa para o próximo conjunto de teste e já começa uma rodada nova
+$("btnNext").onclick = async () => { if (on) await end(); applyPreset(presetIdx + 1); begin(); };
+addEventListener("pagehide", () => { if (agentId) navigator.sendBeacon("/api/stop", new Blob([JSON.stringify({ agentId })], { type: "application/json" })); });
+
+(async () => {
+  try {
+    CFG = await api("/api/config");
+    if (!CFG.ready) { showErr("Faltam as chaves da Agora no arquivo .env."); $("btn").disabled = true; }
+    // Base: o que o servidor guardou. Por cima: o que vier na URL (a URL tem prioridade campo a campo).
+    const q = new URLSearchParams(location.search);
+    const fromUrl = {};
+    for (const k of ["pergunta","perguntas","resposta","aceita","alias","imagem","lang","avatar_img"]) if (q.has(k)) fromUrl[k] = q.get(k);
+    if (fromUrl.pergunta && !fromUrl.perguntas) fromUrl.perguntas = fromUrl.pergunta;   // uma pergunta na URL vale no lugar da lista
+    delete fromUrl.pergunta;
+    setAtividade({ ...(await api("/api/atividade")), ...fromUrl });
+    // ?preset=cachorro (nome ou número) escolhe um conjunto de teste pronto
+    if (q.has("preset")) {
+      const v = q.get("preset"); const i = PRESETS.findIndex((p) => p.nome === v);
+      applyPreset(i >= 0 ? i : Number(v) || 0);
+    }
+    if (q.get("avatar") === "1" && avatarOk()) $("f_avatar").checked = true;
+    if (q.get("invertido") === "1") $("cols").classList.add("invertido");   // avatar à direita, exercício à esquerda
+    // Começa a ouvir assim que a página abre (use ?auto=0 para desligar)
+    if (q.get("auto") !== "0" && CFG.ready) begin();
+  } catch (err) { showErr("Servidor não respondeu: " + err.message); $("btn").disabled = true; }
+})();
+</script>
+</body>
+</html>

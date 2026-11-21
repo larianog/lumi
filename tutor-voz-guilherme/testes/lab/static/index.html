@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab de riscos · newDirections</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --ink: #1d2330; --muted: #677084; --line: #dfe3ea;
+    --accent: #2f6fed; --ok: #1b8a5a; --warn: #b7791f; --bad: #c53030; --user: #eef3ff; --agent: #effaf4;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  header { padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--card); display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; }
+  header span { color: var(--muted); }
+  main { display: grid; grid-template-columns: 360px 1fr; gap: 16px; padding: 16px 20px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 16px; }
+  .card h2 { font-size: 14px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  label { display: block; margin: 8px 0 3px; font-weight: 600; font-size: 13px; }
+  .hint { color: var(--muted); font-size: 12px; font-weight: 400; }
+  select, input[type=text], input[type=number], textarea { width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: #fff; color: var(--ink); }
+  textarea { min-height: 120px; font-size: 12px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > * { flex: 1; }
+  .check { display: flex; gap: 6px; align-items: center; margin-top: 8px; font-weight: 600; font-size: 13px; }
+  .check input { width: auto; }
+  button { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--line); background: #fff; font: inherit; cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.danger { background: var(--bad); color: #fff; border-color: var(--bad); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .presets button { font-size: 12px; padding: 5px 8px; }
+  .presets button.active { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  #banner { margin: 0 20px; padding: 10px 14px; border-radius: 8px; display: none; }
+  #banner.warn { display: block; background: #fff7e6; border: 1px solid #f0d49b; }
+  .stage { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .stage { grid-template-columns: 1fr; } }
+  .video { background: #111; border-radius: 8px; aspect-ratio: 1 / 1; max-height: 320px; width: 100%; position: relative; overflow: hidden; color: #aaa; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+  .video video { width: 100%; height: 100%; object-fit: cover; }
+  #status { font-weight: 600; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 12px; background: #eef0f4; }
+  .pill.on { background: #e3f6ec; color: var(--ok); }
+  #transcript { max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .line { padding: 6px 10px; border-radius: 8px; max-width: 90%; }
+  .line.user { background: var(--user); align-self: flex-end; }
+  .line.agent { background: var(--agent); }
+  .line.partial { opacity: .55; }
+  .line small { color: var(--muted); display: block; font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  td, th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  #log { font: 12px/1.4 ui-monospace, Consolas, monospace; max-height: 200px; overflow-y: auto; white-space: pre-wrap; background: #fafbfc; padding: 8px; border-radius: 6px; }
+  .err { color: var(--bad); }
+  pre#json { font-size: 11px; max-height: 300px; overflow: auto; background: #fafbfc; padding: 8px; border-radius: 6px; display: none; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .notes textarea { min-height: 70px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Lab de riscos</h1>
+  <span>newDirections · UNMUTE by Agora · avatar para crianças</span>
+  <span id="status" class="pill">desconectado</span>
+</header>
+<div id="banner"></div>
+
+<main>
+  <!-- Coluna de configuração -->
+  <section>
+    <div class="card">
+      <h2>Cenário de teste</h2>
+      <div class="presets" id="presets"></div>
+      <p class="hint" id="presetHint" style="margin:8px 0 0"></p>
+    </div>
+
+    <div class="card">
+      <h2>Configuração</h2>
+
+      <label>Reconhecimento de voz (ASR)</label>
+      <div class="row">
+        <select id="asr">
+          <option value="deepgram-nova-3">Deepgram nova-3</option>
+          <option value="deepgram-nova-2">Deepgram nova-2</option>
+          <option value="ares">ARES (Agora)</option>
+        </select>
+        <select id="asr_language">
+          <option value="pt-BR">pt-BR</option>
+          <option value="multi">multi (pt + en)</option>
+          <option value="en-US">en-US</option>
+          <option value="pt-PT">pt-PT</option>
+        </select>
+      </div>
+      <label>Palavras-chave <span class="hint">(separadas por vírgula; ajudam o ASR)</span></label>
+      <input type="text" id="keywords" placeholder="car, ball, dog, Pipo">
+
+      <label>Fim de fala</label>
+      <div class="row">
+        <select id="eos_mode">
+          <option value="vad">VAD (silêncio)</option>
+          <option value="semantic">Semântico (só en/zh)</option>
+        </select>
+        <input type="number" id="silence_ms" min="200" max="5000" step="100" title="silêncio em ms">
+      </div>
+      <span class="hint">Silêncio (ms) antes de o agente responder. Padrão da Agora: 640 (VAD) / 320 (semântico).</span>
+
+      <label class="check"><input type="checkbox" id="sal"> SAL: travar na voz de quem fala (Beta)</label>
+
+      <label>LLM</label>
+      <select id="llm_model">
+        <option>gpt-4o-mini</option><option>gpt-4.1-mini</option><option>gpt-5-nano</option><option>gpt-5-mini</option>
+      </select>
+      <label class="check"><input type="checkbox" id="vision"> Aceitar imagens (input_modalities: text + image)</label>
+
+      <label>Voz (TTS)</label>
+      <div class="row">
+        <select id="tts"><option value="openai">OpenAI tts-1</option><option value="minimax">MiniMax</option></select>
+        <input type="text" id="tts_voice" placeholder="nova">
+      </div>
+      <span class="hint">OpenAI: alloy, echo, fable, nova, onyx, shimmer. MiniMax: voice_id.</span>
+
+      <label class="check"><input type="checkbox" id="avatar"> Avatar (LemonSlice)</label>
+      <input type="text" id="avatar_image_url" placeholder="URL pública da imagem do mascote (vazio = mascote.png)">
+
+      <label>Saudação</label>
+      <input type="text" id="greeting">
+      <label>Instruções do personagem</label>
+      <textarea id="instructions"></textarea>
+
+      <div class="actions">
+        <button class="primary" id="btnStart">Iniciar conversa</button>
+        <button class="danger" id="btnStop" disabled>Parar</button>
+        <button id="btnPreview">Ver JSON enviado</button>
+      </div>
+      <pre id="json"></pre>
+    </div>
+  </section>
+
+  <!-- Coluna da conversa -->
+  <section>
+    <div class="card">
+      <h2>Palco</h2>
+      <div class="stage">
+        <div><div class="video" id="avatarBox">avatar aparece aqui (se ligado)</div></div>
+        <div>
+          <div class="video" id="camBox">câmera para o "mostra pra mim"</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnCam">Ligar câmera</button>
+        <button id="btnSnap" disabled>📸 Mostrar para o agente</button>
+        <select id="b64fmt" style="width:auto" title="formato da imagem enviada">
+          <option value="dataurl">base64 com prefixo data:</option>
+          <option value="raw">base64 puro</option>
+        </select>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input type="text" id="imgUrl" placeholder="ou cole a URL pública de uma imagem">
+        <button id="btnImgUrl" style="flex:0 0 auto" disabled>Enviar URL</button>
+      </div>
+    </div>
+
+    <div class="card" id="activityCard">
+      <h2>Atividade: a criança diz a palavra <span class="hint" id="actScore"></span></h2>
+      <label>Palavras da atividade (uma por linha: <code>alvo | como o ASR costuma escrever | outras respostas certas</code>)</label>
+      <textarea id="actWords" rows="4" spellcheck="false">bola | bol, bou
+ball | bol, bau, bou
+car | cá, kar
+red | hed</textarea>
+      <div class="actions">
+        <button id="btnActLoad">Carregar lista</button>
+        <button id="btnActPrev" disabled>◀</button>
+        <button id="btnActNext" disabled>Próxima ▶</button>
+        <label style="display:inline-flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="actAuto" checked style="width:auto"> avançar sozinho ao acertar</label>
+      </div>
+      <div id="actNow" style="font-size:28px;font-weight:700;margin:10px 0 4px">–</div>
+      <div id="actVerdict" class="hint">Carregue a lista e inicie a conversa. Cada fala final da criança é comparada com a palavra acima.</div>
+      <table style="margin-top:8px"><thead><tr><th>Alvo</th><th>Ouvido</th><th>Resultado</th><th>Como</th></tr></thead><tbody id="actLog"></tbody></table>
+    </div>
+
+    <div class="card">
+      <h2>Conversa <span class="hint" id="counts"></span></h2>
+      <div id="transcript"></div>
+    </div>
+
+    <div class="card">
+      <h2>Latência</h2>
+      <table><thead><tr><th>Turno</th><th>Módulo</th><th>Métrica</th><th>ms</th></tr></thead><tbody id="metrics"></tbody></table>
+    </div>
+
+    <div class="card notes">
+      <h2>Anotações do teste</h2>
+      <label>Quem testou / idade da criança / ambiente</label>
+      <input type="text" id="who" placeholder="ex.: sobrinha da Larissa, 6 anos, sala com TV ligada">
+      <label>O que funcionou e o que falhou</label>
+      <textarea id="notes"></textarea>
+      <div class="actions"><button id="btnExport">Baixar registro do teste (JSON)</button></div>
+    </div>
+
+    <div class="card">
+      <h2>Log</h2>
+      <div id="log"></div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/agora-rtc-sdk-ng@4.24.9/AgoraRTC_N-production.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/agora-rtm-sdk@2.3.0/agora-rtm.js"></script>
+<script src="/static/matcher.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const FIELDS = ["asr","asr_language","keywords","eos_mode","silence_ms","sal","llm_model","vision","tts","tts_voice","avatar","avatar_image_url","greeting","instructions"];
+
+const PRESETS = {
+  "1 · Voz infantil pt-BR": { hint: "Risco 1. A criança fala português com o agente. Anote quantas falas ele entendeu.", s: { asr: "deepgram-nova-3", asr_language: "pt-BR", eos_mode: "vad", silence_ms: 1200, sal: false, avatar: false } },
+  "2 · Mistura pt + en": { hint: "Risco 2. A criança mistura ('eu tenho um car azul'). Compare multi × pt-BR.", s: { asr: "deepgram-nova-3", asr_language: "multi", eos_mode: "vad", silence_ms: 1200, sal: false, avatar: false } },
+  "2b · ARES pt-PT": { hint: "Comparação: o ASR da própria Agora só tem pt-PT (não pt-BR). Vale ver se entende sotaque brasileiro.", s: { asr: "ares", asr_language: "pt-PT", eos_mode: "vad", silence_ms: 1200, sal: false, avatar: false } },
+  "3 · Pausas longas": { hint: "Risco 3. A criança para no meio da frase. Teste 800, 1200 e 2000 ms e veja quando o agente corta.", s: { asr: "deepgram-nova-3", asr_language: "pt-BR", eos_mode: "vad", silence_ms: 2000, sal: false, avatar: false } },
+  "4 · Avatar mascote": { hint: "Risco 4. Precisa de LEMONSLICE_API_KEY no .env e de uma imagem (URL ou mascote.png).", s: { asr: "deepgram-nova-3", asr_language: "pt-BR", eos_mode: "vad", silence_ms: 1200, sal: false, avatar: true } },
+  "5 · Ruído (SAL)": { hint: "Risco 5. Ligue uma TV ou vídeo ao fundo. Teste com e sem SAL.", s: { asr: "deepgram-nova-3", asr_language: "pt-BR", eos_mode: "vad", silence_ms: 1200, sal: true, avatar: false } },
+  "6 · Mostra pra mim": { hint: "Risco 6. Ligue a câmera, mostre um objeto e clique em 📸. Teste os dois formatos de base64.", s: { asr: "deepgram-nova-3", asr_language: "pt-BR", eos_mode: "vad", silence_ms: 1200, vision: true, sal: false, avatar: false } },
+};
+
+let CFG = null, rtc = null, mic = null, rtm = null, agentId = null, channel = null, camStream = null;
+const record = { startedAt: null, settings: null, transcript: [], metrics: [], images: [], errors: [], attempts: [] };
+
+// ---- Atividade: comparar a fala da criança com a palavra-alvo ----
+const ACT = { words: [], idx: -1, byTurn: new Map() }; // byTurn: turno -> {target, results[], row, done}
+const STATUS_TXT = { correct: "✅ acertou", close: "🟡 quase", wrong: "❌ outra palavra", silence: "… sem resposta" };
+
+function parseWords(text) {
+  return text.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+    const [target, aliases = "", accept = ""] = l.split("|").map((x) => x.trim());
+    const list = (s) => s.split(",").map((x) => x.trim()).filter(Boolean);
+    return { target, asrAliases: list(aliases), accept: list(accept) };
+  });
+}
+function actCurrent() { return ACT.words[ACT.idx] || null; }
+function actShow() {
+  const w = actCurrent();
+  $("actNow").textContent = w ? w.target : "–";
+  $("btnActPrev").disabled = ACT.idx <= 0;
+  $("btnActNext").disabled = !ACT.words.length || ACT.idx >= ACT.words.length - 1;
+  const ok = record.attempts.filter((a) => a.status === "correct").length;
+  $("actScore").textContent = ACT.words.length ? `· palavra ${ACT.idx + 1} de ${ACT.words.length} · ${ok} acertos em ${record.attempts.length} tentativas` : "";
+}
+function actGo(i) {
+  if (i < 0 || i >= ACT.words.length) return;
+  ACT.idx = i; actShow();
+  $("actVerdict").textContent = "Esperando a criança dizer: " + ACT.words[i].target;
+}
+function actEvaluate(turnKey, text) {
+  const w = actCurrent();
+  if (!w) return;
+  let t = ACT.byTurn.get(turnKey);
+  // o turno guarda a palavra que valia quando a criança começou a falar
+  if (!t) { t = { word: w, results: [], seen: new Set(), row: null }; ACT.byTurn.set(turnKey, t); }
+  if (t.seen.has(text)) return;
+  t.seen.add(text);
+  t.results.push(Matcher.compare(text, t.word));
+  const r = Matcher.best(t.results);
+  if (!t.row) {
+    t.row = { tr: document.createElement("tr"), rec: { t: Date.now(), turn: turnKey, target: t.word.target } };
+    $("actLog").prepend(t.row.tr);
+    record.attempts.push(t.row.rec);
+  }
+  Object.assign(t.row.rec, { heard: t.results.map((x) => x.heard), status: r.status, score: Math.round(r.score * 100) / 100, how: r.how });
+  t.row.tr.innerHTML = "";
+  for (const v of [t.word.target, t.results.map((x) => x.heard).join(" / "), STATUS_TXT[r.status], r.how]) {
+    const td = document.createElement("td"); td.textContent = v; t.row.tr.appendChild(td);
+  }
+  $("actVerdict").textContent = `${STATUS_TXT[r.status]} — ouvi "${r.heard}" e o alvo era "${t.word.target}" (${r.how})`;
+  actShow();
+  if (r.status === "correct" && $("actAuto").checked && actCurrent() === t.word && ACT.idx < ACT.words.length - 1) actGo(ACT.idx + 1);
+}
+$("btnActLoad").onclick = () => {
+  ACT.words = parseWords($("actWords").value);
+  ACT.byTurn.clear(); $("actLog").innerHTML = ""; record.attempts.length = 0;
+  ACT.idx = -1; actShow();
+  if (ACT.words.length) actGo(0); else $("actVerdict").textContent = "Lista vazia.";
+};
+$("btnActNext").onclick = () => actGo(ACT.idx + 1);
+$("btnActPrev").onclick = () => actGo(ACT.idx - 1);
+const userLines = new Map(), agentLines = new Map();
+
+function log(msg, isErr) {
+  const el = document.createElement("div");
+  el.textContent = new Date().toLocaleTimeString() + "  " + msg;
+  if (isErr) { el.className = "err"; record.errors.push(msg); }
+  $("log").prepend(el);
+}
+function setStatus(text, on) { $("status").textContent = text; $("status").className = "pill" + (on ? " on" : ""); }
+
+function readSettings() {
+  const s = {};
+  for (const f of FIELDS) {
+    const el = $(f);
+    s[f] = el.type === "checkbox" ? el.checked : el.type === "number" ? Number(el.value) : el.value;
+  }
+  return s;
+}
+function writeSettings(s) {
+  for (const [k, v] of Object.entries(s)) {
+    const el = $(k); if (!el) continue;
+    if (el.type === "checkbox") el.checked = !!v; else el.value = v;
+  }
+}
+
+async function api(path, body) {
+  const res = await fetch(path, { method: body ? "POST" : "GET", headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || res.status);
+  return data;
+}
+
+async function init() {
+  CFG = await api("/api/config");
+  writeSettings(CFG.defaults);
+  const msgs = [];
+  if (!CFG.ready) msgs.push("Faltam <b>AGORA_APP_ID</b> e <b>AGORA_APP_CERTIFICATE</b> em <code>testes/lab/.env</code>. Dá para usar \"Ver JSON enviado\", mas não para conversar.");
+  if (!CFG.avatarReady) msgs.push("Sem <b>LEMONSLICE_API_KEY</b>: o cenário de avatar não vai iniciar.");
+  if (msgs.length) { $("banner").innerHTML = msgs.join("<br>"); $("banner").className = "warn"; }
+
+  for (const [name, p] of Object.entries(PRESETS)) {
+    const b = document.createElement("button");
+    b.textContent = name;
+    b.onclick = () => {
+      document.querySelectorAll("#presets button").forEach((x) => x.classList.remove("active"));
+      b.classList.add("active");
+      writeSettings({ ...p.s });
+      $("presetHint").textContent = p.hint;
+    };
+    $("presets").appendChild(b);
+  }
+}
+
+function renderLine(map, key, role, text, final) {
+  let el = map.get(key);
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "line " + role;
+    map.set(key, el);
+    $("transcript").appendChild(el);
+  }
+  el.classList.toggle("partial", !final);
+  el.innerHTML = "";
+  const who = document.createElement("small");
+  who.textContent = role === "user" ? "criança" : "agente";
+  el.appendChild(who);
+  el.appendChild(document.createTextNode(text));
+  $("transcript").scrollTop = $("transcript").scrollHeight;
+  if (final) record.transcript.push({ t: Date.now(), role, text });
+  if (final && role === "user") actEvaluate(key, text);
+  const u = record.transcript.filter((x) => x.role === "user").length;
+  $("counts").textContent = `· ${u} falas da criança registradas`;
+}
+
+function addMetric(turn, module, name, ms) {
+  record.metrics.push({ turn, module, name, ms });
+  const tr = document.createElement("tr");
+  for (const v of [turn ?? "", module ?? "", name ?? "", ms ?? ""]) { const td = document.createElement("td"); td.textContent = v; tr.appendChild(td); }
+  $("metrics").prepend(tr);
+}
+
+function onRtmMessage(e) {
+  let p;
+  try { p = JSON.parse(typeof e.message === "string" ? e.message : new TextDecoder().decode(e.message)); } catch { return; }
+  const kind = p.object || p.event_type;
+  if (kind === "user.transcription") renderLine(userLines, "u" + p.turn_id, "user", p.text, !!p.final);
+  else if (kind === "assistant.transcription") renderLine(agentLines, "a" + p.turn_id, "agent", p.text, p.turn_status === 1 || p.turn_status === "END" || p.turn_status === 2);
+  else if (kind === "message.metrics") addMetric(p.turn_id, p.module, p.metric_name, p.latency_ms);
+  else if (kind === "turn.finished") addMetric(p.payload?.turn_id, "e2e", "fim a fim", p.payload?.metrics?.e2e_latency_ms);
+  else if (kind === "message.error") log(`erro do agente [${p.module}] ${p.code}: ${p.message || ""}`, true);
+  else if (kind === "message.interrupt") log("criança interrompeu o agente (turno " + p.turn_id + ")");
+  else if (kind === "message.sal_status") log("SAL: " + JSON.stringify(p));
+  else if (kind === "message.info") log("info: " + JSON.stringify(p).slice(0, 200));
+}
+
+async function start() {
+  $("btnStart").disabled = true;
+  try {
+    channel = "lab-" + Math.random().toString(36).slice(2, 8);
+    const settings = readSettings();
+    record.startedAt = new Date().toISOString(); record.settings = settings;
+    record.transcript = []; record.metrics = []; record.images = []; record.errors = [];
+    $("transcript").innerHTML = ""; $("metrics").innerHTML = ""; userLines.clear(); agentLines.clear();
+    setStatus("conectando…");
+
+    const { token } = await api("/api/token", { channel, uid: CFG.userUid });
+
+    rtc = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+    rtc.on("user-published", async (user, mediaType) => {
+      await rtc.subscribe(user, mediaType);
+      if (mediaType === "audio") user.audioTrack.play();
+      if (mediaType === "video") { $("avatarBox").textContent = ""; user.videoTrack.play($("avatarBox")); log("vídeo recebido do uid " + user.uid); }
+    });
+    rtc.on("user-joined", (u) => log("entrou no canal: uid " + u.uid));
+    await rtc.join(CFG.appId, channel, token, CFG.userUid);
+    mic = await AgoraRTC.createMicrophoneAudioTrack({ AEC: true, ANS: true, AGC: true });
+    await rtc.publish(mic);
+
+    rtm = new AgoraRTM.RTM(CFG.appId, String(CFG.userUid));
+    rtm.addEventListener("message", onRtmMessage);
+    await rtm.login({ token });
+    await rtm.subscribe(channel);
+
+    const r = await api("/api/start", { channel, settings });
+    agentId = r.agentId;
+    log("agente iniciado: " + agentId + " no canal " + channel);
+    setStatus("conversando", true);
+    $("btnStop").disabled = false; $("btnSnap").disabled = !camStream; $("btnImgUrl").disabled = false;
+  } catch (err) {
+    log("falha ao iniciar: " + err.message, true);
+    await cleanup();
+    $("btnStart").disabled = false;
+    setStatus("desconectado");
+  }
+}
+
+async function cleanup() {
+  try { mic?.stop(); mic?.close(); } catch {}
+  try { await rtc?.leave(); } catch {}
+  try { await rtm?.logout(); } catch {}
+  mic = rtc = rtm = null;
+}
+
+async function stop() {
+  $("btnStop").disabled = true;
+  try { if (agentId) await api("/api/stop", { agentId }); log("agente parado"); } catch (err) { log("falha ao parar: " + err.message, true); }
+  agentId = null;
+  await cleanup();
+  $("btnStart").disabled = false; $("btnSnap").disabled = true; $("btnImgUrl").disabled = true;
+  $("avatarBox").textContent = "avatar aparece aqui (se ligado)";
+  setStatus("desconectado");
+}
+
+async function preview() {
+  try {
+    const p = await api("/api/preview", { channel: "previa", settings: readSettings() });
+    $("json").textContent = JSON.stringify(p, null, 2);
+  } catch (err) { $("json").textContent = "Erro: " + err.message; }
+  $("json").style.display = "block";
+}
+
+async function toggleCam() {
+  if (camStream) {
+    camStream.getTracks().forEach((t) => t.stop()); camStream = null;
+    $("camBox").textContent = 'câmera para o "mostra pra mim"'; $("btnCam").textContent = "Ligar câmera"; $("btnSnap").disabled = true; return;
+  }
+  camStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+  const v = document.createElement("video"); v.autoplay = true; v.muted = true; v.playsInline = true; v.srcObject = camStream; v.id = "camVideo";
+  $("camBox").textContent = ""; $("camBox").appendChild(v);
+  $("btnCam").textContent = "Desligar câmera"; $("btnSnap").disabled = !agentId;
+}
+
+// RTM limita mensagens a ~32 KB: reduz a imagem até caber.
+function snapshotBase64() {
+  const v = $("camVideo");
+  const canvas = document.createElement("canvas");
+  let width = 384, quality = 0.7, data = "";
+  for (let i = 0; i < 6; i++) {
+    canvas.width = width; canvas.height = Math.round(width * v.videoHeight / v.videoWidth);
+    canvas.getContext("2d").drawImage(v, 0, 0, canvas.width, canvas.height);
+    data = canvas.toDataURL("image/jpeg", quality);
+    if (data.length < 26000) break;
+    width = Math.round(width * 0.8); quality = Math.max(0.4, quality - 0.1);
+  }
+  return data;
+}
+
+async function sendImage({ url = "", base64 = "" }) {
+  if (!rtm || !agentId) return;
+  const uuid = "img_" + Date.now();
+  const payload = JSON.stringify({ uuid, image_url: url, image_base64: base64 });
+  await rtm.publish(CFG.agentUid, payload, { channelType: "USER", customType: "image.upload" });
+  record.images.push({ t: Date.now(), uuid, via: url ? "url" : $("b64fmt").value, bytes: payload.length });
+  log(`imagem enviada (${url ? "URL" : $("b64fmt").value}, ${Math.round(payload.length / 1024)} KB): ${uuid}`);
+}
+
+$("btnStart").onclick = start;
+$("btnStop").onclick = stop;
+$("btnPreview").onclick = preview;
+$("btnCam").onclick = () => toggleCam().catch((e) => log("câmera: " + e.message, true));
+$("btnSnap").onclick = () => {
+  const dataUrl = snapshotBase64();
+  const b64 = $("b64fmt").value === "raw" ? dataUrl.split(",")[1] : dataUrl;
+  sendImage({ base64: b64 }).catch((e) => log("envio de imagem: " + e.message, true));
+};
+$("btnImgUrl").onclick = () => sendImage({ url: $("imgUrl").value.trim() }).catch((e) => log("envio de imagem: " + e.message, true));
+$("btnExport").onclick = () => {
+  const blob = new Blob([JSON.stringify({ ...record, who: $("who").value, notes: $("notes").value }, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "teste-" + new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-") + ".json";
+  a.click();
+};
+window.addEventListener("beforeunload", () => { if (agentId) navigator.sendBeacon?.("/api/stop", new Blob([JSON.stringify({ agentId })], { type: "application/json" })); });
+
+init().catch((e) => log("init: " + e.message, true));
+</script>
+</body>
+</html>

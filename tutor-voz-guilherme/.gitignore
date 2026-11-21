@@ -1,0 +1,20 @@
+# Ambiente Python
+.venv/
+__pycache__/
+*.pyc
+
+# Segredos (nunca subir)
+.env
+.env.*
+!.env.example
+
+# Resultados de testes com crianças ficam só local
+testes/lab/resultados/*.json
+
+# Cópia local da documentação da Agora (material de terceiros)
+referencias/agora-docs/
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+~$*
