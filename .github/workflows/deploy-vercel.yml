@@ -1,0 +1,32 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Deploy to production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          : "${VERCEL_TOKEN:?Missing VERCEL_TOKEN repository secret}"
+          : "${VERCEL_ORG_ID:?Missing VERCEL_ORG_ID repository secret}"
+          : "${VERCEL_PROJECT_ID:?Missing VERCEL_PROJECT_ID repository secret}"
+          vercel deploy --prod --yes
