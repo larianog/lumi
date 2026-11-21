@@ -58,6 +58,26 @@ Optional SSE proxy path (not default runtime path). Requires `NEXT_LLM_API_KEY` 
 - Success: `{ agent_id, create_ts, state: 'RUNNING' }`. Invalid JSON/fields: `400`; body over 8000 characters: `413`; absent server credentials: `503`; provider failure: sanitized `502`.
 - Reuses the existing token and stop contracts; all main-app contracts remain unchanged.
 
+### `POST /api/materials`
+
+Authenticated multipart body: `profileId` string plus `file` (`image/jpeg`, `image/png`, `image/webp`, or `application/pdf`, maximum 10 MB), with optional `literacyLevel`. Requires a family-owned child profile; there is no additional adult-password step for uploads. Family-wide history retains its adult verification requirement.
+
+- `201`: new extraction completed, `{ material, cached: false }`.
+- `200`: unexpired ready/processing record reused, `{ material, cached: true }`.
+- `400/401/404/413/415`: request, session, ownership, size, or media validation failure.
+- `422/502/504`: unreadable image, provider failure, or timeout.
+
+### `GET /api/materials`
+
+- `?profileId=<id>` returns browser-safe history metadata for a family-owned child.
+- `?scope=family` requires recent adult verification and returns all current-session family material metadata.
+
+List results exclude hashes, private storage keys, and extracted text.
+
+### `GET/PATCH /api/materials/[id]`
+
+`GET` returns authorized detail including extracted text while retained. `PATCH { "completed": true }` records idempotent explicit completion. Expired content keeps metadata but omits text.
+
 ## Event/Data Interfaces
 
 - RTM transcript/state/metrics/errors consumed through `AgoraVoiceAI` event emitter.
@@ -70,8 +90,9 @@ Required:
 
 - `NEXT_PUBLIC_AGORA_APP_ID`
 - `NEXT_AGORA_APP_CERTIFICATE`
+- `OPENAI_API_KEY`
 
-This is the complete base `.env.local` contract. The optional BYOK route and provider snippets use additional variables only when a developer explicitly enables them.
+Optional material settings are `HOMEWORK_VISION_MODEL` (default `gpt-4.1-mini`) and `LUMI_MATERIAL_RETENTION_HOURS`. Optional voice BYOK snippets use additional variables only when explicitly enabled.
 
 ## Test Coverage for Interfaces
 
@@ -86,6 +107,7 @@ From `types/conversation.ts` (high-use):
 - `AgoraTokenData`: token bootstrap payload consumed by `LandingPage`.
 - `AgoraRenewalTokens`: renewal callback result (`rtcToken`, `rtmToken`).
 - `ConversationComponentProps`: runtime dependencies for in-call component.
+- `StudyMaterialDto`: browser-safe material state; detail responses may populate `extractedText`.
 
 ## Interface Invariants
 
@@ -93,6 +115,8 @@ From `types/conversation.ts` (high-use):
 - Invite route requires both `requester_id` and `channel_name`.
 - Stop route requires `agent_id`; missing should never be tolerated silently.
 - Token route should always return UID as string for downstream compatibility.
+- Material list routes must never return `storageKey`, `sha256`, `familyId`, or extracted text.
+- `profile_id` and `material_id` must be supplied together when grounding `/api/invite-agent`.
 
 ## Event Interface Notes
 

@@ -9,6 +9,8 @@ import type {
   FamilyRecord,
   Profile,
   SessionRecord,
+  HomeworkAnalysis,
+  StudyMaterial,
 } from '@/types/database';
 
 const DB_PATH = path.join(process.cwd(), 'data', 'lumi-db.json');
@@ -21,8 +23,9 @@ const scrypt = promisify(scryptCallback);
 const initialDb: Database = {
   families: [],
   completions: [],
+  materials: [],
   sessions: [],
-  version: 2,
+  version: 3,
 };
 
 const demoFamily: Family = {
@@ -103,12 +106,13 @@ async function readDb(): Promise<Database> {
     families?: Array<Partial<FamilyRecord> & { password?: string }>;
   };
 
-  if (parsed.version === 2) {
+  if (parsed.version === 3) {
     return {
       families: parsed.families as FamilyRecord[] ?? [],
       completions: parsed.completions ?? [],
+      materials: parsed.materials ?? [],
       sessions: parsed.sessions ?? [],
-      version: 2,
+      version: 3,
     };
   }
 
@@ -135,8 +139,9 @@ async function readDb(): Promise<Database> {
       familyId: completion.familyId ?? families.find((family) =>
         family.profiles.some((profile) => profile.id === completion.profileId))?.id ?? '',
     })),
-    sessions: [],
-    version: 2,
+    materials: parsed.materials ?? [],
+    sessions: parsed.sessions ?? [],
+    version: 3,
   };
   await writeDb(migrated);
   return migrated;
@@ -295,4 +300,136 @@ export async function getCompletionsByProfile(familyId: string, profileId: strin
 export async function getCompletionsByFamily(familyId: string) {
   const db = await readDb();
   return db.completions.filter((item) => item.familyId === familyId);
+}
+
+type StudyMaterialReservation = Omit<
+  StudyMaterial,
+  'extractionStatus' | 'createdAt' | 'updatedAt'
+>;
+
+function belongsToMaterialScope(
+  material: StudyMaterial,
+  familyId: string,
+  demoSessionId?: string,
+) {
+  return material.familyId === familyId
+    && (demoSessionId ? material.demoSessionId === demoSessionId : !material.demoSessionId);
+}
+
+export async function reserveStudyMaterial(input: StudyMaterialReservation) {
+  return updateDb((db) => {
+    const nowMs = Date.now();
+    const reusable = db.materials.find((material) =>
+      belongsToMaterialScope(material, input.familyId, input.demoSessionId)
+      && material.profileId === input.profileId
+      && material.sha256 === input.sha256
+      && material.extractionModel === input.extractionModel
+      && material.promptVersion === input.promptVersion
+      && material.literacyLevel === input.literacyLevel
+      && material.extractionStatus !== 'failed'
+      && Date.parse(material.expiresAt) > nowMs
+      && (material.extractionStatus === 'ready' || Date.parse(material.updatedAt) > nowMs - 2 * 60 * 1000),
+    );
+
+    if (reusable) return { material: reusable, created: false };
+
+    const now = new Date(nowMs).toISOString();
+    const material: StudyMaterial = {
+      ...input,
+      extractionStatus: 'processing',
+      createdAt: now,
+      updatedAt: now,
+    };
+    db.materials.unshift(material);
+    return { material, created: true };
+  });
+}
+
+export async function markStudyMaterialReady(
+  id: string,
+  storageKey: string,
+  extractedText: string,
+  analysis?: HomeworkAnalysis,
+) {
+  return updateDb((db) => {
+    const material = db.materials.find((candidate) => candidate.id === id);
+    if (!material) throw new Error('MATERIAL_NOT_FOUND');
+    material.storageKey = storageKey;
+    material.extractedText = extractedText;
+    material.analysis = analysis;
+    material.extractionStatus = 'ready';
+    material.errorCode = undefined;
+    material.updatedAt = new Date().toISOString();
+    return material;
+  });
+}
+
+export async function markStudyMaterialFailed(
+  id: string,
+  errorCode: string,
+  storageKey?: string,
+) {
+  return updateDb((db) => {
+    const material = db.materials.find((candidate) => candidate.id === id);
+    if (!material) throw new Error('MATERIAL_NOT_FOUND');
+    material.storageKey = storageKey;
+    material.extractionStatus = 'failed';
+    material.errorCode = errorCode;
+    material.updatedAt = new Date().toISOString();
+    return material;
+  });
+}
+
+export async function getStudyMaterial(id: string) {
+  const db = await readDb();
+  return db.materials.find((material) => material.id === id) ?? null;
+}
+
+export async function getStudyMaterialsByProfile(
+  familyId: string,
+  profileId: string,
+  demoSessionId?: string,
+) {
+  const db = await readDb();
+  return db.materials.filter((material) =>
+    belongsToMaterialScope(material, familyId, demoSessionId)
+    && material.profileId === profileId,
+  );
+}
+
+export async function getStudyMaterialsByFamily(familyId: string, demoSessionId?: string) {
+  const db = await readDb();
+  return db.materials.filter((material) =>
+    belongsToMaterialScope(material, familyId, demoSessionId),
+  );
+}
+
+export async function completeStudyMaterial(id: string) {
+  return updateDb((db) => {
+    const material = db.materials.find((candidate) => candidate.id === id);
+    if (!material) throw new Error('MATERIAL_NOT_FOUND');
+    material.completedAt ??= new Date().toISOString();
+    material.updatedAt = new Date().toISOString();
+    return material;
+  });
+}
+
+export async function purgeExpiredStudyMaterials() {
+  return updateDb((db) => {
+    const now = Date.now();
+    const purgedAt = new Date(now).toISOString();
+    const storageKeys: string[] = [];
+
+    for (const material of db.materials) {
+      if (material.purgedAt || Date.parse(material.expiresAt) > now) continue;
+      if (material.storageKey) storageKeys.push(material.storageKey);
+      material.storageKey = undefined;
+      material.extractedText = undefined;
+      material.analysis = undefined;
+      material.purgedAt = purgedAt;
+      material.updatedAt = purgedAt;
+    }
+
+    return storageKeys;
+  });
 }

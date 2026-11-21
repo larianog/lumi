@@ -32,6 +32,63 @@ export type ActivityCompletion = {
   completedAt: string;
 };
 
+export type StudyMaterialExtractionStatus = 'processing' | 'ready' | 'failed';
+
+/** How well the child reads on their own; chosen by the parent on upload. */
+export type LiteracyLevel = 'pre_reader' | 'emergent' | 'fluent';
+
+export type HomeworkQuestion = {
+  number: string;
+  /** Faithful transcription of the question. */
+  statement: string;
+  /** Pictures, diagrams or layout the child needs (e.g. "5 maçãs desenhadas"). */
+  visualElements: string;
+  skill: string;
+  /** Server-only: lets Lumi check answers. Never sent to the browser. */
+  expectedAnswer: string;
+  steps: string[];
+  hints: string[];
+};
+
+/** Tutor-ready reading of a worksheet, produced by the vision model. */
+export type HomeworkAnalysis = {
+  readable: boolean;
+  unreadableReason: string;
+  title: string;
+  subject: string;
+  estimatedGrade: string;
+  generalInstructions: string;
+  questions: HomeworkQuestion[];
+  notesForTutor: string;
+};
+
+export type StudyMaterial = {
+  id: string;
+  familyId: string;
+  profileId: string;
+  /** Shared demo families are isolated by the browser session that uploaded the material. */
+  demoSessionId?: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  sha256: string;
+  storageKey?: string;
+  /** Child-safe transcription (instructions + questions, no answers). Shown in the UI. */
+  extractedText?: string;
+  /** Server-only tutoring brief with expected answers. Never exposed in DTOs. */
+  analysis?: HomeworkAnalysis;
+  literacyLevel?: LiteracyLevel;
+  extractionStatus: StudyMaterialExtractionStatus;
+  extractionModel: string;
+  promptVersion: string;
+  errorCode?: string;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt: string;
+  purgedAt?: string;
+  completedAt?: string;
+};
+
 export type SessionRecord = {
   id: string;
   tokenHash: string;
@@ -45,6 +102,7 @@ export type SessionRecord = {
 export type Database = {
   families: FamilyRecord[];
   completions: ActivityCompletion[];
+  materials: StudyMaterial[];
   sessions: SessionRecord[];
-  version: 2;
+  version: 3;
 };

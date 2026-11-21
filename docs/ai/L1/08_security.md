@@ -7,6 +7,8 @@
 - Browser is untrusted and never receives `NEXT_AGORA_APP_CERTIFICATE`.
 - Next.js server routes hold credentials and mint scoped, expiring tokens.
 - Agora cloud executes managed agent pipeline using server-issued credentials.
+- OpenAI receives validated material images and PDFs through a server-only credential.
+- Uploaded bytes stay in private storage; the browser receives only authorized DTOs and retained extracted text.
 
 ## Secret Handling Rules
 
@@ -14,6 +16,7 @@
 - Do not expose BYOK provider API keys to client bundles.
 - Store secrets in `.env.local` for dev and deployment secret store in Vercel.
 - `config/env/env.local.example` documents expected keys without real values.
+- Keep `OPENAI_API_KEY` server-side and rotate any key pasted into chat, logs, issues, or commits.
 
 ## Token Security Model
 
@@ -26,6 +29,7 @@
 
 - Route handlers validate required fields and env availability.
 - Errors return structured JSON with bounded detail.
+- Material routes authenticate the family session, verify profile/material ownership, validate size/MIME/signature, and gate family-wide lists behind adult access.
 - Stop route treats already-stopping/not-found agent as idempotent success.
 
 ## Agent Behavior Safety
@@ -62,6 +66,10 @@
 - Token misuse risk is bounded by token expiry but still requires secure key custody.
 - Public start/stop endpoints are unauthenticated in sample form; production needs auth.
 - RTM message payloads are parsed defensively but should be treated as untrusted input.
+- School material may contain child personal data; file/text retention defaults to seven days and metadata persists only for history/completion.
+- Shared demo uploads require session isolation to avoid cross-visitor disclosure.
+- Extracted text is untrusted prompt data and is explicitly delimited from agent instructions.
+- The local JSON/filesystem adapters are not a production-grade secret/data store on serverless platforms.
 
 ## Hardening Steps for Productionization
 
@@ -70,6 +78,7 @@
 - Add rate limiting for token and invite endpoints.
 - Add request tracing IDs for security incident investigation.
 - Add environment-specific secret rotation policy and monitoring.
+- Replace local material storage with encrypted private object storage and a persistent database; add deletion/export controls and rate limiting.
 
 ## Deployment Secret Checklist (Vercel)
 
@@ -77,6 +86,7 @@
 - `NEXT_AGORA_APP_CERTIFICATE` set as server-side secret only.
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` stored as GitHub repository secrets for the production deployment workflow.
 - Optional BYOK keys set only when related provider block is enabled.
+- `OPENAI_API_KEY` set for deployments using material extraction.
 - Preview environments use non-production credentials.
 
 ## Security-Relevant Files
@@ -85,6 +95,10 @@
 - `app/api/invite-agent/route.ts`
 - `app/api/stop-conversation/route.ts`
 - `config/env/env.local.example`
+- `app/api/materials/route.ts`
+- `app/api/materials/[id]/route.ts`
+- `lib/material-extraction.ts`
+- `lib/material-storage.ts`
 - `README.md` environment section
 
 ## Audit Trigger Events

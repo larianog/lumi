@@ -535,6 +535,112 @@ async function verifyActivitiesRequireSession() {
   );
 }
 
+async function verifyMaterialsRequireSession() {
+  const { POST: uploadMaterial } = await import('../app/api/materials/route');
+  const request = new NextRequest('http://localhost:3000/api/materials', {
+    body: new FormData(),
+    method: 'POST',
+  });
+  const response = await uploadMaterial(request);
+
+  assert(
+    response.status === 401,
+    'POST /api/materials should require an authenticated family session',
+  );
+}
+
+async function verifyMaterialAnalysis() {
+  const { analyzeMaterial, MaterialExtractionError } = await import('../lib/material-extraction');
+  const originalApiKey = process.env.OPENAI_API_KEY;
+  const originalModel = process.env.HOMEWORK_VISION_MODEL;
+  process.env.OPENAI_API_KEY = 'test-openai-key';
+  process.env.HOMEWORK_VISION_MODEL = 'test-vision-model';
+
+  const analysis = {
+    readable: true,
+    unreadableReason: '',
+    title: 'Somas até 10',
+    subject: 'Matemática',
+    estimatedGrade: '1º ano',
+    generalInstructions: 'Resolva as continhas.',
+    notesForTutor: '',
+    questions: [{
+      number: '1',
+      statement: '3 + 4 = ___',
+      visualElements: '',
+      skill: 'adição',
+      expectedAnswer: 'SECRET-ANSWER-7',
+      steps: ['Conte 3', 'Conte mais 4'],
+      hints: ['Use os dedos'],
+    }],
+  };
+
+  let capturedUrl = '';
+  let capturedAuthorization = '';
+  let capturedBody = '';
+  const fakeResponse = (payload: unknown) => (async (input: string | URL | Request, init?: RequestInit) => {
+    capturedUrl = String(input);
+    capturedAuthorization = new Headers(init?.headers).get('authorization') ?? '';
+    capturedBody = String(init?.body);
+    return Response.json({
+      id: 'resp_test',
+      object: 'response',
+      created_at: 1,
+      model: 'test-vision-model',
+      status: 'completed',
+      incomplete_details: null,
+      output: [{
+        type: 'message',
+        id: 'msg_test',
+        role: 'assistant',
+        status: 'completed',
+        content: [{ type: 'output_text', text: JSON.stringify(payload), annotations: [] }],
+      }],
+      usage: {
+        input_tokens: 1,
+        output_tokens: 1,
+        input_tokens_details: { cached_tokens: 0 },
+        output_tokens_details: { reasoning_tokens: 0 },
+      },
+    });
+  }) as typeof fetch;
+
+  try {
+    const result = await analyzeMaterial(
+      Buffer.from([0x89, 0x50, 0x4e, 0x47]),
+      'image/png',
+      { age: 7, literacyLevel: 'emergent' },
+      fakeResponse(analysis),
+    );
+
+    assert(capturedUrl.endsWith('/responses'), 'Material analysis should call the OpenAI Responses API');
+    assert(capturedAuthorization === 'Bearer test-openai-key', 'Material analysis should send the server API key');
+    assert(capturedBody.includes('"test-vision-model"'), 'Material analysis should use the configured model');
+    assert(capturedBody.includes('data:image/png;base64,'), 'Material analysis should send the image as multimodal content');
+    assert(result.analysis.questions[0]?.expectedAnswer === 'SECRET-ANSWER-7', 'Material analysis should keep the answer key server-side');
+    assert(result.text.includes('3 + 4 = ___'), 'Child transcript should include the question');
+    assert(!result.text.includes('SECRET-ANSWER-7'), 'Child transcript must never include expected answers');
+
+    let unreadableCode = '';
+    try {
+      await analyzeMaterial(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47]),
+        'image/png',
+        { age: 7, literacyLevel: 'emergent' },
+        fakeResponse({ ...analysis, readable: false, unreadableReason: 'Não é uma lição.', questions: [] }),
+      );
+    } catch (error) {
+      unreadableCode = error instanceof MaterialExtractionError ? error.code : 'OTHER';
+    }
+    assert(unreadableCode === 'UNREADABLE', 'Non-homework uploads should be rejected as UNREADABLE');
+  } finally {
+    if (originalApiKey === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = originalApiKey;
+    if (originalModel === undefined) delete process.env.HOMEWORK_VISION_MODEL;
+    else process.env.HOMEWORK_VISION_MODEL = originalModel;
+  }
+}
+
 async function main() {
   await verifyGenerateAgoraTokenRoute();
   await verifyGenerateAgoraTokenReplacesZeroUid();
@@ -556,6 +662,8 @@ async function main() {
   await verifyLoginValidation();
   await verifyAdultAccessValidation();
   await verifyActivitiesRequireSession();
+  await verifyMaterialsRequireSession();
+  await verifyMaterialAnalysis();
 
   console.log('API contract checks passed');
 }

@@ -33,6 +33,15 @@
 - Stop route is idempotent for already-stopping/not-found agent states.
 - Frontend logs detailed technical errors and shows concise user-facing messages.
 
+## Material Conventions
+
+- Accept only JPEG, PNG, and WebP images or PDF files whose signatures match the declared MIME type, capped at 10 MB.
+- Build cache identity from owner scope, child profile, SHA-256, vision model, and extraction prompt version.
+- Never place uploads under `public/`, return storage keys, or log uploaded/extracted content.
+- Load material text on the server before building voice-agent instructions and delimit it as untrusted reference text.
+- Keep extraction state (`processing|ready|failed`) separate from explicit child completion.
+- Scope demo uploads by session ID because all demo sessions share one family ID.
+
 ## Styling and UI Kit Rules
 
 - Tailwind config must scan `./node_modules/agora-agent-uikit/dist/**/*.{js,mjs}`.
@@ -46,6 +55,7 @@ When changing workflow/contracts/ownership in `components` or `app/api`, update:
 - `AGENTS.md`
 - `docs/ai/RECIPE.md` if extension points, invariants, or stable contracts changed
 - relevant `docs/ai/L1/*.md` and `docs/ai/L0_repo_card.md` `Last Reviewed`
+- `docs/ai/L1/L2/material_pipeline.md` when upload, cache, retention, or completion behavior changes
 
 ## Git Conventions
 

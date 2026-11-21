@@ -39,6 +39,16 @@
 - Tying mic track creation directly to mute state can break visualizer audio graph.
 - Failing to teardown RTM client on session end leaks subscriptions and stale events.
 
+## Material Pipeline Pitfalls
+
+- Relying on filename extensions instead of MIME plus signature validation lets arbitrary bytes reach storage/provider boundaries.
+- Hash-only caching can reuse the wrong output after model or prompt changes; both are part of the cache identity.
+- Family-only ownership leaks uploads between users of the shared demo family; demo session ID is mandatory.
+- Sending extracted text from the browser into `/api/invite-agent` makes the prompt tamperable; load it server-side by material ID.
+- Treating voice-session end as completion produces false positives; completion is an explicit PATCH action.
+- `data/` writes are not durable on serverless Vercel and cannot be the production material store.
+- A crashed `processing` reservation must age out; only fresh processing entries are reusable.
+
 ## Docs/Process Pitfalls
 
 - Changing `components/` or `app/api/` without syncing README/GUIDE/TEXT_STREAMING/AGENTS leads to stale operator guidance.
@@ -68,6 +78,10 @@
 | Agent starts but no transcript | `components/ConversationComponent.tsx`, `lib/conversation.ts` |
 | Conversation hangs on end | `components/LandingPage.tsx`, `app/api/stop-conversation/route.ts` |
 | Metrics panel empty | `components/ConversationComponent.tsx`, `components/QuickstartPipelineMetrics.tsx` |
+| Upload rejected | `app/api/materials/route.ts`, `lib/material-storage.ts` |
+| Extraction fails or is empty | `lib/material-extraction.ts`, `OPENAI_API_KEY` |
+| Lumi ignores the material | `components/LumiVoiceAgent.tsx`, `app/api/invite-agent/route.ts` |
+| Parent cannot see history | `/api/materials?scope=family`, adult verification window |
 
 ## Sandbox and Local Dev Caveats
 

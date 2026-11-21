@@ -41,6 +41,9 @@ type LumiVoiceAgentProps = {
   profileName: string;
   age: number;
   activityTitle: string;
+  /** Profile/material identifiers let the server ground Lumi without trusting browser-supplied text. */
+  profileId?: string;
+  materialId?: string;
   /** Start the session on mount instead of waiting for the "start" button. */
   autoStart?: boolean;
   /** `modal` = full-screen dialog; `inline` = avatar embedded in the page. */
@@ -53,6 +56,8 @@ export default function LumiVoiceAgent({
   profileName,
   age,
   activityTitle,
+  profileId,
+  materialId,
   autoStart = false,
   variant = 'modal',
   avatarMode = 'provider',
@@ -91,13 +96,17 @@ export default function LumiVoiceAgent({
             requester_id: responseData.uid,
             channel_name: responseData.channel,
             profile_name: profileName,
+            profile_id: profileId,
             age,
             activity_title: activityTitle,
             avatar_mode: avatarMode,
+            material_id: materialId,
           } satisfies ClientStartRequest & {
             profile_name: string;
             age: number;
             activity_title: string;
+            profile_id?: string;
+            material_id?: string;
           }),
         })
           .then(async (response) => {
