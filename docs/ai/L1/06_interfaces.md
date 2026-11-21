@@ -21,6 +21,8 @@ Failure response: `{ "error": string, "details"?: string }` with `500`.
 
 ### `POST /api/invite-agent`
 
+Optional `avatar_mode` accepts only `"local"` or `"provider"` (invalid values return `400`). `"local"` starts the usual voice agent without Lemon Slice; omitted/`"provider"` retains optional avatar generation when its server key exists. Profile pages explicitly send local mode; the response shape is unchanged. Client components pass this selection as `avatarMode`.
+
 Body (`ClientStartRequest`):
 
 ```json

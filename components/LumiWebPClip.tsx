@@ -3,12 +3,13 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import type { LumiVideoState } from '@/lib/lumi-video-states';
-import styles from './lumi-animation.module.css';
+import { forgetLumiWebP, loadLumiWebP } from '@/lib/lumi-webp';
 
 type Props = {
   id: LumiVideoState;
   label: string;
   url: string;
+  className: string;
   visible: boolean;
   playing: boolean;
   replay: number;
@@ -16,7 +17,7 @@ type Props = {
   onError: (id: LumiVideoState, url: string) => void;
 };
 
-export default function LumiWebPClip({ id, label, url, visible, playing, replay, onReady, onError }: Props) {
+export default function LumiWebPClip({ id, label, url, className, visible, playing, replay, onReady, onError }: Props) {
   const [media, setMedia] = useState<{ blob: Blob; poster: string } | null>(null);
   const [animationUrl, setAnimationUrl] = useState<string | null>(null);
 
@@ -27,9 +28,7 @@ export default function LumiWebPClip({ id, label, url, visible, playing, replay,
     const preview = new window.Image();
     void (async () => {
       try {
-        const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) throw new Error('WebP load failed');
-        const blob = await response.blob();
+        const blob = await loadLumiWebP(url, controller.signal);
         if (cancelled) return;
         previewUrl = URL.createObjectURL(blob);
         preview.src = previewUrl;
@@ -46,7 +45,7 @@ export default function LumiWebPClip({ id, label, url, visible, playing, replay,
         setMedia({ blob, poster: canvas.toDataURL('image/png') });
         onReady(id, url);
       } catch {
-        if (!cancelled) onError(id, url);
+        if (!cancelled) { forgetLumiWebP(url); onError(id, url); }
       } finally {
         preview.src = '';
         if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -73,11 +72,11 @@ export default function LumiWebPClip({ id, label, url, visible, playing, replay,
     src={playing && animationUrl ? animationUrl : media.poster}
     alt={`WebP da Lumi: ${label}`}
     width={600} height={650} unoptimized loading="eager"
-    className={styles.stateVideo}
+    className={className}
     data-state={id}
     data-visible={visible}
     data-playing={playing && Boolean(animationUrl)}
     aria-hidden={!visible}
-    onError={() => onError(id, url)}
+    onError={() => { forgetLumiWebP(url); onError(id, url); }}
   />;
 }

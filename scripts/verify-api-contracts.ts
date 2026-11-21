@@ -381,6 +381,36 @@ async function verifyInviteAgentSuccess() {
   }
 }
 
+async function verifyLocalAvatarInvite() {
+  const { POST: inviteAgent } = await import('../app/api/invite-agent/route');
+  const originalCreateSession = Agent.prototype.createSession;
+  const originalKey = process.env.NEXT_LEMONSLICE_API_KEY;
+  const configurations: ReturnType<Agent['toProperties']>[] = [];
+  const request = (avatarMode: unknown) => new NextRequest('http://localhost:3000/api/invite-agent', {
+    method: 'POST',
+    body: JSON.stringify({ requester_id: '4321', channel_name: 'local-avatar-contract', avatar_mode: avatarMode }),
+  });
+  Agent.prototype.createSession = function (this: Agent) {
+    configurations.push(this.toProperties({ channel: 'local-avatar-contract', agentUid: '123456', remoteUids: ['4321'], token: 'mock-token' }));
+    return { start: async () => 'mock-local-avatar-agent' } as ReturnType<Agent['createSession']>;
+  };
+  try {
+    process.env.NEXT_LEMONSLICE_API_KEY = 'mock-provider-key';
+    for (const mode of [undefined, 'provider', 'local']) {
+      assert((await inviteAgent(request(mode))).status === 200, 'Supported avatar modes must start a voice session');
+      assert(Boolean(configurations.at(-1)?.avatar) === (mode !== 'local'), 'Local mode must omit Lemon Slice even when its key exists; other modes preserve the provider');
+    }
+    for (const mode of ['unknown', null, 123]) {
+      assert((await inviteAgent(request(mode))).status === 400, 'Invalid avatar modes must be rejected');
+    }
+    assert(configurations.length === 3, 'Invalid modes must never start sessions');
+  } finally {
+    Agent.prototype.createSession = originalCreateSession;
+    if (originalKey === undefined) delete process.env.NEXT_LEMONSLICE_API_KEY;
+    else process.env.NEXT_LEMONSLICE_API_KEY = originalKey;
+  }
+}
+
 async function verifyStopConversationValidation() {
   const { POST: stopConversation } =
     await import('../app/api/stop-conversation/route');
@@ -513,6 +543,11 @@ async function main() {
   await verifyChatCompletionsSseDone();
   await verifyInviteAgentValidation();
   await verifyInviteAgentSuccess();
+  await verifyLocalAvatarInvite();
+  const { verifyLumiSpeech } = await import('./verify-lumi-speech');
+  verifyLumiSpeech();
+  const { verifyLumiWebP } = await import('./verify-lumi-webp');
+  await verifyLumiWebP();
   await verifyStopConversationValidation();
   await verifyStopConversationSuccess();
   const { verifyLumiAnimation } = await import('./verify-lumi-animation');

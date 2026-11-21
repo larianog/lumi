@@ -14,6 +14,8 @@ import type {
 } from '@/types/conversation';
 import { ErrorBoundary } from './ErrorBoundary';
 import { LoadingSkeleton } from './LoadingSkeleton';
+import LumiConversationAvatar from './LumiConversationAvatar';
+import avatarStyles from './lumi-conversation-avatar.module.css';
 
 const ConversationComponent = dynamic(() => import('./ConversationComponent'), {
   ssr: false,
@@ -43,6 +45,7 @@ type LumiVoiceAgentProps = {
   autoStart?: boolean;
   /** `modal` = full-screen dialog; `inline` = avatar embedded in the page. */
   variant?: 'modal' | 'inline';
+  avatarMode?: 'provider' | 'local';
   onClose?: () => void;
 };
 
@@ -52,6 +55,7 @@ export default function LumiVoiceAgent({
   activityTitle,
   autoStart = false,
   variant = 'modal',
+  avatarMode = 'provider',
   onClose = () => {},
 }: LumiVoiceAgentProps) {
   const [showConversation, setShowConversation] = useState(false);
@@ -89,6 +93,7 @@ export default function LumiVoiceAgent({
             profile_name: profileName,
             age,
             activity_title: activityTitle,
+            avatar_mode: avatarMode,
           } satisfies ClientStartRequest & {
             profile_name: string;
             age: number;
@@ -212,9 +217,9 @@ export default function LumiVoiceAgent({
 
   if (variant === 'inline') {
     return (
-      <div className="lumi-inline-host">
+      <div className={`lumi-inline-host ${avatarMode === 'local' ? avatarStyles.host : ''}`}>
         {showConversation && agoraData && rtmClient ? (
-          <Suspense fallback={<LumiInlinePlaceholder status={messages.voice.starting} />}>
+          <Suspense fallback={<LumiInlinePlaceholder status={messages.voice.starting} avatarMode={avatarMode} />}>
             <ErrorBoundary>
               {agentJoinError && <div className="voice-warning">{messages.voice.connectionError}</div>}
               <AgoraProvider>
@@ -226,12 +231,13 @@ export default function LumiVoiceAgent({
                   onTokenWillExpire={handleTokenWillExpire}
                   onEndConversation={handleEndConversation}
                   variant="inline"
+                  avatarMode={avatarMode}
                 />
               </AgoraProvider>
             </ErrorBoundary>
           </Suspense>
         ) : (
-          <LumiInlinePlaceholder status={error ?? messages.voice.starting} />
+          <LumiInlinePlaceholder status={error ?? messages.voice.starting} avatarMode={avatarMode} />
         )}
       </div>
     );
@@ -264,6 +270,7 @@ export default function LumiVoiceAgent({
                 rtmClient={rtmClient}
                 onTokenWillExpire={handleTokenWillExpire}
                 onEndConversation={handleEndConversation}
+                avatarMode={avatarMode}
               />
             </AgoraProvider>
           </ErrorBoundary>
@@ -288,17 +295,17 @@ function stopSession(agentId: string | undefined, rtm: RTMClient | null) {
   void rtm?.logout().catch(() => {});
 }
 
-function LumiInlinePlaceholder({ status }: { status: string }) {
+function LumiInlinePlaceholder({ status, avatarMode }: { status: string; avatarMode: 'provider' | 'local' }) {
   return (
     <div className="lumi-inline">
-      <Image
+      {avatarMode === 'local' ? <LumiConversationAvatar state="idle" /> : <Image
         className="lumi-inline-fallback"
         src="/assets/lumi-avatar.png"
         alt={messages.accessibility.lumiMascot}
         width={480}
         height={520}
         priority
-      />
+      />}
       <div className="lumi-inline-controls">
         <span className="lumi-inline-status" aria-live="polite">{status}</span>
       </div>

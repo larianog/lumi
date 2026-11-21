@@ -64,6 +64,7 @@ The optional `/playground/lumi-animation` is an additive experiment using `api.r
 
 - `GET /api/generate-agora-token` returns `{ token, uid, channel }`.
 - `POST /api/invite-agent` accepts `{ requester_id, channel_name }` and returns the agent id/state payload.
+- Optional invite `avatar_mode: "local"` disables provider avatar generation for profile animation while preserving voice. Omitted/`"provider"` keeps the prior behavior and all response fields.
 - `POST /api/stop-conversation` accepts `{ agent_id }` and treats already-stopping sessions as success.
 - Required env vars are `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE`.
 - `components/LandingPage.tsx` owns pre-call bootstrap and RTM client lifecycle.

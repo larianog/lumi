@@ -38,6 +38,8 @@ import {
   type ConnectionIssue,
 } from './ConversationErrorCard';
 import type { ConversationComponentProps } from '@/types/conversation';
+import LumiConversationAvatar from './LumiConversationAvatar';
+import { useLumiSpeechState } from './useLumiSpeechState';
 
 // Cap the displayed issues list to avoid overwhelming the UI during a cascade of errors.
 const MAX_CONNECTION_ISSUES = 6;
@@ -90,6 +92,7 @@ export default function ConversationComponent({
   onTokenWillExpire,
   onEndConversation,
   variant = 'full',
+  avatarMode = 'provider',
   onRetryMicrophone,
 }: ConversationComponentProps) {
   const client = useRTCClient();
@@ -173,6 +176,14 @@ export default function ConversationComponent({
   // Do NOT pass `isEnabled` — that ties track lifetime to mute state and breaks the Web Audio
   // graph inside MicButtonWithVisualizer. Mute uses track.setEnabled() only.
   const { localMicrophoneTrack, error: microphoneError } = useLocalMicrophoneTrack(isReady);
+  const lumiSpeechState = useLumiSpeechState({
+    enabled: avatarMode === 'local',
+    connected: isReady && joinSuccess && isAgentConnected && connectionState === 'CONNECTED',
+    microphoneEnabled: isEnabled && !microphoneError,
+    agentAudioEnabled: !autoplayBlocked,
+    microphone: localMicrophoneTrack,
+    agent: remoteUsers.find((user) => String(user.uid) === agentUID),
+  });
 
   // ENABLE_AUDIO_PTS is a module-level SDK parameter (not on the client instance).
   // It must be set before publishing audio for transcript timing to be accurate.
@@ -509,7 +520,7 @@ export default function ConversationComponent({
     return (
       <div className="lumi-inline" role="region" aria-label={messages.voice.title}>
         {voiceWarnings}
-        {avatarUser ? (
+        {avatarMode === 'local' ? <LumiConversationAvatar state={lumiSpeechState} /> : avatarUser ? (
           <div className="lumi-inline-avatar"><RemoteUser user={avatarUser} /></div>
         ) : (
           <Image className="lumi-inline-fallback" src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={480} height={520} priority />
@@ -525,7 +536,9 @@ export default function ConversationComponent({
             enabledColor="hsl(var(--primary))"
             disabledColor="hsl(var(--destructive))"
           />
-          <span className="lumi-inline-status" aria-live="polite">{statusLabel}</span>
+          <span className="lumi-inline-status" aria-live="polite">{avatarMode === 'local' && isAgentConnected && connectionState === 'CONNECTED'
+            ? lumiSpeechState === 'speaking' ? messages.voice.speaking : lumiSpeechState === 'listening' ? messages.voice.listening : messages.voice.connected
+            : statusLabel}</span>
         </div>
       </div>
     );
@@ -547,7 +560,7 @@ export default function ConversationComponent({
           role="region"
           aria-label={messages.accessibility.lumiMascot}
         >
-          {avatarUser ? (
+          {avatarMode === 'local' ? <LumiConversationAvatar state={lumiSpeechState} /> : avatarUser ? (
             <div className="lumi-live-avatar"><RemoteUser user={avatarUser} /></div>
           ) : (
             <img className="lumi-avatar-fallback" src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} />

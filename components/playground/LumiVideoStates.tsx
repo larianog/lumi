@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Download, Film, Pause, Play, RotateCcw, Upload, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BUNDLED_LUMI_VIDEO_CLIPS, LUMI_VIDEO_STATES, VIDEO_CONVERSATION_DEMO, isWebPClip, videoFileError, videoProductionManifest, type LumiVideoClip, type LumiVideoState } from '@/lib/lumi-video-states';
-import LumiWebPClip from './LumiWebPClip';
+import LumiWebPClip from '@/components/LumiWebPClip';
 import styles from './lumi-animation.module.css';
 
 type ClipStatus = { ready?: boolean; error?: string; duration?: number };
@@ -153,6 +153,7 @@ export default function LumiVideoStates({ active, reducedMotion }: { active: boo
                 const source = clips[item.id];
                 if (source && isWebPClip(source)) return <LumiWebPClip
                   key={source.url} id={item.id} label={item.label} url={source.url}
+                  className={styles.stateVideo}
                   visible={state === item.id && playable} playing={state === item.id && playable && !stopped}
                   replay={replay} onReady={onWebPReady} onError={onWebPError}
                 />;
@@ -201,14 +202,13 @@ export default function LumiVideoStates({ active, reducedMotion }: { active: boo
           <div className={styles.controlTitle}><Film size={19} /><h2>Estados da Lumi</h2><span className={styles.clipCount}>{Object.keys(clips).length}/6</span></div>
           <p className={styles.helper}>Um clipe para cada momento. Adicione vídeos MP4, WebM, MOV ou imagens WebP, inclusive animadas e com transparência.</p>
           <div className={styles.videoStateGrid} role="group" aria-label="Estado da Lumi">
-            {LUMI_VIDEO_STATES.map((item) => <button key={item.id} aria-pressed={state === item.id} onClick={() => chooseState(item.id)}><span aria-hidden="true">{item.icon}</span><strong>{item.label}</strong><small>{clips[item.id] ? statuses[item.id]?.error ? 'Revisar arquivo' : isWebPClip(clips[item.id]) ? 'WebP adicionado' : clips[item.id]?.source === 'bundled' ? 'Vídeo padrão' : 'Vídeo adicionado' : 'Sem arquivo'}</small></button>)}
+            {LUMI_VIDEO_STATES.map((item) => <button key={item.id} aria-pressed={state === item.id} onClick={() => chooseState(item.id)}><span aria-hidden="true">{item.icon}</span><strong>{item.label}</strong><small>{clips[item.id] ? statuses[item.id]?.error ? 'Revisar arquivo' : isWebPClip(clips[item.id]) ? clips[item.id]?.source === 'bundled' ? 'WebP padrão' : 'WebP adicionado' : clips[item.id]?.source === 'bundled' ? 'Vídeo padrão' : 'Vídeo adicionado' : 'Sem arquivo'}</small></button>)}
           </div>
           <div className={styles.clipUpload}>
             <label className={styles.outlineButton}><Upload size={16} />{clip ? 'Trocar arquivo' : `Adicionar: ${definition.label}`}<input type="file" accept=".webp,.webm,.mp4,.mov,image/webp,video/webm,video/mp4,video/quicktime" aria-label={`Adicionar vídeo: ${definition.label}`} onChange={(event) => { addClip(state, event.target.files?.[0]); event.target.value = ''; }} /></label>
             {clip && <div className={styles.clipFile}><span title={clip.file.name}>{clip.file.name}<small>{(clip.file.size / 1024 / 1024).toFixed(1)} MB{status?.duration && Number.isFinite(status.duration) ? ` · ${status.duration.toFixed(1)} s` : ''}{clip.source === 'bundled' ? ' · incluído no projeto' : ''}</small></span>{clip.source === 'local' && <button aria-label={BUNDLED_LUMI_VIDEO_CLIPS[state] ? `Restaurar vídeo padrão: ${definition.label}` : `Remover vídeo: ${definition.label}`} onClick={() => removeClip(state)}>{BUNDLED_LUMI_VIDEO_CLIPS[state] ? <RotateCcw size={16} /> : <X size={16} />}</button>}</div>}
-            <p className={styles.footnote}>{clip?.source === 'bundled' ? 'Este vídeo já está salvo no projeto. Você pode experimentar outro arquivo sem substituir o padrão.' : 'Arquivos locais, até 40 MB. Substituições duram até recarregar; nenhum arquivo é enviado.'}</p>
+            <p className={styles.footnote}>{clip?.source === 'bundled' ? 'Este arquivo já está salvo no projeto. Você pode experimentar outro arquivo sem substituir o padrão.' : 'Arquivos locais, até 40 MB. Substituições duram até recarregar; nenhum arquivo é enviado.'}</p>
             {isWebP && <p className={styles.footnote}>WebP usa a velocidade e a repetição do arquivo. Pausar mostra o primeiro quadro; retomar ou reiniciar começa do início. A troca de estado é manual ou pela simulação.</p>}
-            {clip?.source === 'bundled' && state === 'speaking' && <p className={styles.footnote}>O clipe original tem fundo rosa; a reprodução não remove esse fundo.</p>}
           </div>
           {(uploadError || status?.error) && <p role="alert" className={styles.error}>{uploadError || status?.error}</p>}
           <label className={styles.rangeLabel}><span>Velocidade <output>{isWebP ? 'Definida no WebP' : `${speed.toFixed(2).replace(/0$/, '')}×`}</output></span><input aria-label="Velocidade dos vídeos" type="range" min="0.5" max="1.5" step="0.05" value={speed} disabled={isWebP} onChange={(event) => setSpeed(Number(event.target.value))} /></label>

@@ -15,9 +15,14 @@ export type LumiVideoClip = {
 };
 
 export const BUNDLED_LUMI_VIDEO_CLIPS: Partial<Record<LumiVideoState, LumiVideoClip>> = {
+  listening: {
+    file: { name: 'lummi-transparente-02.webp', size: 7209810 },
+    url: '/assets/lumi/states/lummi-transparente-02.webp',
+    source: 'bundled',
+  },
   speaking: {
-    file: { name: 'speaking.mp4', size: 4180928 },
-    url: '/assets/lumi/states/speaking.mp4',
+    file: { name: 'lummi-transparente.webp', size: 6633570 },
+    url: '/assets/lumi/states/lummi-transparente.webp',
     source: 'bundled',
   },
 };

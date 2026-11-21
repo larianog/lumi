@@ -94,6 +94,7 @@ export default function ProfilePage() {
             activityTitle={messages.activities[selectedActivity].title}
             autoStart
             variant="inline"
+            avatarMode="local"
           />
         </aside>
         <div className="activity-menu">

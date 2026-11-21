@@ -29,6 +29,9 @@ Auto-discovered project files remain at the repository root. This includes packa
 
 ## Client Ownership (`components`)
 
+- `LumiConversationAvatar.tsx` + `lumi-conversation-avatar.module.css`: profile stationary idle and bundled listening/speaking playback, independent clip readiness, visibility/reduced-motion handling.
+- `useLumiSpeechState.ts` + `lib/lumi-speech.ts`: samples existing RTC tracks and smooths speech activity; `scripts/verify-lumi-speech.ts` exercises silence, noise, overlap, mute, blocked audio, and reconnect behavior through `verify:api`.
+
 - `LandingPage.tsx`: pre-call shell, token/invite/RTM bootstrap, conversation mount/unmount.
 - `ConversationComponent.tsx`: RTC join, mic publish, toolkit init, transcript/metrics/issues state.
 - `QuickstartConversationLayout.tsx`: in-call framing and slots.
@@ -47,8 +50,9 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `app/playground/lumi-animation/page.tsx` + `components/playground/`: separate animation lab, CSS Module, local motion states, and live-test dialog.
 - `lib/lumi-animation.ts`: bounded prompt validation and presets; no main-app defaults are imported from it.
 - `components/playground/LumiVideoStates.tsx` + `lib/lumi-video-states.ts`: local clips, playback lifecycle, state sequence, and exported production manifest. `docs/lumi-video-states.md` documents the asset brief and future Agora event mapping.
-- `public/assets/lumi/states/speaking.mp4`: bundled, muted speaking loop; `BUNDLED_LUMI_VIDEO_CLIPS` maps its URL and file metadata. Local overrides can restore this default without changing the asset.
-- `components/playground/LumiWebPClip.tsx`: browser-local static/animated WebP playback, first-frame pause preview, replay URL lifecycle, and reduced-motion/hidden playback handling.
+- `public/assets/lumi/states/lummi-transparente.webp` (speaking) and `lummi-transparente-02.webp` (listening): supplied animations selected by `BUNDLED_LUMI_VIDEO_CLIPS` in both profile and playground. Local overrides can restore these defaults without changing the assets. The earlier MP4 is retained but not selected.
+- `components/LumiWebPClip.tsx`: shared browser-local static/animated WebP playback, first-frame pause preview and replay URL lifecycle. Profile and playground supply visibility/playback state and scoped CSS.
+- `lib/lumi-webp.ts` + `scripts/verify-lumi-webp.ts`: shared bundled Blob downloads survive subscriber unmounts, failed requests can retry, and local uploads retain abort ownership. Lifecycle checks run through `verify:api`.
 - `app/api/playground/lumi-animation/route.ts`: configuration status and isolated live-test session creation.
 - `scripts/verify-lumi-animation.ts`: live-test request validation, provider serialization, missing credentials, and sanitized failures, called by `verify:api` with mocked session startup.
 

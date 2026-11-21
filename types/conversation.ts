@@ -13,6 +13,7 @@ export interface ClientStartRequest {
   profile_name?: string;
   age?: number;
   activity_title?: string;
+  avatar_mode?: 'provider' | 'local';
 }
 
 export interface StopConversationRequest {
@@ -37,6 +38,7 @@ export interface ConversationComponentProps {
   onEndConversation: () => void;
   /** `full` = in-call layout with header and transcript; `inline` = avatar + mic only. */
   variant?: 'full' | 'inline';
+  avatarMode?: 'provider' | 'local';
   /** Called from a user tap after microphone access was denied. */
   onRetryMicrophone?: () => void;
 }
