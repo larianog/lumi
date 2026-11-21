@@ -1,0 +1,47 @@
+{
+  "families": [],
+  "completions": [],
+  "sessions": [
+    {
+      "id": "06d5a44f-09db-4c3d-a23a-192d5ea0fe11",
+      "tokenHash": "a284af22a26a2593e3b489a14c603a56933ade3833b526b90003aed1491375a1",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-21T18:02:08.332Z",
+      "expiresAt": "2026-12-21T18:02:08.332Z"
+    },
+    {
+      "id": "e7e67590-44af-4534-9903-b5d234047cc2",
+      "tokenHash": "6a8528da4f72acc8d3a142fe7b0174a5f57ba0c75a6bab9a956811ff1def27c8",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-21T18:02:18.016Z",
+      "expiresAt": "2026-12-21T18:02:18.016Z"
+    },
+    {
+      "id": "5555738d-0fdc-4382-9fac-557e8742437d",
+      "tokenHash": "dd5c9eb7c126b0e497d6ef008928cb423447aee28a9a528d432ffc807a5a7b9b",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-21T18:06:01.998Z",
+      "expiresAt": "2026-12-21T18:06:01.998Z"
+    },
+    {
+      "id": "15b4fab6-5ad1-4505-9f63-ab73eb0a1617",
+      "tokenHash": "0af2c7621db0e676d6a3886d761e93fb9d4e9448909dcdf96d5abec11976cc8d",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-21T18:07:08.417Z",
+      "expiresAt": "2026-12-21T18:07:08.417Z"
+    },
+    {
+      "id": "b95280c4-bad2-405a-8a4a-8d89549452b0",
+      "tokenHash": "c7d4f809c0a7b43227b9b5930b32bb15b1d7834e4459530497c68f3f004c9052",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-21T18:20:23.269Z",
+      "expiresAt": "2026-12-21T18:20:23.269Z"
+    }
+  ],
+  "version": 2
+}

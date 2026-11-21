@@ -97,7 +97,7 @@ The [deployment workflow](.github/workflows/deploy-vercel.yml) runs `vercel depl
 
 ### Environment variables
 
-Defined in [`env.local.example`](env.local.example).
+Defined in [`config/env/env.local.example`](config/env/env.local.example).
 
 | Variable                     | Required | Notes                                                            |
 | ---------------------------- | :------: | ---------------------------------------------------------------- |
@@ -125,11 +125,19 @@ pnpm run verify         # doctor + lint + typecheck + verify:api + build
 
 Run `pnpm run verify` before shipping changes — it covers local prerequisites, lint, type safety, the core API route contracts, and the production build.
 
+### Container build
+
+The Docker build definition and its context-specific ignore file live together under `deploy/docker/`:
+
+```bash
+docker build -f deploy/docker/Dockerfile -t lumi-by-agora .
+```
+
 ## Architecture
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./system-architecture-dark.svg">
-  <img src="./system-architecture.svg" alt="System architecture">
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/architecture/system-architecture-dark.svg">
+  <img src="./docs/assets/architecture/system-architecture.svg" alt="System architecture">
 </picture>
 
 The browser fetches a combined RTC + RTM token (`buildTokenWithRtm`) from this app, joins the channel using a single RTC client, and uses RTM as the data channel for transcript, agent state, metrics, and error events. The Conversational AI Engine joins the same channel as the shared agent UID in [`lib/agora.ts`](lib/agora.ts) and runs the STT → LLM → TTS pipeline in Agora Cloud.
@@ -173,6 +181,10 @@ NEXT_ELEVENLABS_VOICE_ID=...
 - `app/api/generate-agora-token/route.ts` — issues RTC + RTM tokens
 - `app/api/invite-agent/route.ts` — starts the agent session and configures the pipeline
 - `app/api/stop-conversation/route.ts` — stops the agent session
+- `config/env/env.local.example` — tracked local environment template
+- `deploy/docker/` — container build definition and Docker-specific ignore rules
+- `docs/assets/architecture/` — light and dark architecture diagrams
+- `docs/CONTRIBUTING.md` — contributor setup and conventions
 - `components/LandingPage.tsx` — entry point: token fetch, RTM login, conversation lifecycle
 - `components/ConversationComponent.tsx` — RTC client, transcript state, `AGENT_METRICS`, mic release
 - `components/QuickstartConversationLayout.tsx` — in-call header, transcript rail, controls dock
@@ -182,6 +194,8 @@ NEXT_ELEVENLABS_VOICE_ID=...
 - `lib/chat-completions.ts` — server-side custom LLM SSE handler used by the chat completions route
 - `lib/conversation.ts` — transcript normalization and visualizer state mapping
 - `AGENTS.md` — primary agent-facing guide
+
+Files such as `.npmrc`, `.nvmrc`, `.vercelignore`, `vercel.json`, `next.config.mjs`, and `package.json` intentionally remain at the project root because their tools discover them there.
 
 ## Troubleshooting
 
@@ -200,7 +214,7 @@ NEXT_ELEVENLABS_VOICE_ID=...
 
 ## Contributing
 
-Pull requests welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and conventions.
+Pull requests welcome — see [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) for development setup and conventions.
 
 ## Security
 

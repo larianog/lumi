@@ -7,13 +7,18 @@
 ```text
 app/                 Next.js routes + API handlers
 components/          Client UI and RTC/RTM lifecycle
+config/env/           Tracked local environment template
+deploy/docker/        Container build definition and ignore rules
 lib/                 Shared helpers and server-side chat completions handler
 scripts/             Verification and doctor helpers
 docs/                Human-oriented guides
+docs/assets/         Documentation images and diagrams
 docs/ai/             Progressive disclosure docs (this system)
 public/              Static assets and branding
 types/               Shared TypeScript route/component contracts
 ```
+
+Auto-discovered project files remain at the repository root. This includes package-manager files (`package.json`, lockfile, `.npmrc`, `.nvmrc`), framework/build configs, `.vercelignore`, and `vercel.json`; moving them would change or disable tool behavior.
 
 ## API Route Ownership (`app/api`)
 
@@ -62,11 +67,12 @@ types/               Shared TypeScript route/component contracts
 
 - `types/conversation.ts`: request/response payloads and component prop types.
 - `types/env.d.ts`: typed environment variable expectations.
-- `types/jsx.d.ts` and `react-jsx.d.ts`: JSX typing support details.
+- `types/jsx.d.ts` and `types/react-jsx.d.ts`: JSX typing support details.
 
 ## Static and Styling Assets
 
 - `public/*`: icons, logos, and heading SVG assets used in pre-call/in-call experience.
+- `docs/assets/architecture/*`: light and dark architecture diagrams embedded by the README.
 - `app/globals.css` and `styles/globals.css`: baseline theme/layout styles.
 - `tailwind.config.ts`: utility class scan and theme extension.
 

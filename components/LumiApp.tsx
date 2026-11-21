@@ -323,9 +323,52 @@ function Brand() {
 }
 
 function WelcomeScreen({ onSignup, onSignIn, onDemo }: { onSignup: () => void; onSignIn: () => void; onDemo: () => void }) {
+  const [forestReady, setForestReady] = useState(false);
+  const [mascotReady, setMascotReady] = useState(false);
+  const [introFinished, setIntroFinished] = useState(false);
+  const artworkReady = forestReady && mascotReady;
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Bound the wait so stalled artwork cannot block the welcome actions.
+    const timeout = window.setTimeout(() => setIntroFinished(true), reducedMotion ? 0 : 4500);
+    return () => window.clearTimeout(timeout);
+  }, []);
+
   return (
-    <section className="welcome-screen">
-      <div className="welcome-copy">
+    <section className="welcome-screen" data-intro={!introFinished || undefined}>
+      <div className="welcome-art" aria-hidden="true">
+        <Image
+          className="welcome-forest"
+          src="/assets/forest-learning-bg.png"
+          alt=""
+          fill
+          loading="eager"
+          fetchPriority="high"
+          data-ready={forestReady}
+          onLoad={() => setForestReady(true)}
+          onError={() => setForestReady(true)}
+        />
+        <div className="welcome-orbit orbit-one" />
+        <div className="welcome-orbit orbit-two" />
+        <div className="welcome-mascot">
+          <Image
+            src="/assets/lumi-avatar.png"
+            alt=""
+            width={1199}
+            height={1312}
+            loading="eager"
+            fetchPriority="high"
+            data-ready={artworkReady}
+            onLoad={() => setMascotReady(true)}
+            onError={() => setMascotReady(true)}
+            onAnimationEnd={() => setIntroFinished(true)}
+          />
+          <div className="floating-card star-card"><Star size={20} fill="currentColor" />+20</div>
+          <div className="floating-card discovery-card"><BookOpen size={20} />Nova descoberta!</div>
+        </div>
+      </div>
+      <div className="welcome-copy" inert={!introFinished}>
         <Brand />
         <span className="eyebrow">{messages.welcome.eyebrow}</span>
         <h1>{messages.welcome.title}</h1>
@@ -335,13 +378,6 @@ function WelcomeScreen({ onSignup, onSignIn, onDemo }: { onSignup: () => void; o
           <button className="button button-secondary button-large" onClick={onSignIn}><LogIn size={20} />{messages.welcome.signIn}</button>
           <button className="demo-link" onClick={onDemo}><Sparkles size={17} />{messages.welcome.demo}<span>{messages.welcome.demoHint}</span></button>
         </div>
-      </div>
-      <div className="welcome-art" aria-hidden="true">
-        <div className="welcome-orbit orbit-one" />
-        <div className="welcome-orbit orbit-two" />
-        <Image src="/assets/lumi-avatar.png" alt="" width={650} height={710} priority />
-        <div className="floating-card card-top"><Star size={20} fill="currentColor" />+20</div>
-        <div className="floating-card card-bottom"><BookOpen size={20} />Nova descoberta!</div>
       </div>
     </section>
   );
@@ -396,33 +432,49 @@ function ProfileFormScreen({ authMode, form, error, onChange, onSubmit, onBack }
 }
 
 function ProfilePicker({ profiles, onSelect, onAdd }: { profiles: Profile[]; onSelect: (profile: Profile) => void; onAdd: () => void }) {
+  const [selectingProfileId, setSelectingProfileId] = useState<string | null>(null);
+
+  const selectWithAnimation = (profile: Profile) => {
+    if (selectingProfileId) return;
+    setSelectingProfileId(profile.id);
+    window.setTimeout(() => {
+      setSelectingProfileId(null);
+      onSelect(profile);
+    }, 420);
+  };
+
   return (
-    <section className="forest-screen profile-picker-screen">
+    <section className={`forest-screen profile-picker-screen ${selectingProfileId ? 'profile-is-selecting' : ''}`}>
       <div className="forest-overlay" />
       <header className="forest-header"><Brand /></header>
-      <div className="picker-layout">
-        <div className="picker-lumi">
-          <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={420} height={460} priority />
-          <div className="speech-bubble">{messages.profiles.title}</div>
-        </div>
-        <div className="profile-picker-content">
-          <h1>{messages.profiles.title}</h1>
-          <p>{messages.profiles.subtitle}</p>
-          <div className="profile-grid">
-            {profiles.map((profile) => (
-              <button key={profile.id} className="profile-card" onClick={() => onSelect(profile)} aria-label={messages.accessibility.selectProfile(profile.firstName)}>
-                <span className="profile-avatar" style={{ backgroundColor: profileColors[profile.avatar % profileColors.length] }}>
-                  {profile.type === 'adult' ? <ShieldCheck size={36} /> : <span>{profile.firstName.slice(0, 1).toUpperCase()}</span>}
-                </span>
-                <strong>{profile.firstName}</strong>
-                <small>{profile.type === 'adult' ? messages.profiles.adultArea : `${calculateAge(profile.birthDate)} anos`}</small>
-              </button>
-            ))}
-            <button className="profile-card profile-add" onClick={onAdd}>
-              <span className="profile-avatar"><Plus size={36} /></span>
-              <strong>{messages.profiles.addProfile}</strong>
+      <div className="profile-picker-heading">
+        <h1>{messages.profiles.title}</h1>
+        <p>{messages.profiles.subtitle}</p>
+      </div>
+      <div className="picker-lumi">
+        <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={420} height={460} priority />
+      </div>
+      <div className="profile-shelf" aria-busy={Boolean(selectingProfileId)}>
+        <div className="profile-grid">
+          {profiles.map((profile) => (
+            <button
+              key={profile.id}
+              className={`profile-card ${selectingProfileId === profile.id ? 'profile-card-selected' : ''}`}
+              onClick={() => selectWithAnimation(profile)}
+              aria-label={messages.accessibility.selectProfile(profile.firstName)}
+              disabled={Boolean(selectingProfileId)}
+            >
+              <span className="profile-avatar" style={{ backgroundColor: profileColors[profile.avatar % profileColors.length] }}>
+                {profile.type === 'adult' ? <ShieldCheck size={36} /> : <span>{profile.firstName.slice(0, 1).toUpperCase()}</span>}
+              </span>
+              <strong>{profile.firstName}</strong>
+              <small>{profile.type === 'adult' ? messages.profiles.adultArea : `${calculateAge(profile.birthDate)} anos`}</small>
             </button>
-          </div>
+          ))}
+          <button className="profile-card profile-add" onClick={onAdd} disabled={Boolean(selectingProfileId)}>
+            <span className="profile-avatar"><Plus size={36} /></span>
+            <strong>{messages.profiles.addProfile}</strong>
+          </button>
         </div>
       </div>
     </section>
