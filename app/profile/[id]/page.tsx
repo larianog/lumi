@@ -17,7 +17,6 @@ import {
   X,
 } from 'lucide-react';
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
-import AdultPasswordDialog from '@/components/AdultPasswordDialog';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
 import { calculateAge } from '@/lib/age';
@@ -62,7 +61,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
   const [literacyLevel, setLiteracyLevel] = useState<LiteracyLevel | null>(null);
-  const [passwordOpen, setPasswordOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
@@ -161,12 +159,6 @@ export default function ProfilePage() {
       formData.set('file', await prepareUploadFile(selectedMaterial));
       const response = await fetch('/api/materials', { method: 'POST', body: formData });
       const payload = await response.json() as MaterialUploadResponse & { error?: string };
-      if (response.status === 403) {
-        // Adult window expired between the check and the upload: ask again.
-        setMaterialUploadState('idle');
-        setPasswordOpen(true);
-        return;
-      }
       if (!response.ok || !payload.material?.id) {
         throw new Error(payload.error || messages.home.materialError);
       }
@@ -177,17 +169,9 @@ export default function ProfilePage() {
     }
   };
 
-  // Homework is sent by a parent: confirm the family password first
-  // (skipped while the 15-minute adult window is still open).
+  // Send material directly without adult access check
   const sendMaterial = async () => {
     if (!selectedMaterial || materialUploadState === 'uploading') return;
-    const access = await fetch('/api/adult-access', { cache: 'no-store' })
-      .then((response) => response.json() as Promise<{ verified?: boolean }>)
-      .catch(() => ({ verified: false }));
-    if (!access.verified) {
-      setPasswordOpen(true);
-      return;
-    }
     await uploadMaterial();
   };
 
@@ -399,17 +383,6 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {passwordOpen && (
-        <AdultPasswordDialog
-          description={messages.home.parentPassword}
-          isDemo={isDemo}
-          onCancel={() => setPasswordOpen(false)}
-          onVerified={() => {
-            setPasswordOpen(false);
-            void uploadMaterial();
-          }}
-        />
-      )}
     </section>
   );
 }
