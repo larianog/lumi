@@ -136,13 +136,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .form-forest { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(7,58,51,.3), rgba(7,58,51,.72)), url('/assets/forest-learning-bg.png') center / cover; }
 .form-shell { position: relative; z-index: 1; min-height: 100dvh; display: grid; grid-template-columns: minmax(100px, 1fr) minmax(420px, 620px) minmax(24px, 1fr); align-items: center; padding: 28px; }
 .form-shell > .back-button { align-self: start; justify-self: start; color: white; text-shadow: 0 1px 12px rgba(0,0,0,.2); }
-.profile-form-card { grid-column: 2; width: 100%; max-height: calc(100dvh - 48px); overflow: auto; padding: clamp(26px, 4vw, 46px); border: 1px solid rgba(255,255,255,.65); border-radius: 32px; background: rgba(255,254,249,.93); box-shadow: var(--lumi-shadow); backdrop-filter: blur(18px); }
-.profile-form-card h1 { margin: 26px 0 8px; font-family: var(--font-bricolage), sans-serif; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.05em; }
-.profile-form-card > p { margin: 0 0 26px; color: var(--lumi-muted); }
-.profile-form-card form { display: grid; gap: 15px; }
+.profile-form-card { grid-column: 2; width: 100%; padding: clamp(24px, 3vw, 36px); border: 1px solid rgba(255,255,255,.65); border-radius: 32px; background: rgba(255,254,249,.93); box-shadow: var(--lumi-shadow); backdrop-filter: blur(18px); }
+.profile-form-header { display: flex; align-items: center; justify-content: space-between; gap: clamp(18px, 3vw, 32px); }
+.profile-form-header .brand { flex: 0 0 auto; }
+.profile-form-card h1 { margin: 0; font-family: var(--font-bricolage), sans-serif; font-size: clamp(2rem, 3.4vw, 2.75rem); line-height: 1; letter-spacing: -.05em; }
+.profile-form-card form { display: grid; gap: 12px; margin-top: 18px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.form-field { display: grid; gap: 7px; color: var(--lumi-ink); font-size: .9rem; font-weight: 900; }
-.form-field input, .form-field select, .task-card textarea { min-height: 50px; width: 100%; border: 1px solid var(--lumi-border); border-radius: 14px; background: white; padding: 0 14px; color: var(--lumi-ink); }
+.form-field { display: grid; gap: 5px; color: var(--lumi-ink); font-size: .9rem; font-weight: 900; }
+.form-field input, .form-field select, .task-card textarea { min-height: 46px; width: 100%; border: 1px solid var(--lumi-border); border-radius: 14px; background: white; padding: 0 14px; color: var(--lumi-ink); }
 .password-input-wrapper { position: relative; width: 100%; }
 .password-input-wrapper input { width: 100%; padding-right: 52px; }
 .password-toggle { position: absolute; top: 50%; right: 6px; width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 11px; background: transparent; color: var(--lumi-muted); cursor: pointer; transform: translateY(-50%); }
@@ -150,7 +151,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .form-field select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--lumi-ink) 50%), linear-gradient(135deg, var(--lumi-ink) 50%, transparent 50%); background-position: calc(100% - 19px) 21px, calc(100% - 14px) 21px; background-size: 5px 5px; background-repeat: no-repeat; }
 .form-field small { color: var(--lumi-muted); font-size: .76rem; font-weight: 700; line-height: 1.4; }
 .form-error { margin: 0; color: #aa3d47; font-size: .86rem; font-weight: 900; }
-.form-submit { margin-top: 8px; }
+.form-submit { min-height: 50px; margin-top: 4px; }
 
 .forest-screen { min-height: 100dvh; position: relative; isolation: isolate; overflow: hidden; color: white; background: #0f6c5d; }
 .forest-overlay { position: absolute; z-index: -2; inset: 0; background: linear-gradient(180deg, rgba(5,53,47,.08), rgba(4,48,42,.62)), url('/assets/forest-learning-bg.png') center / cover; animation: forest-in 1.2s ease both; }
@@ -277,12 +278,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .report-screen > .loading-spinner, .report-screen > .error-message, .activity-screen > .loading-spinner, .activity-screen > .error-message { color: var(--lumi-ink); }
 
 .modal-backdrop, .voice-modal { position: fixed; z-index: 80; inset: 0; display: grid; place-items: safe center; overflow-y: auto; padding: 20px; background: rgba(3,34,30,.68); backdrop-filter: blur(14px); }
-.password-modal { width: min(100%, 440px); display: grid; gap: 15px; border-radius: 28px; background: var(--lumi-paper); padding: 32px; box-shadow: 0 30px 90px rgba(0,0,0,.3); }
+.password-modal { width: min(100%, 440px); display: grid; gap: 15px; border-radius: 28px; background: var(--lumi-paper); padding: 32px; color: var(--lumi-ink); box-shadow: 0 30px 90px rgba(0,0,0,.3); }
 .modal-icon { width: 52px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 17px; background: var(--lumi-mint); }
 .password-modal h2 { margin: 6px 0 -5px; font-family: var(--font-bricolage), sans-serif; font-size: 2rem; letter-spacing: -.04em; }
 .password-modal > p { margin: 0; color: var(--lumi-muted); }
 .password-modal label { display: grid; gap: 7px; font-weight: 900; }
-.password-modal input { min-height: 50px; width: 100%; border: 1px solid var(--lumi-border); border-radius: 14px; padding: 0 52px 0 14px; }
+.password-modal input { min-height: 50px; width: 100%; border: 1px solid var(--lumi-border); border-radius: 14px; background: white; padding: 0 52px 0 14px; color: var(--lumi-ink); caret-color: var(--lumi-ink); }
 .password-modal small { color: var(--lumi-mint-deep); font-weight: 900; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 6px; }
 
@@ -382,10 +383,21 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .activity-copy small { display: none; }
 }
 
+@media (max-height: 760px) and (min-width: 721px) {
+  .form-shell { padding-block: 16px; }
+  .profile-form-card { padding: 20px 30px; }
+  .profile-form-card form { gap: 8px; margin-top: 12px; }
+  .profile-form-card .form-field { gap: 4px; }
+  .profile-form-card .form-field input,
+  .profile-form-card .form-field select { min-height: 44px; }
+  .profile-form-card .form-submit { min-height: 48px; margin-top: 2px; }
+}
+
 @media (max-width: 720px) {
   .form-shell { display: flex; flex-direction: column; gap: 12px; align-items: stretch; padding: 14px; }
   .form-shell > .back-button { align-self: flex-start; }
-  .profile-form-card { max-height: calc(100dvh - 78px); padding: 24px 20px; border-radius: 25px; }
+  .profile-form-card { padding: 24px 20px; border-radius: 25px; }
+  .profile-form-header { flex-wrap: wrap; gap: 12px 18px; }
   .field-row { grid-template-columns: 1fr; }
   .home-screen { padding-inline: 14px; }
   .home-header { height: 72px; }
