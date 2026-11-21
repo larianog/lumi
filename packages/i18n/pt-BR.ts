@@ -33,6 +33,7 @@ export const ptBR = {
     lastName: 'Sobrenome',
     phone: 'Telefone',
     password: 'Senha',
+    passwordHint: 'Use pelo menos 6 caracteres.',
     birthDate: 'Data de nascimento',
     submitCreate: 'Criar perfil',
     submitSignIn: 'Entrar',

@@ -445,6 +445,66 @@ async function verifyStopConversationSuccess() {
   }
 }
 
+async function verifyProfileCreationValidation() {
+  const { POST: createProfile } = await import('../app/api/profiles/route');
+  const request = new NextRequest('http://localhost:3000/api/profiles', {
+    body: JSON.stringify({ firstName: 'Lia' }),
+    method: 'POST',
+  });
+  const response = await createProfile(request);
+
+  assert(
+    response.status === 400,
+    'POST /api/profiles should reject incomplete profile data',
+  );
+}
+
+async function verifyLoginValidation() {
+  const { POST: login } = await import('../app/api/login/route');
+  const request = new NextRequest('http://localhost:3000/api/login', {
+    body: JSON.stringify({ phone: '(11) 99999-0000' }),
+    method: 'POST',
+  });
+  const response = await login(request);
+
+  assert(
+    response.status === 400,
+    'POST /api/login should require both phone and password',
+  );
+}
+
+async function verifyAdultAccessValidation() {
+  const { POST: verifyAdult } = await import('../app/api/adult-access/route');
+  const request = new NextRequest('http://localhost:3000/api/adult-access', {
+    body: JSON.stringify({}),
+    method: 'POST',
+  });
+  const response = await verifyAdult(request);
+
+  assert(
+    response.status === 400,
+    'POST /api/adult-access should require a password',
+  );
+}
+
+async function verifyActivitiesRequireSession() {
+  const { POST: createCompletion } = await import('../app/api/activities/route');
+  const request = new NextRequest('http://localhost:3000/api/activities', {
+    body: JSON.stringify({
+      profileId: 'profile-1',
+      activityId: 'school',
+      activityTitle: 'Conteúdo escolar',
+    }),
+    method: 'POST',
+  });
+  const response = await createCompletion(request);
+
+  assert(
+    response.status === 401,
+    'POST /api/activities should require an authenticated family session',
+  );
+}
+
 async function main() {
   await verifyGenerateAgoraTokenRoute();
   await verifyGenerateAgoraTokenReplacesZeroUid();
@@ -455,6 +515,10 @@ async function main() {
   await verifyInviteAgentSuccess();
   await verifyStopConversationValidation();
   await verifyStopConversationSuccess();
+  await verifyProfileCreationValidation();
+  await verifyLoginValidation();
+  await verifyAdultAccessValidation();
+  await verifyActivitiesRequireSession();
 
   console.log('API contract checks passed');
 }
