@@ -10,6 +10,8 @@ The experience is designed for families. Adults create the family account and ch
 
 This repository is built from Agora's Conversational AI Next.js quickstart and extends it into a complete study-material workflow with multimodal analysis, family profiles, history, completion tracking, and a material-aware voice tutor.
 
+![Lumi Desktop and Mobile](docs/assets/lumi-desktop-mobile.png)
+
 ## What Lumi does
 
 A typical study session follows this path:
