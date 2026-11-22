@@ -125,6 +125,14 @@
       "isDemo": true,
       "createdAt": "2026-11-21T21:34:53.329Z",
       "expiresAt": "2026-12-21T21:34:53.329Z"
+    },
+    {
+      "id": "3f512cce-3987-4249-84f9-bb926d93c451",
+      "tokenHash": "12d766eae3da50010bb6ee56fd9c0cb0a643acf3f0c48c631a061a76ea814d68",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-21T21:54:32.206Z",
+      "expiresAt": "2026-12-21T21:54:32.206Z"
     }
   ],
   "version": 3
