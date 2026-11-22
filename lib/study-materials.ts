@@ -39,18 +39,8 @@ export function toStudyMaterialDto(
     title: material.analysis?.title,
     subject: material.analysis?.subject,
     questionCount: material.analysis?.questions.length,
-    // Only what the child reads on the sheet: never expectedAnswer, steps or hints.
-    instructions: includeExtractedText ? material.analysis?.generalInstructions || undefined : undefined,
-    questions: includeExtractedText
-      ? material.analysis?.questions.map(({ number, statement, supportContent, answerSlots }) => ({
-        number,
-        statement,
-        supportContent,
-        answerSlots,
-      }))
-      : undefined,
     storageKey: material.storageKey,
-    isDidactic: material.isDidactic,
+    isDidactic: material.isDidactic ?? material.analysis?.isDidactic,
   };
 }
 

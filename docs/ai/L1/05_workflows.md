@@ -15,6 +15,18 @@ If start fails, run `agora project doctor --deep`.
 
 ## Change Agent Behavior
 
+For correct-answer celebration, open an uploaded material in a **new** voice session so the tutor receives the updated confirmation instruction. The exact first sentence **Você acertou!** is reserved for a checked complete answer. Only a completed agent turn after a user answer triggers the supplied celebration; generic praise, partial/interrupted turns, upload and greeting must not trigger it. Verify once-per-turn playback, speech priority, full-cycle completion and cancellation without live services through `verify:api` and a mocked-transport browser check. A real tutoring conversation is still needed to validate the model's judgment on the actual worksheet.
+
+To use local animations during an actual voice session, open a child profile such as `/profile/demo-lia` after signing into the demo. Profile pages request `avatarMode="local"`: no speech plays the idle loop, user speech plays `lummi-transparente-02.webp`, and audible agent speech plays `lummi-falando-asas-web-v1.webp`. Enable the mic and allow browser audio as needed. Both clips are bundled; a temporary playground upload is not deployed to profiles. Other callers keep provider avatars by default. Validate with `pnpm run verify:api` and `pnpm run verify`; do not start paid sessions during automated checks.
+
+Product avatars animate automatically without start/pause buttons. If a profile remains still, check asset loading and page/offscreen visibility; use **Recarregar** only when an animation error appears. Retry refetches failed files. Product character animations autoplay even with OS animations disabled; do not change Windows settings. Old stored motion choices are ignored. Test automatic playback with a previously saved pause, system-preference changes, remounts while downloads are pending, failed-load recovery and actual frame changes with the native WebP image component. Emulate `reducedMotion: "reduce"` explicitly in browser tests: headless defaults may not inherit Windows animation preferences. Verify idle, speech, sleep, reading and celebration all advance, including after OS preference changes.
+
+For motion experiments only, visit `/playground/lumi-animation`. Compare `Atual`, `Mais presente`, and `Expressiva` using the same phrase and a silent interval. Live tests require optional server-only Lemon Slice credentials and consume provider usage. Close each test before changing prompts. Export downloads a JSON recipe; it does not update the main agent. Local controls simulate body motion only, without audio or lip sync. Run `pnpm run verify:api` for the added endpoint and `pnpm run verify` before shipping.
+
+For prerecorded animations, use the default **Vídeos por estado** tab, which opens on the supplied speaking WebP (181 frames, 6033 ms, 800 × 800, `contain` framing to preserve the wings); listening also has a bundled WebP (192 frames, about 8 seconds). Both have alpha and loop as encoded. Reading is also available for manual preview (118 frames, 3933 ms), used during material analysis. Import local overrides, inspect backgrounds, and simulate a conversation without paid sessions. Simulation skips states without loaded, playable clips: with the bundled conversation clips ready it runs listening → speaking → listening → celebrating. Completion pauses on available idle or the last displayed state. Local overrides are memory-only; reset/reload restores bundled defaults. To ship another default, add its unchanged asset under `public/assets/lumi/states/` using a new URL to bypass cached blobs and register its metadata in `BUNDLED_LUMI_VIDEO_CLIPS`; update bundled timing expectations. The optional `fit` field controls framing and defaults to `contain`. Produce remaining assets using [the video brief](../../lumi-video-states.md); the exported manifest is a production guide rather than a video archive.
+
+The same upload control also accepts WebP (static/animated, with optional alpha), up to 40 MB. WebP joins the timed state simulation; pause displays its first frame and resume/replay restarts it. Speed and repeats come from the file, with no automatic manual ended-to-idle transition. See the video brief for these format-specific controls.
+
 Target file: `app/api/invite-agent/route.ts`.
 
 Typical edits:
@@ -42,7 +54,7 @@ Token behavior:
 Bootstrap behavior:
 
 - Edit `components/LandingPage.tsx`.
-- Keep invite + RTM setup parallelized before conversation mount.
+- Acquire a shared RTM lease and await login/subscription before inviting the agent. Mount the conversation only after bootstrap. Release through the handle on stop/unmount; never log out a shared client directly. Verify sequential sessions, StrictMode auto-start, cancellation during token/login/invite, and late cleanup without live credentials.
 
 ## Change Transcript Rendering
 
@@ -53,11 +65,13 @@ Bootstrap behavior:
 
 ## Change Study Material Extraction
 
+Before upload, **Remover** clears a selected file or camera photo and its error/warning, with keyboard focus returning to **Inserir arquivo**. Verify removal, selecting the same file again, and removal after a failed upload. Removal is locked during the request and the final reading cycle; existing history is unaffected.
+
 1. Update provider request/prompt handling in `lib/material-extraction.ts`.
 2. Increment `MATERIAL_EXTRACTION_PROMPT_VERSION` when extraction semantics change so stale text is not reused.
 3. Keep upload validation and authenticated ownership in `app/api/materials/route.ts`.
 4. Keep Lumi grounding server-side through optional `profile_id` + `material_id` fields on `/api/invite-agent`.
-5. Test first upload, cache hit, failure, expiry, demo isolation, completion, child history, and adult report.
+5. Test first upload, processing/ready cache hits, upload/poll failures and retry, expiry, demo isolation, completion, child history, and adult report. Assert that upload/result/completion/new-activity stay on the profile URL; the caption sits below the reading avatar, duplicate uploads are blocked, and navigation cancels pending work. Include image/PDF and mobile previews. Verify fast API success waits for one loaded reading cycle, slow success finishes the current cycle, and grounded voice starts only afterwards. Check processing/retry, API and animation failures, stalled asset loading, automatic playback under reduced motion, hidden tabs and navigation cleanup.
 6. Run lint, typecheck, API contracts, and build.
 
 The bundled JSON database and `data/material-cache/` adapter are suitable for local or persistent-container development. Select durable database/private object storage adapters before serverless production deployment.
@@ -136,6 +150,10 @@ Material routes also require session ownership tests and must never expose stora
 
 ## Related Deep Dives
 
+- For a profile stuck at **Lumi está chegando**, inspect RTC join/service events and use **Reconectar Lumi**. Agent departures, failed joins/invites and connection waits over 20 seconds expose recovery on the same page. Verify cleanup, duplicate-click locking and reuse of the document's RTM instance with mocked services; live voice still needs microphone/audio permissions and an available provider.
+
 - [conversation_lifecycle.md](L2/conversation_lifecycle.md) — Full runtime sequence for bootstrap and teardown tasks.
 - [from_scratch_bootstrap.md](L2/from_scratch_bootstrap.md) — Baseline implementation checklist for recipe consumers.
 - [transcript_pipeline.md](L2/transcript_pipeline.md) — Required checks when editing transcript flow.
+
+Test automatic material completion with at least two questions: the first **Você acertou!** only celebrates, while **Atividade concluída com sucesso!** after the final checked answer saves and resets upload. Exercise final audio still playing, partial/interrupted/user-spoken/repeated markers, fast and slow PATCH responses, full 3033 ms animation playback, failed save and retry, hidden/failed animation, navigation during a pending request, ordinary profiles and completed history entries. Verify the profile URL stays unchanged, the attachment clears, old voice stops, and history records completion. New tutoring sessions are required to load the updated prompt; mocked transcript tests do not establish model grading accuracy.

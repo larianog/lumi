@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RtcTokenBuilder, RtcRole } from 'agora-token';
+import { MAX_AGORA_PARTICIPANT_UID } from '@/lib/agora';
 
 const EXPIRATION_TIME_IN_SECONDS = 3600;
 
@@ -24,6 +25,9 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const uidStr = searchParams.get('uid');
   const parsedUid = uidStr ? parseInt(uidStr, 10) : Number.NaN;
+  if (parsedUid > MAX_AGORA_PARTICIPANT_UID) {
+    return NextResponse.json({ error: `uid must not exceed ${MAX_AGORA_PARTICIPANT_UID}` }, { status: 400 });
+  }
   const uid = Number.isNaN(parsedUid) || parsedUid <= 0
     ? Math.floor(Math.random() * 9_999_000) + 1000
     : parsedUid;

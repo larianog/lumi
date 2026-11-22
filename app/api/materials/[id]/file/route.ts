@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, context: MaterialFileRouteContex
     const { id } = await context.params;
     const token = getSessionToken(request);
     const result = await getFamilyForSession(token);
-    
+
     if (!result) {
       return NextResponse.json({ error: 'Sessão não encontrada.' }, { status: 401 });
     }
@@ -29,13 +29,13 @@ export async function GET(request: NextRequest, context: MaterialFileRouteContex
     }
 
     const filePath = path.join(MATERIAL_CACHE_DIR, material.storageKey);
-    
+
     try {
       const fileBuffer = await fs.readFile(filePath);
-      
+
       // Determine content type from mimeType or file extension
       const contentType = material.mimeType || 'application/octet-stream';
-      
+
       return new NextResponse(fileBuffer, {
         status: 200,
         headers: {

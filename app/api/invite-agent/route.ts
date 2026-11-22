@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   AgoraClient,
@@ -6,17 +8,14 @@ import {
   DeepgramSTT,
   ExpiresIn,
   LemonSlice,
-  MiniMaxTTS,
   OpenAI,
 } from 'agora-agents';
-import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
-import { buildAgentToken, buildAvatarToken } from '@/lib/agora-agent-token';
-import { resolveLemonSliceSource } from '@/lib/lumi-avatar-source';
-import { getLumiAvatar } from '@/lib/lumi-avatars';
+import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID, isAgoraParticipantUid } from '@/lib/agora';
 import { getFamilyForSession, getStudyMaterial } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
 import { defaultLiteracyLevel, formatHomeworkBrief } from '@/lib/material-extraction';
 import { ownsStudyMaterial } from '@/lib/study-materials';
+import { LumiTTS } from '@/lib/lumi-tts';
 import type { HomeworkAnalysis, LiteracyLevel } from '@/types/database';
 import { messages } from '@/packages/i18n';
 import type { AgentResponse, ClientStartRequest } from '@/types/conversation';
@@ -33,6 +32,12 @@ export async function POST(request: NextRequest) {
     const { requester_id: requesterId, channel_name: channelName } = body;
     if (!channelName || !requesterId) {
       return NextResponse.json({ error: 'channel_name and requester_id are required' }, { status: 400 });
+    }
+    if (!isAgoraParticipantUid(requesterId)) {
+      return NextResponse.json({ error: 'requester_id must be a valid numeric participant UID between 1 and 2147483647' }, { status: 400 });
+    }
+    if (body.avatar_mode !== undefined && body.avatar_mode !== 'provider' && body.avatar_mode !== 'local') {
+      return NextResponse.json({ error: 'avatar_mode must be provider or local' }, { status: 400 });
     }
 
     let profileName = body.profile_name?.trim().slice(0, 40) || 'explorador';
@@ -86,9 +91,6 @@ export async function POST(request: NextRequest) {
       area: Area.US,
       appId: requireEnv('NEXT_PUBLIC_AGORA_APP_ID'),
       appCertificate: requireEnv('NEXT_AGORA_APP_CERTIFICATE'),
-      // REST auth: the SDK's per-request token also expires after one second, which
-      // fails large start requests with 401 "Token is expired" (lib/agora-agent-token.ts).
-      authToken: buildAgentToken(channelName, DEFAULT_AGENT_UID),
     });
 
     let agent = new Agent({
@@ -128,25 +130,21 @@ export async function POST(request: NextRequest) {
           params: { max_tokens: 500, temperature: 0.65, top_p: 0.95 },
         }),
       )
-      .withTts(
-        new MiniMaxTTS({
-          model: 'speech_2_6_turbo',
-          voiceId: 'English_captivating_female1',
-          // 4 = skip text inside [ ]: Lumi's [preencher …] commands for the answer grid.
-          skipPatterns: [4],
-        }),
-      );
+      .withTts(new LumiTTS());
 
     const lemonSliceApiKey = process.env.NEXT_LEMONSLICE_API_KEY;
-    if (lemonSliceApiKey) {
-      // The child's chosen Lumi (lib/lumi-avatars.ts); unknown values fall back to the default.
-      const avatarSource = await resolveLemonSliceSource(getLumiAvatar(body.avatar_id).id);
+    if (lemonSliceApiKey && body.avatar_mode !== 'local') {
+      const lumiImage = await readFile(join(process.cwd(), 'public/assets/lumi-avatar.png'));
       agent = agent.withAvatar(
         new LemonSlice({
           apiKey: lemonSliceApiKey,
           agoraUid: String(DEFAULT_AVATAR_UID),
-          agoraToken: buildAvatarToken(channelName, DEFAULT_AVATAR_UID),
-          ...avatarSource,
+          additionalParams: {
+            agent_image_base64: lumiImage.toString('base64'),
+            aspect_ratio: '2x3',
+            agent_prompt: 'Mascote de pelúcia gentil, expressivo e curioso.',
+            agent_idle_prompt: 'Respira suavemente, pisca e faz pequenos acenos amigáveis.',
+          },
         }),
       );
     }
@@ -154,8 +152,6 @@ export async function POST(request: NextRequest) {
     const session = agent.createSession({
       channel: channelName,
       agentUid: String(DEFAULT_AGENT_UID),
-      // Pre-built: the SDK's own token expires after one second (see lib/agora-agent-token.ts).
-      token: buildAgentToken(channelName, DEFAULT_AGENT_UID),
       remoteUids: [requesterId],
       idleTimeout: 60,
       expiresIn: ExpiresIn.hours(1),

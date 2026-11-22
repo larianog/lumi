@@ -8,7 +8,7 @@
 
 Query params:
 
-- `uid` optional; invalid/zero resolves to random RTM-safe UID.
+- `uid` optional; missing/non-numeric/nonpositive resolves to a random RTM-safe UID. Numeric values above `2147483647` return `400` rather than silently changing the requested identity.
 - `channel` optional; defaults to generated `ai-conversation-<ts>-<rand>`.
 
 Success response:
@@ -17,9 +17,11 @@ Success response:
 { "token": "...", "uid": "1234", "channel": "ai-conversation-..." }
 ```
 
-Failure response: `{ "error": string, "details"?: string }` with `500`.
+Failure response: `{ "error": string, "details"?: string }` with `400` for oversized UIDs or `500` for server failures.
 
 ### `POST /api/invite-agent`
+
+Optional `avatar_mode` accepts only `"local"` or `"provider"` (invalid values return `400`). `"local"` starts the usual voice agent without Lemon Slice; omitted/`"provider"` retains optional avatar generation when its server key exists. Profile pages explicitly send local mode; the response shape is unchanged. Client components pass this selection as `avatarMode`.
 
 Body (`ClientStartRequest`):
 
@@ -35,6 +37,10 @@ Success (`AgentResponse`):
 
 Validation failures return `400`; server failures return `500`.
 
+The main route uses `LumiTTS` from `lib/lumi-tts.ts` for both greeting and replies: managed MiniMax `speech_2_6_turbo`, voice `English_captivating_female1`, and explicit `params.language_boost: 'Portuguese'`. The adapter preserves SDK-managed model metadata while adding the documented MiniMax language option. No new environment variable or browser parameter is required. Contract tests inspect serialization without starting live sessions; pronunciation must be checked in a new conversation. The isolated playground provider experiment retains its own configuration.
+
+`requester_id` must be a decimal string in `1..2147483647` distinct from the reserved agent/avatar IDs. This is the current Conversational AI numeric participant limit, narrower than RTC's uint32 range. Invalid IDs are rejected before an agent session is created.
+
 ### `POST /api/stop-conversation`
 
 Body (`StopConversationRequest`): `{ "agent_id": "..." }`.
@@ -49,9 +55,16 @@ Responses:
 
 Optional SSE proxy path (not default runtime path). Requires `NEXT_LLM_API_KEY` and `NEXT_LLM_URL` when used.
 
+### `/api/playground/lumi-animation`
+
+- `GET`: uncached `{ configured: boolean }` for the three live-test credentials; never returns keys.
+- `POST`: `{ requester_id, channel_name, animation: { speakingPrompt, idlePrompt, aspectRatio } }`. UID must be a decimal string in `1..2147483647` distinct from agent/avatar UIDs; channel must start with `lumi-animation-` and have 1–48 alphanumeric/hyphen suffix characters. Prompts must be nonblank and at most 1600 characters each; aspect ratio is `2x3`, `9x16`, or `1x1`. Only the repository Lumi image is used.
+- Success: `{ agent_id, create_ts, state: 'RUNNING' }`. Invalid JSON/fields: `400`; body over 8000 characters: `413`; absent server credentials: `503`; provider failure: sanitized `502`.
+- Reuses the existing token and stop contracts; all main-app contracts remain unchanged.
+
 ### `POST /api/materials`
 
-Authenticated multipart body: `profileId` string plus `file` (`image/jpeg`, `image/png`, or `image/webp`, maximum 8 MB).
+Authenticated multipart body: `profileId` string plus `file` (`image/jpeg`, `image/png`, `image/webp`, or `application/pdf`, maximum 10 MB), with optional `literacyLevel`. Requires a family-owned child profile; there is no additional adult-password step for uploads. Family-wide history retains its adult verification requirement.
 
 - `201`: new extraction completed, `{ material, cached: false }`.
 - `200`: unexpired ready/processing record reused, `{ material, cached: true }`.
@@ -61,13 +74,13 @@ Authenticated multipart body: `profileId` string plus `file` (`image/jpeg`, `ima
 ### `GET /api/materials`
 
 - `?profileId=<id>` returns browser-safe history metadata for a family-owned child.
-- `?scope=family` returns all current-session family material metadata (family session only).
+- `?scope=family` requires recent adult verification and returns all current-session family material metadata.
 
 List results exclude hashes, private storage keys, and extracted text.
 
 ### `GET/PATCH /api/materials/[id]`
 
-`GET` returns authorized detail including extracted text while retained. `PATCH { "completed": true }` records idempotent explicit completion. Expired content keeps metadata but omits text.
+`GET` returns authorized detail including extracted text while retained. `PATCH { "completed": true }` records idempotent completion, invoked by the manual action or a whole-material tutor confirmation. Expired content keeps metadata but omits text.
 
 ## Event/Data Interfaces
 
@@ -90,6 +103,26 @@ Optional material settings are `HOMEWORK_VISION_MODEL` (default `gpt-4.1-mini`) 
 - `scripts/verify-api-contracts.ts` asserts token generation, input validation, env failures, and SSE framing cases.
 
 ## Shared Client-Side Interfaces
+
+`ConversationComponent.celebrateAnswers` defaults to false and is enabled by `LumiVoiceAgent` only for material sessions, in inline and full layouts. It derives a `celebrationId` from `LumiAnswerCelebrationDetector` using completed normalized agent confirmations, deduplicated by turn ID. `LumiConversationAvatar` accepts `celebrationId?: string | null` (undefined skips the study clip preload) and `celebrationReady` (response preparation/audio finished). The avatar consumes one loaded celebration cycle; its cancellation gates consume the cue without replay. `LumiAnimationState` includes `celebrating`, while RTC speech detection remains idle/listening/speaking. Per-question cues do not persist completion. Whole-material completion uses the separate callback below; HTTP payloads and private analysis remain unchanged.
+
+Product avatars and material reading have automatic playback, with no start/pause button. They autoplay regardless of `prefers-reduced-motion` by explicit product choice and do not read or write manual playback choices in `sessionStorage`; old saved pauses cannot disable new mounts. Only failed loading/playback exposes **Recarregar**, which retries automatic playback. Hidden/offscreen gates remain. Playground controls and its reduced-motion autoplay gate remain independent.
+
+`LumiConversationAvatar` optionally accepts `idleOnly`, `className`, `entranceReady`, `onVisualReady` and `onAnimationEnd` for standalone illustrations. `idleOnly` loads only idle and uses a responsive frame; callers may size it through `--lumi-idle-width`. A disconnected call still renders idle, but never keeps its previous listening/speaking loop. Intersection and document visibility pause animation without changing voice lifecycle.
+
+`useLumiIdleSleep(state, enabled)` returns `LumiAnimationState` (`LumiSpeechState | 'sleeping'`). `LumiSpeechDetector` remains audio-only. `LumiConversationAvatar` accepts this presentation state, and `nextLumiAnimationState` immediately exits sleep on interaction; other ending actions retain their current-cycle behavior. `LUMI_IDLE_SLEEP_MS` is 30,000 ms, measured only while enabled, silent and visible. `isLumiRestingAgentState` accepts SDK `idle`, `listening`, `silent` and null; it rejects `thinking`/`speaking`. Passing its boolean result keeps the timer stable across resting-state events.
+
+`getBrowserRtmManager().acquire(channel?)` returns `{ ready, release }`. `ready` supplies combined token data and the shared RTM client; `release` is idempotent for that lease and never releases a newer owner. `startManagedConversation` wraps a lease with an invite callback and agent-stop callback, exposing `{ ready, stop }`. Ready includes `agentJoinError` for the base/Lumi nonfatal invite path. Tokens use a stable per-document numeric UID and a fresh channel unless an isolated playground channel is supplied; endpoint contracts remain unchanged. SDK import/construction stays browser-only.
+
+`MaterialStudyPageClient` accepts optional `embedded`, `initialProfile`, `initialMaterial` and `onBack` props. The profile seeds it with the authorized upload response, so upload success renders in place instead of routing away. History/detail routes omit these props. Processing is polled serially every 1.8 seconds, aborted on cleanup and bounded to two minutes before offering retry. No API request or DTO contract changes are required.
+
+`LumiMaterialLoading` receives `loading` (API pending), `active` (reading presentation enabled) and `onComplete`. Keep it mounted after success with `loading=false` until `onComplete` fires at the next loaded WebP cycle boundary, guaranteeing a full first cycle even for fast responses. Errors cancel the presentation immediately. Motion cancellation, hidden tabs and animation failures bypass the wait; a 15-second asset watchdog prevents stalls. Profile uploads hold a pending response until completion; material polling holds the ready presentation and voice startup until completion, without delaying requests. Retry starts a fresh reading animation.
+
+`LumiConversationAvatar` receives the requested `state` plus `active`, `listeningEnabled` and `speakingEnabled` cancellation flags from the existing RTC lifecycle. Its `data-lumi-state` is the displayed cycle; `data-lumi-requested-state` tracks current speech. `LumiWebPClip.onReady` optionally reports cycle duration in milliseconds and `onCycleEnd` reports loaded playback boundaries. Conversation callers finish cycles except for incoming speech priority or explicit cancellation. Playground callers retain their independent timed simulation.
+
+`LumiVideoClip.fit` optionally selects `contain` (default) or centered `cover` for both players and the exported production manifest. The bundled square speaking WebP uses `contain` to show the whole image and wings in portrait containers without modifying its bytes. Local replacements default to `contain`.
+
+The playground file selector accepts WebP/WebM/MP4/MOV up to 40 MB. `LumiVideoClip` represents both images and videos; file extension selects the renderer, and the browser validates decoding. `videoProductionManifest` exports `suggestedWebp` alongside existing video paths; it contains no local file bytes or blob URLs.
 
 From `types/conversation.ts` (high-use):
 
@@ -124,20 +157,6 @@ From `types/conversation.ts` (high-use):
 - [conversation_lifecycle.md](L2/conversation_lifecycle.md) — How route contracts are used in sequence.
 - [transcript_pipeline.md](L2/transcript_pipeline.md) — Event-level contract mapping.
 
-### Session recordings
+Non-didactic material classification from main is retained in persistence and DTOs (`isDidactic`, with an analysis fallback for older records). Prompt version `material-tutor-v3` invalidates pre-classification cache entries. Upload success still finishes the reading cycle before showing the adult-profile warning or the embedded study result. Processing responses that later become non-didactic must not start a child tutoring session. The shared workspace retains keyboard/close-button image preview and the history route.
 
-- `POST /api/recordings` (child's session, multipart): `profileId` (child), `file` (`audio/webm` | `audio/ogg` | `audio/mp4`, ≤ 30 MB), optional `materialId` (kept only if it belongs to the same child), `title`, `startedAt`, `durationMs`, `transcript` (JSON `[{ speaker: 'child' | 'lumi', text }]`). `201 { id }`; `401`, `404` non-child, `413`, `415`.
-- `GET /api/recordings` → `SessionRecordingDto[]` for the family (demo sessions isolated).
-- `GET /api/recordings/[id]/file` → audio, supports `Range` (`206`).
-- `DELETE /api/recordings/[id]` → removes record and file.
-
-### `POST /api/logout`
-
-Deletes the caller's session record and clears the `lumi_session` cookie. Always `200 { success: true }` (idempotent). UI: `components/LogoutButton.tsx` on `/profiles` and in the parent area header.
-
-### `POST /api/profiles` (two-step signup)
-
-- No session (step 1): `{ firstName, lastName, phone, password }` creates the family with the **adult** profile (no birth date) and sets the session cookie. `400` missing name / phone / password < 6, `409` phone already registered.
-- With a family session (step 2 or "add child"): `{ children: [{ firstName, lastName, birthDate }] }` (1–8) adds child profiles in one write; a single child object is also accepted. Birth dates must be valid, not in the future, under 18 years. Demo family: `403`.
-- UI: `components/NewProfileForm.tsx` (`/new-profile?mode=signup` → step 1, `&type=child` → step 2). `/profiles` sends a family without children to step 2.
-
+`ConversationComponent.onMaterialCompleted?: () => void` reports the distinct final tutor verdict only after speech/preparation ends; `LumiVoiceAgent` forwards it only with `materialId`. The study workspace disables this callback for already-completed materials. Its automatic mode owns a locked, abortable 15-second `PATCH { completed: true }` and waits for the successful response plus success animation before invoking `onBack`/`onClose`, or returning standalone detail to `/profile/:id`. `LumiConversationAvatar.onCelebrationComplete?(id, outcome)` reports exactly once per cue with `played` after a full cycle or `skipped` on visibility/error/30-second timeout; it does not itself persist anything. Retry never creates a second completion timestamp.

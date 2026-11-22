@@ -4,6 +4,7 @@ import {
   getFamilyForSession,
   getStudyMaterialsByFamily,
   getStudyMaterialsByProfile,
+  hasAdultAccess,
   markStudyMaterialFailed,
   markStudyMaterialReady,
   reserveStudyMaterial,
@@ -81,6 +82,9 @@ export async function GET(request: NextRequest) {
     }
 
     if (familyScope) {
+      if (!(await hasAdultAccess(token))) {
+        return NextResponse.json({ error: 'Confirme a senha do responsável.' }, { status: 403 });
+      }
       const materials = await getStudyMaterialsByFamily(result.family.id, demoSessionId);
       return NextResponse.json(materials.map((material) => toStudyMaterialDto(material)));
     }
@@ -137,7 +141,7 @@ export async function POST(request: NextRequest) {
     const model = getExtractionModel();
     const sha256 = createHash('sha256').update(bytes).digest('hex');
     const now = Date.now();
-    
+
     const reservation = await reserveStudyMaterial({
       id: randomUUID(),
       familyId: result.family.id,
@@ -163,12 +167,12 @@ export async function POST(request: NextRequest) {
 
     storageKey = await storeMaterialFile(reservation.material.id, file.type, bytes);
     const extraction = await analyzeMaterial(bytes, file.type, { age, literacyLevel });
-    
+
     // For non-didactic materials, assign to parent's profile
-    const targetProfileId = extraction.analysis?.isDidactic === false 
+    const targetProfileId = extraction.analysis?.isDidactic === false
       ? result.family.profiles.find((p) => p.type === 'adult')?.id || profileId
       : profileId;
-    
+
     // If we need to change the profile, update the reservation
     if (targetProfileId !== profileId) {
       await updateDb((db) => {
@@ -176,7 +180,7 @@ export async function POST(request: NextRequest) {
         if (material) material.profileId = targetProfileId;
       });
     }
-    
+
     const material = await markStudyMaterialReady(
       reservation.material.id,
       storageKey,
