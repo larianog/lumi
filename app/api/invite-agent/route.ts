@@ -140,6 +140,8 @@ export async function POST(request: NextRequest) {
         new MiniMaxTTS({
           model: 'speech_2_6_turbo',
           voiceId: 'English_captivating_female1',
+          // Do not speak answer-grid commands appended to tutor replies.
+          skipPatterns: [4],
         }),
       );
 

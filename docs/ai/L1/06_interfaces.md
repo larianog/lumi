@@ -41,7 +41,7 @@ Validation failures return `400`; server failures return `500`.
 
 ### `PATCH /api/profiles`
 
-An authenticated family session may save `{ "profileId": "...", "lumiAvatar": "plush" }` for one of its child profiles. The avatar ID must be in the catalog. The shared demo family cannot change its avatar (`403`); an unknown or adult profile returns `404`. Existing profiles without `lumiAvatar` resolve to Plush. The picker at `/profile/[id]/avatars` uses this contract.
+An authenticated family session may save `{ "profileId": "...", "lumiAvatar": "plush" }` for one of its child profiles. The avatar ID must be in the catalog. Demo saves update only the current session overlay, leaving the shared demo family unchanged; an unknown or adult profile returns `404`. Existing profiles without `lumiAvatar` resolve to Plush. The picker at `/profile/[id]/avatars` uses this contract.
 
 ### `POST /api/stop-conversation`
 
@@ -157,4 +157,4 @@ From `types/conversation.ts` (high-use):
 - [conversation_lifecycle.md](L2/conversation_lifecycle.md) — How route contracts are used in sequence.
 - [transcript_pipeline.md](L2/transcript_pipeline.md) — Event-level contract mapping.
 
-Non-didactic material classification from main is retained in persistence and DTOs (`isDidactic`, with an analysis fallback for older records). Prompt version `material-tutor-v3` invalidates pre-classification cache entries. Upload success still finishes the reading cycle before showing the adult-profile warning or the embedded study result. Processing responses that later become non-didactic must not start a child tutoring session. The shared workspace retains keyboard/close-button image preview and the history route.
+Non-didactic material classification from main is retained in persistence and DTOs (`isDidactic`, with an analysis fallback for older records). Prompt version `material-tutor-v5` invalidates pre-classification cache entries. Upload success still finishes the reading cycle before showing the adult-profile warning or the embedded study result. Processing responses that later become non-didactic must not start a child tutoring session. The shared workspace retains the original-file viewer, answer blanks, and the history route.

@@ -207,6 +207,16 @@ export async function addProfileToFamily(familyId: string, profile: Profile) {
   });
 }
 
+/** Adds the children from sign-up step 2 in one write. */
+export async function addProfilesToFamily(familyId: string, profiles: Profile[]) {
+  return updateDb((db) => {
+    const family = db.families.find((candidate) => candidate.id === familyId);
+    if (!family) throw new Error('FAMILY_NOT_FOUND');
+    family.profiles.push(...profiles);
+    return toPublicFamily(family);
+  });
+}
+
 /** Saves the avatar selected by a child in this family. */
 export async function setProfileLumiAvatar(familyId: string, profileId: string, lumiAvatar: string) {
   return updateDb((db) => {
@@ -215,6 +225,18 @@ export async function setProfileLumiAvatar(familyId: string, profileId: string, 
     if (!profile) return null;
     profile.lumiAvatar = lumiAvatar;
     return { ...profile };
+  });
+}
+
+/** Demo choices belong to the current session, never the shared demo family. */
+export async function setDemoProfileLumiAvatar(sessionId: string, profileId: string, lumiAvatar: string) {
+  const demoProfile = demoFamily.profiles.find((profile) => profile.id === profileId && profile.type === 'child');
+  if (!demoProfile) return null;
+  return updateDb((db) => {
+    const session = db.sessions.find((candidate) => candidate.id === sessionId && candidate.isDemo);
+    if (!session) return null;
+    session.demoLumiAvatars = { ...session.demoLumiAvatars, [profileId]: lumiAvatar };
+    return { ...demoProfile, lumiAvatar };
   });
 }
 
@@ -248,7 +270,14 @@ export async function getSession(token: string | undefined): Promise<SessionReco
 export async function getFamilyForSession(token: string | undefined) {
   const session = await getSession(token);
   if (!session) return null;
-  if (session.isDemo) return { family: getDemoFamily(), session };
+  if (session.isDemo) {
+    const family = getDemoFamily();
+    family.profiles = family.profiles.map((profile) => ({
+      ...profile,
+      lumiAvatar: session.demoLumiAvatars?.[profile.id] ?? profile.lumiAvatar,
+    }));
+    return { family, session };
+  }
 
   const db = await readDb();
   const family = db.families.find((candidate) => candidate.id === session.familyId);

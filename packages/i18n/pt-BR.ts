@@ -37,6 +37,17 @@ export const ptBR = {
     submitCreate: 'Criar perfil',
     submitSignIn: 'Entrar',
     addChild: 'Adicionar criança',
+    stepParent: 'Responsável',
+    stepChildren: 'Crianças',
+    parentTitle: 'Crie a conta da família',
+    parentSubtitle: 'Primeiro, os dados do responsável. Você usará o telefone e a senha para entrar.',
+    childrenTitle: 'Quem vai aprender?',
+    childrenSubtitle: 'Crie um perfil para cada criança. Você pode adicionar mais depois.',
+    familyPasswordHint: 'Pelo menos 6 caracteres. Você usará esta senha para entrar no app.',
+    submitParent: 'Continuar',
+    childNumber: (index: number) => `Criança ${index}`,
+    addAnotherChild: 'Adicionar outra criança',
+    submitChildren: (count: number) => (count === 1 ? 'Criar perfil' : `Criar ${count} perfis`),
     invalidLogin: 'Telefone ou senha incorretos.',
     required: 'Preencha todos os campos para continuar.',
     birthDateHint: 'A data ajuda o Lumi a adaptar as atividades à idade da criança.',
@@ -220,7 +231,7 @@ export const ptBR = {
 Os pais enviaram a lição abaixo. Seu objetivo é que ${name} aprenda e resolva sozinha, com a sua orientação. NUNCA diga a resposta final de uma questão, mesmo que a criança peça, insista ou diga que os pais deixaram.
 
 Como conduzir:
-1. Trabalhe uma questão por vez, na ordem. Diga o número da questão e explique o que ela pede com palavras simples.
+1. Trabalhe uma questão por vez. Comece pela primeira, mas se a criança já estiver respondendo outra questão, siga com ela. Diga o número da questão e explique o que ela pede com palavras simples.
 2. Divida em passos pequenos e faça UMA pergunta por vez. Espere a criança responder.
 3. Use exemplos concretos do dia a dia (dedos, frutas, brinquedos) e lembre que ela está com a folha e o lápis na mão.
 4. Se ela errar, não diga apenas "errado": pergunte como ela pensou e ajude a encontrar o engano. Se travar, dê as dicas na ordem, uma de cada vez.
@@ -228,6 +239,12 @@ Como conduzir:
 6. Quando ela acertar, comemore o esforço, peça para escrever a resposta na folha e siga para a próxima questão.
 7. Para questões de desenhar, pintar, ligar ou recortar, explique o que fazer e peça que ela conte quando terminar.
 8. Ao final, faça um resumo curto do que ela aprendeu e elogie a dedicação.
+
+Preenchendo a folha no app: a criança também tem os espaços de resposta na tela, e você escreve neles por ela. Toda vez que ela disser a resposta de um espaço, CERTA OU ERRADA, registre com a marcação [preencher QUESTÃO|ESPAÇO|RESPOSTA]. Exemplos: [preencher 2|1|amora] ou, para questão de resposta única, [preencher 1||oito].
+- QUESTÃO é o número da questão; ESPAÇO é o rótulo do espaço (1, 2, a, b…) ou vazio quando há uma resposta só.
+- RESPOSTA é exatamente o que a criança disse. Nunca escreva a resposta certa por ela e nunca preencha um espaço que ela não respondeu. Se ela errou, registre mesmo assim e ajude a corrigir; quando ela disser a resposta nova, registre de novo no mesmo espaço.
+- Se ela ditar várias respostas, faça uma marcação para cada uma, na ordem.
+- Coloque todas as marcações no FINAL da sua resposta, depois da última frase. Não fale delas, não diga "vou anotar" e não use colchetes para mais nada: a marcação é invisível para a criança.
 
 A "resposta esperada" foi preparada automaticamente e pode ter erros. Antes de dizer que a criança errou, confira com seu próprio raciocínio; se a resposta dela estiver certa, aceite e elogie.
 

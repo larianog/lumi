@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import AgoraRTC, {
   useRTCClient,
   useLocalMicrophoneTrack,
@@ -17,6 +17,8 @@ import {
   AgoraVoiceAI,
   AgoraVoiceAIEvents,
   AgentState,
+  ChatMessagePriority,
+  ChatMessageType,
   MessageSalStatus,
   TranscriptHelperMode,
   type TranscriptHelperItem,
@@ -25,6 +27,13 @@ import {
 } from 'agora-agent-client-toolkit';
 import { AgentVisualizer } from 'agora-agent-uikit';
 import { MicButtonWithVisualizer } from 'agora-agent-uikit/rtc';
+import {
+  childSaid,
+  extractFillCommands,
+  fillAnswer,
+  LUMI_SEND_TEXT_EVENT,
+  type LumiSendTextDetail,
+} from '@/lib/lumi-events';
 import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
 import { messages } from '@/packages/i18n';
 import {
@@ -124,6 +133,12 @@ export default function ConversationComponent({
   const [agentLeft, setAgentLeft] = useState(false);
   const [connectionTimedOut, setConnectionTimedOut] = useState(false);
   const agentUID = String(DEFAULT_AGENT_UID);
+  const handledFillCommandsRef = useRef(new Set<string>());
+  const childTurnsRef = useRef(new Map<string, { text: string; timer: ReturnType<typeof setTimeout> }>());
+  useEffect(() => {
+    const pending = childTurnsRef.current;
+    return () => pending.forEach(({ timer }) => clearTimeout(timer));
+  }, []);
   const avatarUID = String(DEFAULT_AVATAR_UID);
   const [joinedUID, setJoinedUID] = useState<UID>(0);
 
@@ -264,6 +279,35 @@ export default function ConversationComponent({
 
         ai.on(AgoraVoiceAIEvents.TRANSCRIPT_UPDATED, (t) => {
           setRawTranscript([...t]);
+          for (const item of t) {
+            if (typeof item.text !== 'string') continue;
+            if (item.uid === '0') {
+              const key = `child:${item.turn_id}`;
+              if (handledFillCommandsRef.current.has(key)) continue;
+              const text = item.text;
+              const pending = childTurnsRef.current;
+              const emit = () => {
+                if (handledFillCommandsRef.current.has(key)) return;
+                handledFillCommandsRef.current.add(key);
+                clearTimeout(pending.get(key)?.timer);
+                pending.delete(key);
+                if (text.trim()) childSaid(text);
+              };
+              if ((item.metadata as { final?: boolean } | null)?.final === true) {
+                emit();
+              } else if (pending.get(key)?.text !== text) {
+                clearTimeout(pending.get(key)?.timer);
+                pending.set(key, { text, timer: setTimeout(emit, 1500) });
+              }
+              continue;
+            }
+            extractFillCommands(item.text).forEach((command, position) => {
+              const key = `${item.turn_id}:${position}`;
+              if (handledFillCommandsRef.current.has(key)) return;
+              handledFillCommandsRef.current.add(key);
+              fillAnswer(command);
+            });
+          }
         });
         // Agent state drives the visualizer, independent of RTC audio presence.
         ai.on(AgoraVoiceAIEvents.AGENT_STATE_CHANGED, (_, event) =>
@@ -330,6 +374,26 @@ export default function ConversationComponent({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, joinSuccess]);
+
+  // Worksheet answer cards can ask the live tutor to check a typed answer.
+  useEffect(() => {
+    if (!isReady || !joinSuccess) return;
+    const forwardText = (event: Event) => {
+      const detail = (event as CustomEvent<LumiSendTextDetail>).detail;
+      let ai: ReturnType<typeof AgoraVoiceAI.getInstance> | undefined;
+      try { ai = AgoraVoiceAI.getInstance(); } catch { return; }
+      if (!ai || !detail?.text) return;
+      detail.handled = true;
+      void ai.chat(agentUID, {
+        messageType: ChatMessageType.TEXT,
+        priority: ChatMessagePriority.INTERRUPTED,
+        responseInterruptable: true,
+        text: detail.text,
+      }).catch((error: unknown) => console.error('Failed to send text to Lumi:', error));
+    };
+    window.addEventListener(LUMI_SEND_TEXT_EVENT, forwardText);
+    return () => window.removeEventListener(LUMI_SEND_TEXT_EVENT, forwardText);
+  }, [isReady, joinSuccess, agentUID]);
 
   // Raw RTM parsing is kept as a fallback for signaling-level errors and SAL status.
   useEffect(() => {

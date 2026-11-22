@@ -48,7 +48,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `QuickstartTranscriptPanel.tsx`: live transcript panel.
 - `QuickstartPipelineMetrics.tsx`: latency chips from metrics stream.
 - `ConnectionStatusPanel.tsx` + `ConversationErrorCard.tsx`: issue rendering/severity.
-- `MaterialStudyPageClient.tsx`: shared embedded profile result and standalone history detail, with image/PDF preview, bounded processing polling/retry, grounded voice and explicit completion.
+- `MaterialStudyPageClient.tsx` + `MaterialQuestion.tsx` + `MaterialViewer.tsx`: shared embedded/standalone worksheet, answer blanks, spoken answer routing, original-file viewer, bounded polling/retry, grounded voice and explicit completion.
 - `LumiMaterialLoading.tsx`: reading avatar and **Carregando…** caption during upload/analysis, without opening a voice session. Reports completion after a full loaded cycle once the API responds; motion cancellation/failure bypasses the wait.
 - `MaterialHistoryPageClient.tsx`: child material history/status list.
 

@@ -16,12 +16,12 @@ This repository is built from Agora's Conversational AI Next.js quickstart and e
 
 A typical study session follows this path:
 
-1. An adult creates a family account and adds one or more child profiles; development builds also offer the built-in demo.
+1. An adult completes the two-step sign-up form: create the family account, then add one or more child profiles; development builds also offer the built-in demo.
 2. The child selects their profile and adds a school activity as a photo, image, or PDF.
 3. The child selects how independently they currently read: not yet reading, reading with help, or reading independently.
 4. The server validates the file and uses an OpenAI vision model to understand the worksheet.
 5. Lumi identifies the subject, instructions, questions, expected answers, solution steps, and progressive hints.
-6. The profile page opens the material workspace in place, and a private, material-aware voice agent guides the child through the activity. **Enviar outra atividade** returns to submission.
+6. The profile page opens the worksheet question cards and original-file viewer in place. Children can type answers or fill blanks by speaking, and a private, material-aware voice agent guides them through the activity. **Enviar outra atividade** returns to submission.
 7. The child explicitly completes the activity. Its status then appears in the child's history and the adult progress report.
 
 Lumi's tutoring prompt is adapted to the child's name, age, reading level, and uploaded activity. Expected answers remain server-side and are used only to check the child's reasoning; the child-facing extracted text does not expose the answer key.
@@ -135,7 +135,7 @@ agora project doctor --deep
 - Cache reuse based on owner, profile, file hash, model, and prompt version.
 - Private temporary file storage; uploads are never placed under `public/`.
 - Child-safe material DTOs that do not expose private storage paths, hashes, or the server-only answer brief.
-- Demo uploads isolated by browser session even though the demo family is shared.
+- Demo uploads and avatar choices isolated by browser session even though the demo family is shared.
 - Automatic expiry of uploaded bytes and extracted text, with a seven-day default retention period.
 
 Run `pnpm run verify` before shipping changes — it covers local prerequisites, lint, type safety, the core API route contracts, and the production build.

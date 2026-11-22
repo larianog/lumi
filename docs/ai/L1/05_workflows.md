@@ -15,7 +15,7 @@ If start fails, run `agora project doctor --deep`.
 
 ## Change Agent Behavior
 
-To use local Plush animations during an actual voice session, open a child profile such as `/profile/demo-lia` after signing into the demo. Missing avatar choices request `avatarMode="local"`: no speech plays the idle loop, user speech plays `lummi-transparente-02.webp`, and audible agent speech plays `lummi-falando-otimizada.webp`. Enable the mic and allow browser audio as needed. A signed-in non-demo child can choose another avatar at `/profile/[id]/avatars`; later profile, material, and activity calls then request that catalog provider avatar. Demo avatar changes remain disabled. Both Plush clips are bundled; a temporary playground upload is not deployed to profiles. Other callers keep provider avatars by default. Validate with `pnpm run verify:api` and `pnpm run verify`; do not start paid sessions during automated checks.
+To use local Plush animations during an actual voice session, open a child profile such as `/profile/demo-lia` after signing into the demo. Missing avatar choices request `avatarMode="local"`: no speech plays the idle loop, user speech plays `lummi-transparente-02.webp`, and audible agent speech plays `lummi-falando-otimizada.webp`. Enable the mic and allow browser audio as needed. Any child, including one in the demo, can choose another avatar at `/profile/[id]/avatars`; later profile, material, and activity calls request that catalog provider avatar. Demo choices are isolated to that browser session. Both Plush clips are bundled; a temporary playground upload is not deployed to profiles. Other callers keep provider avatars by default. Validate with `pnpm run verify:api` and `pnpm run verify`; do not start paid sessions during automated checks.
 
 If the profile remains on its still fallback, check the system reduced-motion preference. A failed file load shows an error status; reload the page to retry the asset. Test remounts while downloads are pending, failure fallback, and actual frame changes with the real Next Image component; avoid replacing the image renderer with a stub for lifecycle regression checks.
 
@@ -71,6 +71,8 @@ Before upload, **Remover** clears a selected file or camera photo and its error/
 4. Keep Lumi grounding server-side through optional `profile_id` + `material_id` fields on `/api/invite-agent`.
 5. Test first upload, processing/ready cache hits, upload/poll failures and retry, expiry, demo isolation, completion, child history, and adult report. Assert that upload/result/completion/new-activity stay on the profile URL; the caption sits below the reading avatar, duplicate uploads are blocked, and navigation cancels pending work. Include image/PDF and mobile previews. Verify fast API success waits for one loaded reading cycle, slow success finishes the current cycle, and grounded voice starts only afterwards. Check processing/retry, API and animation failures, stalled asset loading, pause/reduced motion, hidden tabs and navigation cleanup.
 6. Run lint, typecheck, API contracts, and build.
+
+The two-step sign-up form posts an adult account first, then up to eight child profiles in one request. The lesson page displays child-safe question cards, answer blanks and a private original-file viewer; spoken or typed answers can be checked with Lumi.
 
 The bundled JSON database and `data/material-cache/` adapter are suitable for local or persistent-container development. Select durable database/private object storage adapters before serverless production deployment.
 

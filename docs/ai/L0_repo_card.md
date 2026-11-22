@@ -20,6 +20,8 @@
 
 Avatar integration on 2026-11-22 restores the child avatar picker from `larianog/change-avatar` after its ancestor merge became a no-op. The animated Plush remains on welcome and profile selection and is the default for new lessons. Saved non-Plush choices keep their provider avatar path; all bundled Plush WebP states remain in place.
 
+Sign-up and lesson review on 2026-11-22 restores the two-step family form and worksheet question cards, answer blanks and original-file viewer from `larianog/change-avatar`. Demo avatar choices are session-scoped while Plush remains the initial choice.
+
 Motion control removal on 2026-11-22 removes the main-app avatar and reading play/pause/reload buttons. Playback now follows the system reduced-motion preference directly; failed assets retain the still fallback and error status, and a page reload retries them. The animation playground keeps its separate controls.
 
 Welcome review on 2026-11-22 removes the family-description paragraph and limits the demo button/hint/error to development builds. Production retains registration and sign-in; the login API contract is unchanged.

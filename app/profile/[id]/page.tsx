@@ -23,6 +23,7 @@ import LumiVoiceAgent from '@/components/LumiVoiceAgent';
 import LumiMaterialLoading from '@/components/LumiMaterialLoading';
 import MaterialStudyPageClient from '@/components/MaterialStudyPageClient';
 import { calculateAge } from '@/lib/age';
+import { clearStoredAnswers } from '@/lib/answer-storage';
 import { getLumiAvatarMode } from '@/lib/lumi-avatars';
 import { prepareUploadFile } from '@/lib/prepare-upload';
 import { messages } from '@/packages/i18n';
@@ -203,6 +204,7 @@ export default function ProfilePage() {
       if (isDidactic !== false && payload.material.profileId !== profileId) throw new Error(messages.home.materialError);
       if (!controller.signal.aborted) {
         accepted = true;
+        if (isDidactic !== false) clearStoredAnswers(payload.material.id);
         setPendingMaterial({ ...payload.material, isDidactic });
       }
     } catch (error) {
@@ -291,7 +293,7 @@ export default function ProfilePage() {
           key={studyMaterial.id}
           profileId={profileId} materialId={studyMaterial.id}
           initialProfile={profile} initialMaterial={studyMaterial} embedded
-          onBack={() => { setStudyMaterial(null); setSelectedMaterial(null); setMaterialError(''); setMaterialWarning(''); }}
+          onClose={() => { setStudyMaterial(null); setSelectedMaterial(null); setMaterialError(''); setMaterialWarning(''); }}
         />
       ) : <div className="home-layout">
         <aside className="home-lumi">
