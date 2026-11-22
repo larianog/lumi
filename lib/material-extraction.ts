@@ -9,7 +9,7 @@ const MAX_QUESTIONS = 15;
 const MAX_FIELD_CHARS = 600;
 
 /** Bump when the schema or prompt changes, so cached materials are re-analyzed. */
-export const MATERIAL_EXTRACTION_PROMPT_VERSION = 'material-tutor-v2';
+export const MATERIAL_EXTRACTION_PROMPT_VERSION = 'material-tutor-v3';
 export const LITERACY_LEVELS: LiteracyLevel[] = ['pre_reader', 'emergent', 'fluent'];
 
 export class MaterialExtractionError extends Error {

@@ -19,12 +19,13 @@ import {
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
+import LumiMaterialLoading from '@/components/LumiMaterialLoading';
 import MaterialStudyPageClient from '@/components/MaterialStudyPageClient';
 import { calculateAge } from '@/lib/age';
 import { prepareUploadFile } from '@/lib/prepare-upload';
 import { messages } from '@/packages/i18n';
 import type { ActivityCompletion, LiteracyLevel, Profile } from '@/types/database';
-import type { MaterialUploadResponse } from '@/types/materials';
+import type { MaterialUploadResponse, StudyMaterialDto } from '@/types/materials';
 
 type ActivityId = 'school' | 'games' | 'stories' | 'suggest';
 
@@ -54,22 +55,38 @@ export default function ProfilePage() {
   const [completions, setCompletions] = useState<ActivityCompletion[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<ActivityId>('school');
   const [selectedMaterial, setSelectedMaterial] = useState<File | null>(null);
-  const [activeMaterial, setActiveMaterial] = useState<{ id: string; profileId: string } | null>(null);
   const [materialUploadState, setMaterialUploadState] = useState<'idle' | 'uploading'>('idle');
   const [materialError, setMaterialError] = useState('');
   const [materialWarning, setMaterialWarning] = useState('');
+  const [studyMaterial, setStudyMaterial] = useState<StudyMaterialDto | null>(null);
+  const [pendingMaterial, setPendingMaterial] = useState<StudyMaterialDto | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
   const [literacyLevel, setLiteracyLevel] = useState<LiteracyLevel | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const addFileButtonRef = useRef<HTMLButtonElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
+  const uploadController = useRef<AbortController | null>(null);
+
+  useEffect(() => () => {
+    uploadController.current?.abort();
+    uploadController.current = null;
+  }, [profileId]);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
+    setProfile(null);
+    setStudyMaterial(null);
+    setPendingMaterial(null);
+    setSelectedMaterial(null);
+    setMaterialUploadState('idle');
+    setMaterialError(''); setMaterialWarning('');
+    setLiteracyLevel(null);
+    setCameraOpen(false);
     const loadData = async () => {
       try {
         const [profileResponse, completionsResponse] = await Promise.all([
@@ -83,7 +100,6 @@ export default function ProfilePage() {
           : [];
         if (!cancelled) {
           setProfile(profileData.profile);
-          setIsDemo(Boolean(profileData.isDemo));
           setCompletions(completionData);
         }
       } finally {
@@ -142,41 +158,58 @@ export default function ProfilePage() {
   };
 
   const selectMaterial = (event: ChangeEvent<HTMLInputElement>) => {
+    if (uploadController.current) return;
     const [file] = Array.from(event.currentTarget.files ?? []);
     if (!file) return;
     setSelectedMaterial(file);
     setMaterialUploadState('idle');
-    setMaterialError('');
+    setMaterialError(''); setMaterialWarning('');
     event.currentTarget.value = '';
   };
 
-  const uploadMaterial = async () => {
-    if (!selectedMaterial || !profile) return;
-    setMaterialUploadState('uploading');
+  const removeMaterial = () => {
+    if (uploadController.current || materialUploadState === 'uploading') return;
+    setSelectedMaterial(null);
     setMaterialError('');
+    setMaterialWarning('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+    addFileButtonRef.current?.focus();
+  };
 
+  const uploadMaterial = async () => {
+    if (!selectedMaterial || !profile || uploadController.current) return;
+    const controller = new AbortController();
+    uploadController.current = controller;
+    setMaterialUploadState('uploading');
+    setPendingMaterial(null);
+    setMaterialError(''); setMaterialWarning('');
+
+    let accepted = false;
     try {
       const formData = new FormData();
       formData.set('profileId', profileId);
       formData.set('literacyLevel', literacyLevel ?? defaultLiteracy(calculateAge(profile.birthDate)));
       formData.set('file', await prepareUploadFile(selectedMaterial));
-      const response = await fetch('/api/materials', { method: 'POST', body: formData });
+      if (controller.signal.aborted) return;
+      const response = await fetch('/api/materials', { method: 'POST', body: formData, signal: controller.signal });
       const payload = await response.json() as MaterialUploadResponse & { error?: string };
       if (!response.ok || !payload.material?.id) {
         throw new Error(payload.error || messages.home.materialError);
       }
-      const targetProfileId = payload.profileId ?? profileId;
-      if (payload.isDidactic === false) {
-        setMaterialWarning('Esse material não é didático. Ele foi salvo no perfil do responsável.');
-        setMaterialUploadState('idle');
-      } else {
-        setSelectedMaterial(null);
-        setMaterialUploadState('idle');
-        setActiveMaterial({ id: payload.material.id, profileId: targetProfileId });
+      const isDidactic = payload.isDidactic ?? payload.material.isDidactic;
+      if (isDidactic !== false && payload.material.profileId !== profileId) throw new Error(messages.home.materialError);
+      if (!controller.signal.aborted) {
+        accepted = true;
+        setPendingMaterial({ ...payload.material, isDidactic });
       }
     } catch (error) {
-      setMaterialError(error instanceof Error ? error.message : messages.home.materialError);
-      setMaterialUploadState('idle');
+      if (!controller.signal.aborted) setMaterialError(error instanceof Error ? error.message : messages.home.materialError);
+    } finally {
+      if (uploadController.current === controller) {
+        uploadController.current = null;
+        if (!accepted) setMaterialUploadState('idle');
+      }
     }
   };
 
@@ -217,7 +250,7 @@ export default function ProfilePage() {
       const photo = new File([blob], `material-${Date.now()}.jpg`, { type: 'image/jpeg' });
       setSelectedMaterial(photo);
       setMaterialUploadState('idle');
-      setMaterialError('');
+      setMaterialError(''); setMaterialWarning('');
       setCameraOpen(false);
     }, 'image/jpeg', 0.9);
   };
@@ -231,7 +264,7 @@ export default function ProfilePage() {
   const selectedLiteracy = literacyLevel ?? defaultLiteracy(age);
 
   return (
-    <section className={`forest-screen home-screen${activeMaterial ? ' home-screen-study' : ''}`}>
+    <section className={`forest-screen home-screen${studyMaterial ? ' home-screen-study' : ''}`}>
       <div className="forest-overlay forest-overlay-home" />
       <header className="home-header">
         <Brand size="medium" />
@@ -248,26 +281,34 @@ export default function ProfilePage() {
           </button>
         </div>
       </header>
-      {activeMaterial ? (
+      {studyMaterial ? (
         <MaterialStudyPageClient
-          key={activeMaterial.id}
-          profileId={activeMaterial.profileId}
-          materialId={activeMaterial.id}
-          initialProfile={activeMaterial.profileId === profileId ? profile : undefined}
-          embedded
-          onClose={() => setActiveMaterial(null)}
+          key={studyMaterial.id}
+          profileId={profileId} materialId={studyMaterial.id}
+          initialProfile={profile} initialMaterial={studyMaterial} embedded
+          onBack={() => { setStudyMaterial(null); setSelectedMaterial(null); setMaterialError(''); setMaterialWarning(''); }}
         />
       ) : <div className="home-layout">
         <aside className="home-lumi">
           <div className="lumi-halo" />
           {/* Lumi greets the child as soon as the profile screen opens. */}
-          <LumiVoiceAgent
+          {materialUploadState === 'uploading' ? <LumiMaterialLoading loading={!pendingMaterial} onComplete={() => {
+            if (!pendingMaterial) return;
+            if (pendingMaterial.isDidactic === false) {
+              setMaterialWarning('Esse material não é didático. Ele foi salvo no perfil do responsável.');
+              setSelectedMaterial(null);
+            } else {
+              setStudyMaterial(pendingMaterial);
+            }
+            setPendingMaterial(null); setMaterialUploadState('idle');
+          }} /> : <LumiVoiceAgent
             profileName={profile.firstName}
             age={age}
             activityTitle={messages.activities[selectedActivity].title}
             autoStart
             variant="inline"
-          />
+            avatarMode="local"
+          />}
         </aside>
         <div className="activity-menu">
           <span className="eyebrow">{messages.home.greeting(profile.firstName)}</span>
@@ -286,14 +327,14 @@ export default function ProfilePage() {
               })}
             </div>
           ) : (
-            <div className="study-source-panel">
+            <div className="study-source-panel" aria-busy={materialUploadState === 'uploading'}>
               <p>{messages.home.materialDescription}</p>
               <div className="study-source-actions">
-                <button className="study-source-button" type="button" onClick={() => fileInputRef.current?.click()}>
+                <button ref={addFileButtonRef} className="study-source-button" type="button" disabled={materialUploadState === 'uploading'} onClick={() => fileInputRef.current?.click()}>
                   <span className="study-source-icon accent-mint"><Upload size={30} /></span>
                   <span><strong>{messages.home.addFile}</strong><small>{messages.home.addFileHint}</small></span>
                 </button>
-                <button className="study-source-button" type="button" onClick={openCamera}>
+                <button className="study-source-button" type="button" disabled={materialUploadState === 'uploading'} onClick={openCamera}>
                   <span className="study-source-icon accent-sun"><Camera size={30} /></span>
                   <span><strong>{messages.home.takePicture}</strong><small>{messages.home.takePictureHint}</small></span>
                 </button>
@@ -303,6 +344,7 @@ export default function ProfilePage() {
                 type="file"
                 accept="image/jpeg,image/png,image/webp,application/pdf"
                 hidden
+                disabled={materialUploadState === 'uploading'}
                 onChange={selectMaterial}
               />
               <input
@@ -311,6 +353,7 @@ export default function ProfilePage() {
                 accept="image/*"
                 capture="environment"
                 hidden
+                disabled={materialUploadState === 'uploading'}
                 onChange={selectMaterial}
               />
               {selectedMaterial && (
@@ -330,39 +373,37 @@ export default function ProfilePage() {
                   ))}
                 </fieldset>
               )}
-              {selectedMaterial && !materialWarning ? (
+              {selectedMaterial && (
                 <div className="study-source-selection" role="status" aria-live="polite">
                   <div className="study-source-file">
                     <FileCheck2 size={20} />
                     <span>{messages.home.selectedFile(selectedMaterial.name)}</span>
                   </div>
-                  <button
-                    className="study-send-button"
-                    type="button"
-                    disabled={materialUploadState === 'uploading'}
-                    onClick={() => void sendMaterial()}
-                  >
-                    {materialUploadState === 'uploading'
-                      ? <LoaderCircle className="spin" size={19} />
-                      : <Send size={19} />}
-                    {materialUploadState === 'uploading' ? messages.home.extractingFile : messages.home.sendFile}
-                  </button>
+                  <div className="study-selection-actions">
+                    <button
+                      className="study-remove-button"
+                      type="button"
+                      aria-label={messages.home.removeFileLabel}
+                      disabled={materialUploadState === 'uploading'}
+                      onClick={removeMaterial}
+                    >
+                      <X size={18} aria-hidden="true" />{messages.home.removeFile}
+                    </button>
+                    <button
+                      className="study-send-button"
+                      type="button"
+                      disabled={materialUploadState === 'uploading'}
+                      onClick={() => void sendMaterial()}
+                    >
+                      {materialUploadState === 'uploading'
+                        ? <LoaderCircle className="spin" size={19} />
+                        : <Send size={19} />}
+                      {materialUploadState === 'uploading' ? messages.home.extractingFile : messages.home.sendFile}
+                    </button>
+                  </div>
                 </div>
-              ) : materialWarning ? (
-                <div className="study-source-warning" role="status" aria-live="polite">
-                  <span>{materialWarning}</span>
-                  <button
-                    className="button button-secondary"
-                    type="button"
-                    onClick={() => {
-                      setMaterialWarning('');
-                      setSelectedMaterial(null);
-                    }}
-                  >
-                    OK
-                  </button>
-                </div>
-              ) : null}
+              )}
+              {materialWarning && <div className="study-source-warning" role="status"><p>{materialWarning}</p><button type="button" onClick={() => setMaterialWarning('')}>Entendi</button></div>}
               {materialError && <p className="study-source-error" role="alert">{materialError}</p>}
             </div>
           )}

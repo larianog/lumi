@@ -37,20 +37,32 @@ Agora Cloud
 
 ## Start Sequence
 
-1. UI fetches RTC+RTM token and channel.
-2. UI invites agent and initializes RTM in parallel.
+1. UI acquires a lease from `lib/agora-rtm-session.ts`, which waits for prior logout and fetches a fresh RTC+RTM token/channel using the document's stable UID.
+2. The shared RTM instance logs in and subscribes before the UI invites the agent.
 3. UI mounts conversation view.
 4. `useJoin` connects RTC once `isReady` guard passes.
 5. `AgoraVoiceAI.init()` subscribes transcript/state/metrics streams.
 
 ## End Sequence
 
-1. UI calls `/api/stop-conversation` with `agent_id` if present.
-2. UI logs out RTM client.
+1. UI cancels the session handle and unmounts the call view.
+2. Its lease logs out RTM before another session can start; the agent is stopped through `/api/stop-conversation`, including IDs returned by pending invites after cancellation.
 3. RTC hook ownership handles leave/unpublish cleanup.
+
+The RTM manager is held on the browser window so client routing and Fast Refresh reuse one SDK instance. Each document generates its own numeric UID, avoiding duplicated-tab collisions from session storage. The UID is not a family/profile authorization identifier. Partial login/subscription failures clean up before retry; failed logout blocks new login until cleanup succeeds. Callers never directly log out a shared client. StrictMode auto-start is timer-gated, and per-component handles reject duplicate clicks.
+
+Numeric participant IDs must fit `1..2147483647` for the Conversational AI join API. `lib/agora.ts` bounds browser randomness and validates invite IDs; the token route rejects larger numbers so token/RTM/RTC/invite identity remains consistent. Agent/avatar reserved IDs are excluded by the browser generator and invite validation.
 4. Component state resets to pre-call shell.
 
 ## Core State Domains
+
+`LumiConversationAvatar` also owns the idle loop. Its `idleOnly` illustration mode loads only `lummi-idle-transparente.webp` for welcome, profile picker, activities, parent report and precall panels; responsive frame sizing uses `--lumi-idle-width`. The welcome uses `onVisualReady`/`onAnimationEnd` for its bounded entrance. Provider waiting views and inactive material panels reuse the shared idle. An intersection observer pauses offscreen/CSS-hidden avatars; document visibility and motion preferences remain independent gates. Disconnect immediately cancels action completion and resumes idle, while explicit motion pause keeps the static fallback. Idle never delays a requested action.
+
+`useLumiIdleSleep` overlays `sleeping` on an idle local conversation after 30 seconds without audio or pointer/key/input/scroll interaction. It owns only a presentation timer and activity listeners; RTC/RTM remain connected. Agent preparation, connection errors, microphone/audio blocking and hidden tabs suspend the countdown; visibility restoration starts a fresh interval. `isLumiRestingAgentState` includes SDK `silent` alongside `idle`, `listening` and null, so a silent agent can sleep after responding. Resting-state changes preserve the countdown; RTC speech still resets it. Sleeping wakes immediately on any interaction or speech, while normal listening/speaking completion rules remain intact. The sleeping WebP preloads independently alongside listening and speaking; only the displayed clip animates. Material loading uses its separate reading player.
+
+Profile pages explicitly pass `avatarMode="local"` through `LumiVoiceAgent` to `ConversationComponent` and the invite API (`avatar_mode`). The API skips avatar generation in that mode; RTC/RTM voice providers stay the same. `useLumiSpeechState` samples the existing mic and agent audio tracks every 80 ms. `LumiSpeechDetector` uses an 80 ms user attack and short release windows to select idle/listening/speaking. Audible agent speech takes visual priority over microphone activity; once its 220 ms release window ends, ongoing user speech selects listening. This does not change RTC interruption behavior. Muted, disconnected, missing, or non-playing tracks do not sustain speech poses. Agent semantic state still drives the existing visualizer; it is not evidence of audible speech.
+
+`LumiConversationAvatar` separates the requested speech state from the displayed animation. Speaking preempts listening immediately. Other changes finish the current cycle before applying the latest request, without queuing outdated states or restarting on short gaps; silence then resumes the idle loop. `lib/lumi-webp-timing.ts` reads ANMF frame durations, and `LumiWebPClip` reports cycle boundaries from image load without changing asset bytes. Video defaults use native `ended`. Conversation clips preload independently; only the displayed state animates. Explicit pause, hidden tabs, disconnect, muted listening, blocked speaking and failed playback cancel pending transitions. The shared implementation is used in profiles, material study and activity voice dialogs for normal and demo accounts. Motion preferences, reload recovery and the still fallback remain available. There is no phoneme lip sync. Playground uploads and its timed simulation remain independent and memory-only.
 
 - Session bootstrap: `LandingPage` (`agoraData`, `rtmClient`, loading/error flags).
 - RTC transport and mic: `ConversationComponent` + `agora-rtc-react` hooks.
@@ -59,6 +71,16 @@ Agora Cloud
 - Study material: `lib/db.ts` metadata/completion state, `lib/material-storage.ts` temporary bytes, and the child-safe transcript plus a server-only tutoring analysis.
 
 ## External Dependencies
+
+The additive `/playground/lumi-animation` route owns a separate CSS Module and local motion state. Its live-test dialog creates RTM first, then calls `/api/playground/lumi-animation` and mounts the existing `ConversationComponent` with a separate RTC provider. It reuses token/stop endpoints. Pending invites are allowed to return their agent ID before cleanup stops the session, including cancellation during startup. Explicit stop failures remain visible for retry. Main app bootstrap and invite defaults are unchanged.
+
+The lab defaults to browser-local video states. `LumiVideoStates` owns object URLs and persistent video elements, plays only the selected clip, pauses when hidden, and releases URLs on replacement/removal/unmount. Reduced motion pauses autoplay; manual play or simulation enables an in-memory override until reload or a system preference change. Stop simulation pauses its video too. Manual one-shot clips return to idle on completion. Conversation simulation snapshots a timed sequence of loaded, error-free clips, skipping missing states; completion pauses on available idle or the last displayed state. Removing/replacing a clip cancels the sequence. Real Agora events are not connected to these videos. The Lemon Slice configuration check only runs when its tab is selected.
+
+Bundled clips come from `BUNDLED_LUMI_VIDEO_CLIPS` and static `public/assets/lumi/states/` assets. The optimized `lummi-falando-otimizada.webp` (speaking, 600 × 650, all 143 frames and 5957 ms retained) is selected initially; `lummi-transparente-02.webp` (listening) is also available. Local uploads override defaults in memory, and reset/reload restores the bundled sources. Only blob URLs are revoked; static asset URLs persist. Video playback checks already-loaded media after hydration in addition to listening for `loadeddata`.
+
+WebP selections use `LumiWebPClip`, an unoptimized image instead of a video element. It decodes a static first-frame preview via canvas (up to 1024 px), preserves alpha, and uses a fresh blob URL for each play/replay. Paused, hidden, and reduced-motion-blocked WebP uses the still preview; temporary URLs and local override loads are cleaned up. `lib/lumi-webp.ts` retains bundled Blob promises across avatar remounts, so placeholder cleanup does not abort a download needed by the live view. Failed loads leave the cache; profile reload clears cache/status and remounts players. Speed/repeat count are native file settings; video speed is disabled and manual WebP has no ended-to-idle transition. Ready/error callbacks guard against stale source URLs, and valid WebP participates in the existing timed simulation.
+
+The profile motion toggle keeps explicit on/off choices in `sessionStorage` (`lumi-avatar-motion-v2`, through `lib/lumi-motion-preference.ts`), preserving them through the placeholder-to-conversation transition and reload. System preference changes clear the override. Failed storage access retains choices in memory across remounts. The old unversioned pause is cleared once; explicit opt-in and system reduced motion remain respected. Avatars and material reading share this helper. This does not change the playground's independent motion override.
 
 - `agora-rtc-react` / `agora-rtc-sdk-ng` for media transport.
 - `agora-rtm` for data channel.
@@ -85,7 +107,7 @@ Agora Cloud
 1. The profile page sends an authenticated multipart image upload.
 2. The server validates the signature/size, hashes the bytes, and reserves a material record.
 3. An unexpired match for owner/profile/hash/model/prompt is reused; otherwise the private file is stored and OpenAI extracts text.
-4. The profile page embeds the study workspace after upload, displaying the material and starting Lumi with server-loaded material context. The saved-material route reuses that workspace for history links.
+4. The profile retains its URL/header and embeds `MaterialStudyPageClient` with the upload response. `LumiMaterialLoading` displays the bundled reading WebP plus a loading caption during upload/processing, while the previous voice component is unmounted. Once ready and the current reading cycle completes (at least one full cycle), the same panel displays the original image/PDF and starts Lumi with server-loaded material context. History detail routes reuse the study component independently.
 5. The child explicitly marks completion; child history and adult report read the same record.
 6. File and text content expire lazily while metadata and completion state remain.
 
@@ -121,3 +143,5 @@ Agora Cloud
 
 - [conversation_lifecycle.md](L2/conversation_lifecycle.md) — Detailed bootstrapping and teardown timeline.
 - [transcript_pipeline.md](L2/transcript_pipeline.md) — Event mapping, UID remap, in-progress/completed segmentation.
+
+Non-didactic material classification from main is retained in persistence and DTOs (`isDidactic`, with an analysis fallback for older records). Prompt version `material-tutor-v3` invalidates pre-classification cache entries. Upload success still finishes the reading cycle before showing the adult-profile warning or the embedded study result. Processing responses that later become non-didactic must not start a child tutoring session. The shared workspace retains keyboard/close-button image preview and the history route.

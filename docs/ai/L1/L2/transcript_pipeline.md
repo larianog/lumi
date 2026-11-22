@@ -6,6 +6,8 @@
 
 Transcript and call diagnostics are delivered through AgoraVoiceAI events over RTM, then normalized for UI kit components.
 
+`lib/agora-rtm-session.ts` supplies a shared browser RTM instance through exclusive leases. Login and channel subscription complete before agent invite and `ConversationComponent` mount. On cleanup, component/toolkit listeners are removed and the lease logs out before another channel starts. Reuse the instance/UID but fetch new channel tokens; stale cleanup must not affect a later lease. The per-document UID is independent of profile/family identity and is not persisted across tabs.
+
 Primary pipeline:
 
 1. RTM/RTC data arrives.
@@ -28,6 +30,8 @@ Primary pipeline:
 If the first agent turn is interrupted and omitted, `messageList` can remain empty and transcript auto-open logic may never engage. Keeping interrupted turns preserves user-visible causality.
 
 ## Agent Visualizer Mapping
+
+Profile local avatars use a separate RTC audio activity path (`useLumiSpeechState` / `LumiSpeechDetector`). A session's generic `listening` event is not proof the user is speaking. Existing mic/remote agent levels drive idle/listening/speaking with short attack/release windows; audible agent speech wins visual overlap, and continuing user speech resumes listening once agent audio ends. Disabled mic, lost connection, or inaudible remote playback clears the corresponding activity. Transcript rendering, voice interruption behavior, and the visualizer mapping below are unchanged.
 
 `mapAgentVisualizerState` prioritizes RTC transport state before agent semantic state:
 

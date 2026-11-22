@@ -40,7 +40,7 @@ export function toStudyMaterialDto(
     subject: material.analysis?.subject,
     questionCount: material.analysis?.questions.length,
     storageKey: material.storageKey,
-    isDidactic: material.isDidactic,
+    isDidactic: material.isDidactic ?? material.analysis?.isDidactic,
   };
 }
 

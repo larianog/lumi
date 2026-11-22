@@ -102,6 +102,36 @@ async function verifyGenerateAgoraTokenReplacesZeroUid() {
   }
 }
 
+async function verifyAgoraParticipantUidBounds() {
+  const { GET } = await import('../app/api/generate-agora-token/route');
+  const { POST } = await import('../app/api/invite-agent/route');
+  const originalToken = RtcTokenBuilder.buildTokenWithRtm;
+  const originalSession = Agent.prototype.createSession;
+  let tokens = 0;
+  let starts = 0;
+  RtcTokenBuilder.buildTokenWithRtm = (() => { tokens++; return 'mock-token'; }) as typeof RtcTokenBuilder.buildTokenWithRtm;
+  Agent.prototype.createSession = function (options) {
+    assert(options.remoteUids?.[0] === '2147483647', 'Invite must preserve the largest supported participant UID');
+    return { start: async () => { starts++; return 'boundary-agent'; } } as ReturnType<Agent['createSession']>;
+  };
+  const invite = (uid: string) => POST(new NextRequest('http://localhost/api/invite-agent', {
+    method: 'POST', body: JSON.stringify({ requester_id: uid, channel_name: 'uid-boundary', avatar_mode: 'local' }),
+  }));
+  try {
+    for (const uid of ['2147483648', '2796831013', '2746931989', '4294967295']) {
+      assert((await GET(new NextRequest(`http://localhost/api/generate-agora-token?uid=${uid}`))).status === 400, 'Reject unsupported token identity without silently changing it');
+      assert((await invite(uid)).status === 400, 'Reject oversized participants before calling Agora');
+    }
+    assert(tokens === 0 && starts === 0, 'Invalid UIDs must not mint tokens or start an agent');
+    const maximum = await GET(new NextRequest('http://localhost/api/generate-agora-token?uid=2147483647'));
+    assert(maximum.status === 200 && (await maximum.json()).uid === '2147483647', 'Maximum participant UID is supported');
+    assert((await invite('2147483647')).status === 200, 'Maximum participant UID reaches the agent contract');
+  } finally {
+    RtcTokenBuilder.buildTokenWithRtm = originalToken;
+    Agent.prototype.createSession = originalSession;
+  }
+}
+
 async function verifyChatCompletionsMissingEnv() {
   const { createChatCompletionsHandler } =
     await import('../lib/chat-completions');
@@ -333,7 +363,7 @@ async function verifyInviteAgentSuccess() {
   try {
     const request = new NextRequest('http://localhost:3000/api/invite-agent', {
       body: JSON.stringify({
-        requester_id: 'user-4321',
+        requester_id: '4321',
         channel_name: 'test-channel',
       }),
       method: 'POST',
@@ -373,11 +403,41 @@ async function verifyInviteAgentSuccess() {
     );
     assert(
       JSON.stringify(sessionConfig.remoteUids) ===
-        JSON.stringify(['user-4321']),
+        JSON.stringify(['4321']),
       'POST /api/invite-agent should scope the session to the requesting user',
     );
   } finally {
     Agent.prototype.createSession = originalCreateSession;
+  }
+}
+
+async function verifyLocalAvatarInvite() {
+  const { POST: inviteAgent } = await import('../app/api/invite-agent/route');
+  const originalCreateSession = Agent.prototype.createSession;
+  const originalKey = process.env.NEXT_LEMONSLICE_API_KEY;
+  const configurations: ReturnType<Agent['toProperties']>[] = [];
+  const request = (avatarMode: unknown) => new NextRequest('http://localhost:3000/api/invite-agent', {
+    method: 'POST',
+    body: JSON.stringify({ requester_id: '4321', channel_name: 'local-avatar-contract', avatar_mode: avatarMode }),
+  });
+  Agent.prototype.createSession = function (this: Agent) {
+    configurations.push(this.toProperties({ channel: 'local-avatar-contract', agentUid: '123456', remoteUids: ['4321'], token: 'mock-token' }));
+    return { start: async () => 'mock-local-avatar-agent' } as ReturnType<Agent['createSession']>;
+  };
+  try {
+    process.env.NEXT_LEMONSLICE_API_KEY = 'mock-provider-key';
+    for (const mode of [undefined, 'provider', 'local']) {
+      assert((await inviteAgent(request(mode))).status === 200, 'Supported avatar modes must start a voice session');
+      assert(Boolean(configurations.at(-1)?.avatar) === (mode !== 'local'), 'Local mode must omit Lemon Slice even when its key exists; other modes preserve the provider');
+    }
+    for (const mode of ['unknown', null, 123]) {
+      assert((await inviteAgent(request(mode))).status === 400, 'Invalid avatar modes must be rejected');
+    }
+    assert(configurations.length === 3, 'Invalid modes must never start sessions');
+  } finally {
+    Agent.prototype.createSession = originalCreateSession;
+    if (originalKey === undefined) delete process.env.NEXT_LEMONSLICE_API_KEY;
+    else process.env.NEXT_LEMONSLICE_API_KEY = originalKey;
   }
 }
 
@@ -528,6 +588,7 @@ async function verifyMaterialAnalysis() {
 
   const analysis = {
     readable: true,
+    isDidactic: true,
     unreadableReason: '',
     title: 'Somas até 10',
     subject: 'Matemática',
@@ -590,6 +651,15 @@ async function verifyMaterialAnalysis() {
     assert(result.analysis.questions[0]?.expectedAnswer === 'SECRET-ANSWER-7', 'Material analysis should keep the answer key server-side');
     assert(result.text.includes('3 + 4 = ___'), 'Child transcript should include the question');
     assert(!result.text.includes('SECRET-ANSWER-7'), 'Child transcript must never include expected answers');
+    assert(result.analysis.isDidactic === true, 'Schoolwork must retain its didactic classification');
+
+    const unrelated = await analyzeMaterial(
+      Buffer.from([0x89, 0x50, 0x4e, 0x47]), 'image/png',
+      { age: 7, literacyLevel: 'emergent' },
+      fakeResponse({ ...analysis, isDidactic: false, questions: [] }),
+    );
+    assert(unrelated.analysis.isDidactic === false, 'Readable unrelated files must be classified for adult review');
+    assert(unrelated.analysis.questions.length === 0, 'Non-didactic content need not invent worksheet questions');
 
     let unreadableCode = '';
     try {
@@ -602,7 +672,7 @@ async function verifyMaterialAnalysis() {
     } catch (error) {
       unreadableCode = error instanceof MaterialExtractionError ? error.code : 'OTHER';
     }
-    assert(unreadableCode === 'UNREADABLE', 'Non-homework uploads should be rejected as UNREADABLE');
+    assert(unreadableCode === 'UNREADABLE', 'Unreadable uploads should be rejected as UNREADABLE');
   } finally {
     if (originalApiKey === undefined) delete process.env.OPENAI_API_KEY;
     else process.env.OPENAI_API_KEY = originalApiKey;
@@ -614,13 +684,27 @@ async function verifyMaterialAnalysis() {
 async function main() {
   await verifyGenerateAgoraTokenRoute();
   await verifyGenerateAgoraTokenReplacesZeroUid();
+  await verifyAgoraParticipantUidBounds();
+  const { verifyAgoraRtmSession } = await import('./verify-agora-rtm-session');
+  await verifyAgoraRtmSession();
   await verifyChatCompletionsMissingEnv();
   await verifyChatCompletionsInvalidJson();
   await verifyChatCompletionsSseDone();
   await verifyInviteAgentValidation();
   await verifyInviteAgentSuccess();
+  await verifyLocalAvatarInvite();
+  const { verifyLumiSpeech } = await import('./verify-lumi-speech');
+  verifyLumiSpeech();
+  const { verifyLumiTransitions } = await import('./verify-lumi-transitions');
+  await verifyLumiTransitions();
+  const { verifyLumiMotion } = await import('./verify-lumi-motion');
+  verifyLumiMotion();
+  const { verifyLumiWebP } = await import('./verify-lumi-webp');
+  await verifyLumiWebP();
   await verifyStopConversationValidation();
   await verifyStopConversationSuccess();
+  const { verifyLumiAnimation } = await import('./verify-lumi-animation');
+  await verifyLumiAnimation();
   await verifyProfileCreationValidation();
   await verifyLoginValidation();
   await verifyAdultAccessValidation();

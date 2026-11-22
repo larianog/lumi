@@ -1,11 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import { Loader2, Mic, X } from 'lucide-react';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { RTMClient } from 'agora-rtm';
 import { messages } from '@/packages/i18n';
+import { getBrowserRtmManager, startManagedConversation, stopBrowserAgent, type ManagedConversation } from '@/lib/agora-rtm-session';
 import type {
   AgentResponse,
   AgoraRenewalTokens,
@@ -14,6 +14,8 @@ import type {
 } from '@/types/conversation';
 import { ErrorBoundary } from './ErrorBoundary';
 import { LoadingSkeleton } from './LoadingSkeleton';
+import LumiConversationAvatar from './LumiConversationAvatar';
+import avatarStyles from './lumi-conversation-avatar.module.css';
 
 const ConversationComponent = dynamic(() => import('./ConversationComponent'), {
   ssr: false,
@@ -46,6 +48,7 @@ type LumiVoiceAgentProps = {
   autoStart?: boolean;
   /** `modal` = full-screen dialog; `inline` = avatar embedded in the page. */
   variant?: 'modal' | 'inline';
+  avatarMode?: 'provider' | 'local';
   onClose?: () => void;
 };
 
@@ -57,6 +60,7 @@ export default function LumiVoiceAgent({
   materialId,
   autoStart = false,
   variant = 'modal',
+  avatarMode = 'provider',
   onClose = () => {},
 }: LumiVoiceAgentProps) {
   const [showConversation, setShowConversation] = useState(false);
@@ -71,105 +75,86 @@ export default function LumiVoiceAgent({
     import('agora-rtm').catch(() => {});
   }, []);
 
-  // True once the component has really unmounted. Reset on (re)mount so the
-  // StrictMode simulated unmount does not count.
-  const unmountedRef = useRef(false);
+  const mounted = useRef(false);
+  const session = useRef<ManagedConversation | null>(null);
+  const restarting = useRef(false);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      const current = session.current;
+      session.current = null;
+      void current?.stop().catch(() => {});
+    };
+  }, []);
 
   const handleStartConversation = async () => {
-    setIsLoading(true);
-    setError(null);
-    setAgentJoinError(false);
+    if (session.current) return;
+    setIsLoading(true); setError(null); setAgentJoinError(false);
+    let current: ManagedConversation | undefined;
     try {
-      const agoraResponse = await fetch('/api/generate-agora-token');
-      const responseData = await agoraResponse.json();
-      if (!agoraResponse.ok) throw new Error(responseData.error ?? 'Agora token error');
-
-      const [agentData, rtm] = await Promise.all([
-        fetch('/api/invite-agent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            requester_id: responseData.uid,
-            channel_name: responseData.channel,
-            profile_name: profileName,
-            profile_id: profileId,
-            age,
-            activity_title: activityTitle,
-            material_id: materialId,
-          } satisfies ClientStartRequest & {
-            profile_name: string;
-            age: number;
-            activity_title: string;
-            profile_id?: string;
-            material_id?: string;
-          }),
-        })
-          .then(async (response) => {
-            if (!response.ok) {
-              setAgentJoinError(true);
-              return null;
-            }
-            return response.json() as Promise<AgentResponse>;
-          })
-          .catch(() => {
-            setAgentJoinError(true);
-            return null;
-          }),
-        (async () => {
-          const { default: AgoraRTM } = await import('agora-rtm');
-          const rtm: RTMClient = new AgoraRTM.RTM(
-            process.env.NEXT_PUBLIC_AGORA_APP_ID!,
-            responseData.uid,
-          );
-          await rtm.login({ token: responseData.token });
-          await rtm.subscribe(responseData.channel);
-          return rtm;
-        })(),
-      ]);
-
-      // The page was left while connecting: release what was just created
-      // instead of leaving an orphan RTM client (and agent) logged in.
-      if (unmountedRef.current) {
-        stopSession(agentData?.agent_id, rtm);
-        return;
+      current = startManagedConversation(getBrowserRtmManager().acquire(), async (data) => {
+        try {
+          const response = await fetch('/api/invite-agent', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              requester_id: data.uid, channel_name: data.channel,
+              profile_name: profileName, profile_id: profileId, age,
+              activity_title: activityTitle, avatar_mode: avatarMode, material_id: materialId,
+            } satisfies ClientStartRequest),
+          });
+          return response.ok ? await response.json() as AgentResponse : null;
+        } catch { return null; }
+      }, stopBrowserAgent);
+      session.current = current;
+      const live = await current.ready;
+      if (!mounted.current || session.current !== current) { await current.stop(); return; }
+      if (live.agentJoinError) {
+        await current.stop();
+        throw new Error('Lumi agent did not start');
       }
-
-      setRtmClient(rtm);
-      setAgoraData({ ...responseData, agentId: agentData?.agent_id });
+      setRtmClient(live.rtm); setAgoraData(live.data); setAgentJoinError(live.agentJoinError);
       setShowConversation(true);
     } catch (conversationError) {
-      console.error('Failed to start Lumi conversation:', conversationError);
-      setError(messages.voice.connectionError);
+      if (mounted.current && (!current || session.current === current)) {
+        session.current = null;
+        console.error('Failed to start Lumi conversation:', conversationError);
+        setError(messages.voice.connectionError);
+      }
     } finally {
-      setIsLoading(false);
+      if (mounted.current && (!session.current || session.current === current)) setIsLoading(false);
     }
   };
 
-  // The ref survives React StrictMode's simulated remount, so only one
-  // agent session is started per mount.
-  const autoStartedRef = useRef(false);
-  useEffect(() => {
-    if (!autoStart || autoStartedRef.current) return;
-    autoStartedRef.current = true;
-    void handleStartConversation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
-  }, [autoStart]);
+  const handleRetryConversation = async () => {
+    if (restarting.current) return;
+    restarting.current = true;
+    const current = session.current;
+    setShowConversation(false); setAgoraData(null); setRtmClient(null);
+    setIsLoading(true); setError(null);
+    try {
+      // Unmount RTC through its hooks, then release the RTM lease before retrying.
+      await current?.stop();
+      if (!mounted.current || session.current !== current) return;
+      session.current = null;
+      await handleStartConversation();
+    } catch {
+      if (mounted.current && session.current === current) {
+        // Keep ownership if shutdown failed, so another tap can retry cleanup.
+        setError(messages.voice.connectionError);
+        setIsLoading(false);
+      }
+    } finally { restarting.current = false; }
+  };
 
-  // Stop the agent and leave RTM when the page unmounts (e.g. the child opens
-  // an activity), so no agent keeps running in an empty channel.
-  const sessionRef = useRef<{ agentId?: string; rtm: RTMClient | null }>({ rtm: null });
   useEffect(() => {
-    sessionRef.current = { agentId: agoraData?.agentId, rtm: rtmClient };
-  }, [agoraData, rtmClient]);
-  useEffect(() => {
-    unmountedRef.current = false;
-    return () => {
-      unmountedRef.current = true;
-      const { agentId, rtm } = sessionRef.current;
-      sessionRef.current = { rtm: null };
-      stopSession(agentId, rtm);
-    };
-  }, []);
+    if (!autoStart) return;
+    // StrictMode cancels the first timer before token requests or SDK creation.
+    const timer = window.setTimeout(() => { void handleStartConversation(); }, 0);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one automatic attempt per mount
+  }, [autoStart]);
 
   const handleTokenWillExpire = useCallback(
     async (uid: string): Promise<AgoraRenewalTokens> => {
@@ -201,27 +186,19 @@ export default function LumiVoiceAgent({
   }, []);
 
   const handleEndConversation = useCallback(async () => {
-    sessionRef.current = { rtm: null }; // stopped here, skip the unmount cleanup
-    if (agoraData?.agentId) {
-      try {
-        await fetch('/api/stop-conversation', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agent_id: agoraData.agentId }),
-        });
-      } catch (stopError) {
-        console.error('Failed to stop Lumi agent:', stopError);
-      }
+    const current = session.current;
+    setShowConversation(false); setRtmClient(null); setIsLoading(true);
+    try { await current?.stop(); }
+    catch { if (mounted.current) setError(messages.voice.connectionError); }
+    finally {
+      if (session.current === current) session.current = null;
+      if (mounted.current) { setIsLoading(false); onClose(); }
     }
-    await rtmClient?.logout().catch(() => {});
-    setRtmClient(null);
-    setShowConversation(false);
-    onClose();
-  }, [agoraData, onClose, rtmClient]);
+  }, [onClose]);
 
   if (variant === 'inline') {
     return (
-      <div className="lumi-inline-host">
+      <div className={`lumi-inline-host ${avatarMode === 'local' ? avatarStyles.host : ''}`}>
         {showConversation && agoraData && rtmClient ? (
           <Suspense fallback={<LumiInlinePlaceholder status={messages.voice.starting} />}>
             <ErrorBoundary>
@@ -230,17 +207,20 @@ export default function LumiVoiceAgent({
                 <ConversationComponent
                   key={microphoneAttempt}
                   onRetryMicrophone={handleRetryMicrophone}
+                  onRetryConversation={handleRetryConversation}
                   agoraData={agoraData}
                   rtmClient={rtmClient}
                   onTokenWillExpire={handleTokenWillExpire}
                   onEndConversation={handleEndConversation}
                   variant="inline"
+                  avatarMode={avatarMode}
                 />
               </AgoraProvider>
             </ErrorBoundary>
           </Suspense>
         ) : (
-          <LumiInlinePlaceholder status={error ?? messages.voice.starting} />
+          <LumiInlinePlaceholder status={error ?? messages.voice.starting}
+            onRetry={error && !isLoading ? handleRetryConversation : undefined} />
         )}
       </div>
     );
@@ -251,7 +231,7 @@ export default function LumiVoiceAgent({
       {!showConversation ? (
         <div className="voice-precall">
           <button className="voice-close" onClick={onClose} aria-label={messages.common.close}><X size={21} /></button>
-          <div className="voice-precall-orbit"><Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={160} height={165} /></div>
+          <div className="voice-precall-orbit"><LumiConversationAvatar state="idle" idleOnly /></div>
           <span className="eyebrow">{messages.voice.title}</span>
           <h2>{messages.voice.preCall}</h2>
           <p>{messages.voice.configurationHint}</p>
@@ -269,10 +249,12 @@ export default function LumiVoiceAgent({
               <ConversationComponent
                 key={microphoneAttempt}
                 onRetryMicrophone={handleRetryMicrophone}
+                onRetryConversation={handleRetryConversation}
                 agoraData={agoraData}
                 rtmClient={rtmClient}
                 onTokenWillExpire={handleTokenWillExpire}
                 onEndConversation={handleEndConversation}
+                avatarMode={avatarMode}
               />
             </AgoraProvider>
           </ErrorBoundary>
@@ -284,32 +266,13 @@ export default function LumiVoiceAgent({
   );
 }
 
-/** Stop the agent and log the RTM client out. Safe to call with partial data. */
-function stopSession(agentId: string | undefined, rtm: RTMClient | null) {
-  if (agentId) {
-    void fetch('/api/stop-conversation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agent_id: agentId }),
-      keepalive: true,
-    }).catch(() => {});
-  }
-  void rtm?.logout().catch(() => {});
-}
-
-function LumiInlinePlaceholder({ status }: { status: string }) {
+function LumiInlinePlaceholder({ status, onRetry }: { status: string; onRetry?: () => void }) {
   return (
     <div className="lumi-inline">
-      <Image
-        className="lumi-inline-fallback"
-        src="/assets/lumi-avatar.png"
-        alt={messages.accessibility.lumiMascot}
-        width={480}
-        height={520}
-        priority
-      />
+      <LumiConversationAvatar state="idle" />
       <div className="lumi-inline-controls">
         <span className="lumi-inline-status" aria-live="polite">{status}</span>
+        {onRetry && <button className="button button-primary" onClick={onRetry}>{messages.voice.reconnect}</button>}
       </div>
     </div>
   );

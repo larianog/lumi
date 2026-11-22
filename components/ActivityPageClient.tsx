@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import LumiConversationAvatar from './LumiConversationAvatar';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, Mic, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -116,10 +116,10 @@ export default function ActivityPageClient({ activityId, profileId }: ActivityPa
         </div>
         <aside className="task-lumi">
           <div className="task-lumi-label">{activity.title}</div>
-          <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={390} height={425} />
+          {!voiceOpen && <LumiConversationAvatar state="idle" idleOnly />}
         </aside>
       </div>
-      {voiceOpen && <LumiVoiceAgent profileName={profile.firstName} age={calculateAge(profile.birthDate)} activityTitle={activity.title} onClose={() => setVoiceOpen(false)} />}
+      {voiceOpen && <LumiVoiceAgent profileName={profile.firstName} age={calculateAge(profile.birthDate)} activityTitle={activity.title} avatarMode="local" onClose={() => setVoiceOpen(false)} />}
     </section>
   );
 }
