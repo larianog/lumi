@@ -176,7 +176,6 @@ export default function MaterialStudyPageClient({
               age={calculateAge(profile.birthDate)}
               activityTitle={material.title ?? material.originalName}
               profileId={profileId}
-              lumiAvatar={profile.lumiAvatar}
               materialId={material.id}
               recording={{ profileId, materialId: material.id, title: material.title ?? material.originalName }}
               autoStart

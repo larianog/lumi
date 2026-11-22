@@ -36,7 +36,7 @@
 
 - Recordings contain children's voices. There is no separate adult password: anyone using the signed-in family session (including a child on that device) can list, play or delete them. Sign out on shared devices. Demo sessions are isolated by session id.
 - Audio is stored outside `public/` in `data/recordings/`, served with `Cache-Control: private, no-store`, and purged after `LUMI_RECORDING_RETENTION_HOURS` (default 7 days).
-- Sessions are recorded without an on-screen indicator; families should be told about recording outside the call UI.
+- The inline Lumi always shows a "Gravando" indicator while recording.
 
 ## Agent Behavior Safety
 

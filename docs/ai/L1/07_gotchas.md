@@ -19,7 +19,7 @@
 
 - Missing `NEXT_PUBLIC_AGORA_APP_ID`/`NEXT_AGORA_APP_CERTIFICATE` yields hard 500s on token/invite/stop routes.
 - `agora-agents` 2.15.0 calls `ConvoAITokenBuilder.buildToken` with a role where the token lifetime belongs, producing a one-second token. Keep server start/stop/avatar tokens on `lib/agora-agent-token.ts` until that SDK call is fixed. `RtcTokenBuilder.buildTokenWithRtm` also expects relative lifetime seconds, not a Unix timestamp. The same bug hits the SDK's per-request REST auth token, so `invite-agent` passes `authToken` to `AgoraClient`.
-- With a LemonSlice avatar enabled, the agent's audio is published by the avatar UID. If LemonSlice fails (RTM `message.error`, `module: "avatar"`), the child hears nothing; check the avatar error before debugging TTS. LemonSlice needs a plain RTC publisher token (`buildAvatarToken`); with a ConvoAI token its session request times out after 30 s.
+- With a LemonSlice avatar enabled, the agent's audio is published by the avatar UID. If LemonSlice fails (RTM `message.error`, `module: "avatar"`), the child hears nothing; check the avatar error before debugging TTS.
 - Changing the agent UID outside `lib/agora.ts` can desynchronize the browser and invite route.
 - RTM subscription failures may only surface through SAL status or raw signaling fallback events.
 

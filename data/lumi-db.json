@@ -105,8 +105,7 @@
           "lastName": "Grillo",
           "birthDate": "2023-11-25",
           "avatar": 1,
-          "createdAt": "2026-11-22T09:59:05.343Z",
-          "lumiAvatar": "princess"
+          "createdAt": "2026-11-22T09:59:05.343Z"
         }
       ],
       "createdAt": "2026-11-22T09:58:54.068Z",
@@ -396,102 +395,6 @@
   ],
   "recordings": [
     {
-      "id": "78352b95-d16d-48a7-8bc7-fd759015ea4a",
-      "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
-      "profileId": "568384fe-016c-4648-8dde-59258f2d471a",
-      "title": "Conversa livre",
-      "mimeType": "audio/webm",
-      "size": 316033,
-      "durationMs": 19631,
-      "storageKey": "78352b95-d16d-48a7-8bc7-fd759015ea4a.webm",
-      "transcript": [
-        {
-          "speaker": "lumi",
-          "text": "Oi, Lucas! Eu sou o Lumi. O que vamos descobrir juntos hoje?"
-        }
-      ],
-      "startedAt": "2026-11-22T11:20:18.076Z",
-      "createdAt": "2026-11-22T11:20:37.744Z",
-      "expiresAt": "2026-11-29T11:20:37.744Z"
-    },
-    {
-      "id": "9cbce152-6b24-45e7-8563-59a404d00924",
-      "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
-      "profileId": "568384fe-016c-4648-8dde-59258f2d471a",
-      "title": "Conversa livre",
-      "mimeType": "audio/webm",
-      "size": 642861,
-      "durationMs": 39929,
-      "storageKey": "9cbce152-6b24-45e7-8563-59a404d00924.webm",
-      "transcript": [
-        {
-          "speaker": "lumi",
-          "text": "Oi, Lucas! Eu sou o Lumi. O que vamos descobrir juntos hoje?"
-        },
-        {
-          "speaker": "child",
-          "text": "Muitas coisas."
-        },
-        {
-          "speaker": "lumi",
-          "text": "Que legal! Vamos começar com algo divertido. Você gosta de matemática?"
-        }
-      ],
-      "startedAt": "2026-11-22T11:18:50.266Z",
-      "createdAt": "2026-11-22T11:19:30.457Z",
-      "expiresAt": "2026-11-29T11:19:30.457Z"
-    },
-    {
-      "id": "9549cb26-9611-48b3-85db-999a164ffff2",
-      "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
-      "profileId": "568384fe-016c-4648-8dde-59258f2d471a",
-      "title": "Conversa livre",
-      "mimeType": "audio/webm",
-      "size": 314101,
-      "durationMs": 19577,
-      "storageKey": "9549cb26-9611-48b3-85db-999a164ffff2.webm",
-      "transcript": [
-        {
-          "speaker": "lumi",
-          "text": "Oi, Lucas! Eu sou o Lumi. O que vamos descobrir juntos hoje?"
-        }
-      ],
-      "startedAt": "2026-11-22T10:55:17.678Z",
-      "createdAt": "2026-11-22T10:55:37.370Z",
-      "expiresAt": "2026-11-29T10:55:37.370Z"
-    },
-    {
-      "id": "444b304b-673a-4754-b5f7-ceee1e35eb88",
-      "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
-      "profileId": "568384fe-016c-4648-8dde-59258f2d471a",
-      "title": "Conversa livre",
-      "mimeType": "audio/webm",
-      "size": 1727810,
-      "durationMs": 107244,
-      "storageKey": "444b304b-673a-4754-b5f7-ceee1e35eb88.webm",
-      "transcript": [
-        {
-          "speaker": "lumi",
-          "text": "Oi, Lucas! Eu sou o Lumi. O que vamos descobrir juntos hoje?"
-        },
-        {
-          "speaker": "child",
-          "text": "Alô!"
-        },
-        {
-          "speaker": "child",
-          "text": "Tudo bem?"
-        },
-        {
-          "speaker": "lumi",
-          "text": "Oi, Lucas! Tudo bem, e você? O que você quer aprender hoje?"
-        }
-      ],
-      "startedAt": "2026-11-22T10:44:33.979Z",
-      "createdAt": "2026-11-22T10:46:21.412Z",
-      "expiresAt": "2026-11-29T10:46:21.412Z"
-    },
-    {
       "id": "c3dfccf3-229a-46ab-9ef6-89d9b4ad7249",
       "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
       "profileId": "568384fe-016c-4648-8dde-59258f2d471a",
@@ -678,14 +581,6 @@
       "isDemo": false,
       "createdAt": "2026-11-22T09:58:54.069Z",
       "expiresAt": "2026-12-22T09:58:54.069Z"
-    },
-    {
-      "id": "96b504c9-b2c2-4722-8679-f3ee35c334fe",
-      "tokenHash": "41c9cecf9d166a78a7387e6afa575e2f5752ea678d13ff8d02e786e2faa45e86",
-      "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
-      "isDemo": false,
-      "createdAt": "2026-11-22T10:55:08.652Z",
-      "expiresAt": "2026-12-22T10:55:08.652Z"
     }
   ],
   "version": 3

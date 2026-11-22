@@ -11,7 +11,6 @@ import {
   Library,
   LoaderCircle,
   Send,
-  Sparkles,
   Star,
   Upload,
   WandSparkles,
@@ -245,9 +244,6 @@ export default function ProfilePage() {
           <span><Star size={18} fill="currentColor" />{starCount} estrelas</span>
         </div>
         <div className="home-profile-actions">
-          <button className="home-history-button" onClick={() => router.push(`/profile/${profileId}/avatars`)}>
-            <Sparkles size={18} />{messages.avatars.tab}
-          </button>
           <button className="home-history-button" onClick={() => router.push(`/profile/${profileId}/history`)}>
             <History size={18} />{messages.home.history}
           </button>
@@ -274,7 +270,6 @@ export default function ProfilePage() {
             age={age}
             activityTitle={messages.activities[selectedActivity].title}
             recording={profile.type === 'child' ? { profileId: profile.id, title: 'Conversa livre' } : undefined}
-            lumiAvatar={profile.lumiAvatar}
             autoStart
             variant="inline"
           />
