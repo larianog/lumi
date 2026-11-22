@@ -19,9 +19,13 @@ export type StudyMaterialDto = {
   subject?: string;
   questionCount?: number;
   storageKey?: string;
+  /** Whether the material is related to didactic/educational purposes. */
+  isDidactic?: boolean;
 };
 
 export type MaterialUploadResponse = {
   material: StudyMaterialDto;
   cached: boolean;
+  profileId?: string;
+  isDidactic?: boolean;
 };

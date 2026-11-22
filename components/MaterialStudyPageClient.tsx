@@ -133,6 +133,7 @@ export default function MaterialStudyPageClient({
         </aside>
         <article className="material-card">
           <h1 className="material-title">{messages.materials.title}</h1>
+          {!material.isDidactic && <span className="material-status-pill status-failed">Não Didático</span>}
           {material.extractionStatus === 'processing' ? (
             <div className="material-state-card">
               <LoaderCircle className="spin" size={30} />
