@@ -47,9 +47,7 @@ jobs:
         run: |
           IMAGE=$(printf '%s\n' "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Smoke-testing $IMAGE"
-          docker run -d --name smoke -p 3000:3000 \
-            -e NEXT_AGORA_APP_CERTIFICATE=fedcba9876543210fedcba9876543210 \
-            "$IMAGE"
+          docker run -d --name smoke -p 3000:3000 "$IMAGE"
           ok=""
           for i in $(seq 1 40); do
             if curl -fsS http://localhost:3000/ -o /dev/null; then ok=1; echo "OK"; break; fi
