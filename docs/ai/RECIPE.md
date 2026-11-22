@@ -54,8 +54,8 @@ Do not recreate Agora ConvoAI integration from memory. Provider schemas, SDK bui
 - `api.routes`: add browser-facing routes under `app/api`, with shared request/response types in `types/conversation.ts` when the client consumes them.
 - `api.material-extraction`: change OpenAI request/prompt behavior in `lib/material-extraction.ts`; bump the prompt version when semantics change.
 - `persistence.material-storage`: replace `lib/material-storage.ts` and JSON material persistence with durable private adapters for production deployment.
-- `prompts.system`: edit `ADA_PROMPT` and `GREETING` in `app/api/invite-agent/route.ts`.
-- `pipeline.providers`: adjust the `DeepgramSTT`, `OpenAI`, and `LumiTTS` builder chain in the invite route. `lib/lumi-tts.ts` wraps managed `MiniMaxTTS` with an explicit Portuguese language setting while preserving SDK model metadata.
+- `prompts.system`: use [the tutoring prompt spec](../specs/07-lummi-prompt-tutoria-v2.md) as the behavior reference; edit localized `messages.voice.homeworkPrompt` and `messages.voice.agentPrompt` in `packages/i18n/pt-BR.ts`. `app/api/invite-agent/route.ts` supplies profile, activity, and server-loaded lesson context.
+- `pipeline.providers`: adjust the `DeepgramSTT`, `OpenAI`, and `MiniMaxTTS` builder chain, or enable the commented BYOK blocks.
 - `ui.conversation`: customize `QuickstartPreCallCard`, `QuickstartConversationLayout`, `QuickstartTranscriptPanel`, and `QuickstartPipelineMetrics`.
 
 The optional `/playground/lumi-animation` is an additive experiment using `api.routes` and UI composition. It reuses the existing conversation lifecycle hooks without changing main-app routes or defaults. Its optional server-only Lemon Slice key is outside the base required environment contract; local motion preview needs no credentials.
