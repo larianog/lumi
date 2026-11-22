@@ -134,7 +134,8 @@ agora project doctor --deep
 - Demo uploads isolated by browser session even though the demo family is shared.
 - Automatic expiry of uploaded bytes and extracted text, with a seven-day default retention period.
 
-## Supported study materials
+Run `pnpm run verify` before shipping changes — it covers local prerequisites, lint, type safety, the core API route contracts, and the production build.
+GitHub CI installs the pnpm version declared in `package.json`.
 
 | Type | Accepted MIME type | Validation |
 | --- | --- | --- |
@@ -143,7 +144,8 @@ agora project doctor --deep
 | WebP | `image/webp` | RIFF/WebP signature |
 | PDF | `application/pdf` | `%PDF-` signature |
 
-Files are limited to 10 MB. When a file is readable, Lumi creates two related representations:
+The Docker build definition and its context-specific ignore file live together under `deploy/docker/`:
+The Dockerfile pins the same pnpm version as `package.json`.
 
 - A child-safe transcription containing the activity title, instructions, and questions.
 - A private tutoring brief containing expected answers, reasoning steps, hints, and pedagogical notes.
@@ -203,6 +205,7 @@ Agent transcript, state, metrics, and errors
   -> browser UI
 ```
 
+For uploaded study material, the browser sends multipart form data to `/api/materials` and opens the study workspace directly on the profile page, with a visible **Voltar ao perfil** control. The saved `/profile/:profileId/materials/:materialId` route remains available from history. Lumi starts an inline session grounded with server-loaded extracted text. The child explicitly completes the activity; ending the voice session alone does not mark it complete.
 The default managed agent uses:
 
 | Stage | Provider/model |

@@ -80,6 +80,7 @@ After a didactic upload, the profile page embeds `MaterialStudyPageClient` in pl
 ## Build the Container Image
 
 The Dockerfile and its Dockerfile-specific ignore rules are colocated under `deploy/docker/`. Keep the repository root as the build context:
+When changing the `packageManager` version, update both Dockerfile install stages to match.
 
 ```bash
 docker build -f deploy/docker/Dockerfile -t lumi-by-agora .

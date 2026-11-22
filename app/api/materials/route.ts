@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   getFamilyForSession,
+  hasAdultAccess,
   getStudyMaterialsByFamily,
   getStudyMaterialsByProfile,
   markStudyMaterialFailed,

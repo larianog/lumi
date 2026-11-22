@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, History, LoaderCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, History, LoaderCircle, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
@@ -12,6 +12,9 @@ import type { StudyMaterialDto } from '@/types/materials';
 type MaterialStudyPageClientProps = {
   profileId: string;
   materialId: string;
+  initialProfile?: Profile;
+  embedded?: boolean;
+  onClose?: () => void;
 };
 
 function calculateAge(birthDate: string) {
@@ -26,15 +29,19 @@ function calculateAge(birthDate: string) {
 export default function MaterialStudyPageClient({
   profileId,
   materialId,
+  initialProfile,
+  embedded = false,
+  onClose,
 }: MaterialStudyPageClientProps) {
   const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(initialProfile ?? null);
   const [material, setMaterial] = useState<StudyMaterialDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [completionError, setCompletionError] = useState('');
   const [completing, setCompleting] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const close = onClose ?? (() => router.push(`/profile/${profileId}`));
 
   const loadMaterial = useCallback(async () => {
     const response = await fetch(`/api/materials/${encodeURIComponent(materialId)}`, { cache: 'no-store' });
@@ -49,13 +56,13 @@ export default function MaterialStudyPageClient({
     const load = async () => {
       try {
         const [profileResponse, materialData] = await Promise.all([
-          fetch(`/api/profiles?profileId=${encodeURIComponent(profileId)}`, { cache: 'no-store' }),
+          initialProfile ? Promise.resolve(null) : fetch(`/api/profiles?profileId=${encodeURIComponent(profileId)}`, { cache: 'no-store' }),
           loadMaterial(),
         ]);
-        if (!profileResponse.ok) throw new Error('Perfil não encontrado.');
-        const profileData = await profileResponse.json() as { profile: Profile };
+        if (profileResponse && !profileResponse.ok) throw new Error('Perfil não encontrado.');
+        const profileData = profileResponse ? await profileResponse.json() as { profile: Profile } : null;
         if (!cancelled) {
-          setProfile(profileData.profile);
+          setProfile(profileData?.profile ?? initialProfile ?? null);
           setMaterial(materialData);
         }
       } catch (error) {
@@ -66,7 +73,7 @@ export default function MaterialStudyPageClient({
     };
     void load();
     return () => { cancelled = true; };
-  }, [loadMaterial, profileId]);
+  }, [initialProfile, loadMaterial, profileId]);
 
   useEffect(() => {
     if (material?.extractionStatus !== 'processing') return;
@@ -75,6 +82,15 @@ export default function MaterialStudyPageClient({
     }, 1800);
     return () => window.clearInterval(interval);
   }, [loadMaterial, material?.extractionStatus]);
+
+  useEffect(() => {
+    if (!showImageModal) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowImageModal(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [showImageModal]);
 
   const completeMaterial = async () => {
     if (!material || material.completedAt || completing) return;
@@ -96,21 +112,22 @@ export default function MaterialStudyPageClient({
     }
   };
 
-  if (loading) return <MaterialPageState message={messages.common.loading} />;
+  if (loading) return <MaterialPageState message={messages.common.loading} action={embedded ? close : undefined} embedded={embedded} />;
   if (!profile || !material) {
-    return <MaterialPageState message={loadError || 'Material não encontrado.'} action={() => router.push(`/profile/${profileId}`)} />;
+    return <MaterialPageState message={loadError || 'Material não encontrado.'} action={close} embedded={embedded} />;
   }
 
   const ready = material.extractionStatus === 'ready' && Boolean(material.extractedText) && !material.purgedAt;
+  const materialFileUrl = `/api/materials/${encodeURIComponent(material.id)}/file`;
 
   return (
-    <section className="material-screen">
+    <section className={embedded ? 'profile-material-workspace' : 'material-screen'}>
       <header className="activity-header material-header">
-        <button className="back-button" onClick={() => router.push(`/profile/${profileId}`)}>
-          <ArrowLeft size={19} />{messages.common.back}
+        <button className="back-button" type="button" onClick={close}>
+          <ArrowLeft size={19} />{embedded ? 'Voltar ao perfil' : messages.common.back}
         </button>
-        <Brand size="small" />
-        <button className="material-history-link" onClick={() => router.push(`/profile/${profileId}/history`)}>
+        {!embedded && <Brand size="small" />}
+        <button className="material-history-link" type="button" onClick={() => router.push(`/profile/${profileId}/history`)}>
           <History size={18} />{messages.materials.history}
         </button>
       </header>
@@ -143,26 +160,31 @@ export default function MaterialStudyPageClient({
           ) : material.extractionStatus === 'failed' ? (
             <div className="material-state-card material-state-error">
               <strong>{messages.materials.failed}</strong>
-              <button className="button button-secondary" onClick={() => router.push(`/profile/${profileId}`)}>
-                {messages.common.back}
+              <button className="button button-secondary" onClick={close}>
+                {embedded ? 'Voltar ao perfil' : messages.common.back}
               </button>
             </div>
           ) : material.purgedAt || !material.extractedText ? (
             <div className="material-state-card material-state-error"><strong>{messages.materials.expired}</strong></div>
           ) : (
             <>
-              <div className="material-original-file" onClick={() => setShowImageModal(true)}>
-                <img
-                  src={`/api/materials/${encodeURIComponent(material.id)}/file`}
-                  alt={material.originalName}
-                  loading="lazy"
-                />
-              </div>
-              {showImageModal && (
-                <div className="image-modal-overlay" onClick={() => setShowImageModal(false)}>
+              {material.mimeType === 'application/pdf' ? (
+                <object className="material-pdf" data={materialFileUrl} type="application/pdf" aria-label={material.originalName}>
+                  <a href={materialFileUrl} target="_blank" rel="noopener noreferrer">Abrir material PDF</a>
+                </object>
+              ) : (
+                <button className="material-original-file" type="button" aria-label="Ampliar material" onClick={() => setShowImageModal(true)}>
+                  <img src={materialFileUrl} alt={material.originalName} loading="lazy" />
+                </button>
+              )}
+              {material.mimeType !== 'application/pdf' && showImageModal && (
+                <div className="image-modal-overlay" role="dialog" aria-modal="true" aria-label="Material ampliado" onClick={() => setShowImageModal(false)}>
                   <div className="image-modal" onClick={(e) => e.stopPropagation()}>
+                    <button className="image-modal-close" type="button" aria-label="Fechar material ampliado" autoFocus onClick={() => setShowImageModal(false)}>
+                      <X size={22} />
+                    </button>
                     <img
-                      src={`/api/materials/${encodeURIComponent(material.id)}/file`}
+                      src={materialFileUrl}
                       alt={material.originalName}
                       style={{ maxWidth: '90vw', maxHeight: '90vh' }}
                     />
@@ -189,13 +211,13 @@ export default function MaterialStudyPageClient({
   );
 }
 
-function MaterialPageState({ message, action }: { message: string; action?: () => void }) {
+function MaterialPageState({ message, action, embedded = false }: { message: string; action?: () => void; embedded?: boolean }) {
   return (
-    <section className="material-screen">
-      <div className={action ? 'error-message' : 'loading-spinner'}>
-        {!action && <div className="spinner" />}
+    <section className={embedded ? 'profile-material-workspace' : 'material-screen'}>
+      <div className={action && message !== messages.common.loading ? 'error-message' : 'loading-spinner'}>
+        {message === messages.common.loading && <div className="spinner" />}
         <p>{message}</p>
-        {action && <button className="button button-primary" onClick={action}>{messages.common.back}</button>}
+        {action && <button className="button button-primary" onClick={action}>{embedded ? 'Voltar ao perfil' : messages.common.back}</button>}
       </div>
     </section>
   );
