@@ -33,6 +33,9 @@ export async function POST(request: NextRequest) {
     if (!channelName || !requesterId) {
       return NextResponse.json({ error: 'channel_name and requester_id are required' }, { status: 400 });
     }
+    if (body.avatar_mode !== undefined && body.avatar_mode !== 'provider' && body.avatar_mode !== 'local') {
+      return NextResponse.json({ error: 'avatar_mode must be provider or local' }, { status: 400 });
+    }
 
     let profileName = body.profile_name?.trim().slice(0, 40) || 'explorador';
     let age = Math.min(10, Math.max(6, Number(body.age) || 8));
@@ -132,7 +135,7 @@ export async function POST(request: NextRequest) {
       );
 
     const lemonSliceApiKey = process.env.NEXT_LEMONSLICE_API_KEY;
-    if (lemonSliceApiKey) {
+    if (lemonSliceApiKey && body.avatar_mode !== 'local') {
       const lumiImage = await readFile(join(process.cwd(), 'public/assets/lumi-avatar.png'));
       agent = agent.withAvatar(
         new LemonSlice({

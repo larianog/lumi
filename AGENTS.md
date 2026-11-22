@@ -40,6 +40,7 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 
 - Run from the repo root with `pnpm run dev`.
 - Next.js serves the app and the route handlers at `http://localhost:3000`.
+- For LAN previews bind to `0.0.0.0`, not `127.0.0.1`. Voice on a remote device needs a secure context; `pnpm run dev:lan` enables development HTTPS, with a certificate trusted by that device. LAN access does not publish the app on the internet.
 - Local credentials are read from `.env.local`, usually written by `agora project env write .env.local`.
 - Material extraction additionally requires server-only `OPENAI_API_KEY` values.
 
@@ -63,15 +64,29 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 
 ## Key Files
 
+- `app/playground/lumi-animation/page.tsx`: additive animation lab; leave the main route/navigation intact when experimenting.
+- `components/playground/`: local motion preview, scoped CSS, and isolated Lemon Slice test-session bootstrap. The existing `ConversationComponent` retains RTC hook ownership.
+- `app/api/playground/lumi-animation/route.ts`: optional live-test route with validated prompts, a fixed local image, and separate `lumi-animation-*` channels. Requires server-only `NEXT_LEMONSLICE_API_KEY` plus Agora credentials; it does not change the base environment contract.
+- `lib/lumi-animation.ts`: experiment presets and validation. Changes here do not apply to the production invite route. `scripts/verify-lumi-animation.ts` runs through `verify:api`.
+- `components/playground/LumiVideoStates.tsx` + `lib/lumi-video-states.ts`: default local video-state lab, six-state production brief, and in-memory file selection. Only the active state plays; hidden tabs pause playback. No voice sessions or uploads occur in this mode. Follow `docs/lumi-video-states.md` for alpha formats and the future event integration boundary.
+- `public/assets/lumi/states/lummi-transparente.webp` (speaking) and `lummi-transparente-02.webp` (listening): supplied animations, each with 192 frames, about 8 seconds and alpha, registered in `BUNDLED_LUMI_VIDEO_CLIPS` and shared by profiles and the lab. Keep the exact supplied bytes and registry metadata. The earlier `speaking.mp4` remains an asset but is no longer selected. Temporary playground replacements do not change profile defaults.
+- In video mode, reduced motion blocks autoplay only: keep manual play and **Simular conversa** enabled. A deliberate click enables motion for this page; reset that override on system preference changes or reload. Stopping the simulation pauses its video too.
+- Video simulation snapshots only loaded, error-free clips when starting; skip missing states, including greeting. Finish paused on idle if available, otherwise on the last displayed state. Removing/replacing a clip cancels the sequence.
+- The same file input accepts static/animated WebP. Shared `components/LumiWebPClip.tsx` renders it as an unoptimized image, accepts the caller's CSS class, shows a static first frame when paused/hidden/reduced-motion blocked, and allocates/revokes a new blob URL per replay. WebP speed/repeats come from the file; disable video speed for it. Manual WebP has no ended-to-idle event; timed simulation still switches states.
+- `lib/lumi-webp.ts` shares bundled downloads across StrictMode and placeholder/live avatar remounts. Do not abort that shared download when one subscriber leaves. Local uploads still use abort cleanup; temporary decode/replay URLs are always revoked. Failed loads are evicted; the profile's **Recarregar** clears statuses and remounts players to refetch. Test this lifecycle through `verify:api`.
+
 - `app/api/generate-agora-token/route.ts`: issues RTC + RTM tokens for the browser user.
 - `app/api/invite-agent/route.ts`: starts the managed agent session; edit here for system prompt, VAD, model, or voice changes.
+- Profile pages opt into `avatarMode="local"`, forwarded as `avatar_mode: "local"` to the invite route. This mode must omit Lemon Slice even if its key exists; omitted/`provider` preserves existing callers. `verify:api` checks both paths.
+- `LumiConversationAvatar` + `useLumiSpeechState` + `lib/lumi-speech.ts`: profile idle/listening/speaking poses from existing RTC microphone/agent audio levels. Do not map the agent's generic `listening` state to user speech. Keep short attack/release windows, agent-speech priority over microphone activity, mute/reconnect clearing, and no motion during silence. Once agent playback ends, ongoing user speech selects listening. This visual priority does not change voice interruption behavior. Preload both listening/speaking clips with independent ready/error status, animate only the active state, and use the still image as fallback (tilted during listening).
+- Profile explicit play/pause is stored as `lumi-avatar-motion` in tab `sessionStorage` so entering the conversation does not reset it; system motion preference changes clear the choice. Storage failures fall back to in-memory state. Keep an accessible, visible enable/reload action rather than silently remaining on the fallback image.
 - `app/api/stop-conversation/route.ts`: stops the agent session.
 - `app/api/chat/completions/route.ts`: optional OpenAI-compatible SSE proxy for a custom LLM (not wired by default).
 - `app/api/materials/route.ts`: validates and hashes image uploads, reuses cached extraction, calls the OpenAI vision model, and lists material history.
 - `app/api/materials/[id]/route.ts`: returns authorized material detail and records explicit completion.
 - `app/profile/[id]/history/page.tsx`: child material history.
 - `app/profile/[id]/materials/[materialId]/page.tsx`: saved-material study route used by history.
-- `components/MaterialStudyPageClient.tsx`: shared study workspace, embedded on the profile page after upload and used by the saved-material route.
+- `components/MaterialStudyPageClient.tsx`: shared study workspace with local Lumi animations, embedded on the profile page after upload and used by the saved-material route.
 - `components/LandingPage.tsx`: session bootstrap, RTM setup, provider wiring, and conversation lifecycle.
 - `components/ConversationComponent.tsx`: RTC join, mic publication, `AgoraVoiceAI` init, transcript state, and renewals.
 - `components/QuickstartConversationLayout.tsx`: in-call header, transcript rail, and controls dock.
@@ -81,7 +96,7 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `lib/agora.ts`: shared agent UID defaults.
 - `lib/conversation.ts`: transcript normalization and visualizer state mapping.
 - `lib/material-extraction.ts`: server-only multimodal extraction request and response validation.
-- Homework tutoring: `analyzeMaterial` returns a child-safe `extractedText` and a server-only `analysis` (expected answers, steps, hints). Never add `analysis` to DTOs. `invite-agent` switches to `messages.voice.homeworkPrompt` when a material has an analysis. Uploads require adult access.
+- Homework tutoring: `analyzeMaterial` returns a child-safe `extractedText` and a server-only `analysis` (expected answers, steps, hints). Never add `analysis` to DTOs. `invite-agent` switches to `messages.voice.homeworkPrompt` when a material has an analysis. Uploads require a family session and owned child profile, without an additional adult-password step; family-wide history still requires recent adult access. The study workspace explicitly uses `avatarMode="local"` alongside `profileId` and `materialId`.
 - `lib/material-storage.ts`: private temporary local file cache.
 - `lib/study-materials.ts`: ownership, shared-demo isolation, DTO, and expiry helpers.
 - `config/env/env.local.example`: local environment template.
@@ -144,7 +159,7 @@ useEffect(() => {
 
 ### Study Material Pipeline
 
-- Accept only signature-validated JPEG, PNG, and WebP images up to 8 MB.
+- Accept only signature-validated JPEG, PNG, WebP, or PDF files up to 10 MB.
 - Cache by owner scope, profile, SHA-256, vision model, and extraction prompt version.
 - Load extracted text server-side when grounding Lumi; never trust browser-supplied source text.
 - Treat extracted document text as untrusted data, not agent instructions.

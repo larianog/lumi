@@ -4,6 +4,18 @@
 
 ## Critical Runtime Pitfalls
 
+- Profile avatar poses follow actual RTC audio levels, not the toolkit's generic ready-to-listen state. Silence/thinking must be stationary. Audible agent speech takes visual priority during overlap, including microphone pickup of the speaker; ongoing user speech selects listening after agent speech ends. Mute, lost connection, stopped/blocked playback clear speech activity. Level thresholds are heuristics and may respond to loud background noise. Never create another microphone track or take ownership of SDK cleanup for animation.
+- Local profile mode must send `avatar_mode: "local"`; merely hiding a provider video would still create a paid avatar. Manual playground uploads do not propagate to profiles. Speaking uses `lummi-transparente.webp` and listening uses `lummi-transparente-02.webp`, preserved as supplied; never assume the earlier MP4 is still selected or render WebP with `<video>`. Keep ready/error status per clip and stop the previous animation when speech state changes.
+
+- Playground Local 2D is a body-motion study, not Lemon Slice output or phoneme lip sync. Motion prompts influence generated video without guaranteeing gestures. Watch both speech and idle intervals in real sessions.
+- Closing the playground during startup must collect a late invite's agent ID and stop it. Do not abort the invite response and lose that ID. RTM failure prevents inviting an agent; explicit stop failure keeps a retry available.
+- All playground CSS stays in its CSS Module. No playground-specific rules belong in the global Lumi stylesheet.
+- Video states are a local simulation, not real Agora state binding. MP4 container support does not imply alpha support; the player neither removes backgrounds nor converts codecs. Keep an image fallback for missing/unsupported clips, mute all videos, pause hidden elements, and revoke object URLs after use. Replacing/removing a clip must ignore late events from the old URL.
+- Do not disable the video simulation/play buttons for `prefers-reduced-motion`. Suppress autoplay, explain the paused state, and let a user click enable playback for that page. Reset this override when the system preference changes or the page reloads; stopping simulation must pause playback as well.
+- Do not start video simulation with a fixed greeting or finish on a missing idle clip. Build the sequence from loaded, error-free clips; with both defaults ready, simulate listening → speaking → listening and finish paused on listening.
+- WebP is rendered as an image, not `<video>`. Native animated images have no video pause/rate/ended controls. Use the static first-frame preview while paused or hidden, restart with a fresh blob URL, and keep the speed control disabled. WebP repeat counts remain file-defined; manual playback does not automatically return to idle. Do not optimize away animation or leave an animated image visible under reduced motion without an explicit play request.
+- A canceled WebP request during avatar replacement is different from a missing public file. Bundled loads are shared and survive subscriber cleanup; do not reintroduce per-avatar aborts for them. Preserve cleanup for local uploads and blob URLs. Failed profile loads need refetch/remount, not just a new replay counter. Explicit motion choices must survive the placeholder-to-live transition.
+
 - Using RTC-only token generation breaks RTM login and transcript/state events.
 - Removing `isReady` guard can trigger StrictMode double-initialization and duplicate/missing tracks.
 - Manual `client.leave()` conflicts with `useJoin` cleanup contract.

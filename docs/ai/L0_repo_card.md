@@ -18,6 +18,16 @@
 
 ## L1 — Summaries
 
+Integration review on 2026-11-21 combines the material upload/history/tutoring flow from main with local profile and material-study animations. Invites preserve both material grounding identifiers and `avatar_mode`; upload password removal does not remove the adult check on family-wide history. Local database sessions are preserved separately from the merge commit.
+
+Review scope on 2026-11-21 includes the animation playground, local video/WebP workflow, and profile avatars driven by RTC speech activity. Profiles explicitly request local avatars without Lemon Slice; omitted invite avatar mode preserves provider defaults.
+
+The bundled assets are `lummi-transparente.webp` for speaking and `lummi-transparente-02.webp` for listening (each 192 frames, alpha, approximately 8 seconds), rendered by a shared WebP component in both profiles and the playground. Profiles preload both clips and animate only the active speech state; silence remains still. The earlier MP4 is not the default.
+
+The reviewed avatar loading flow shares bundled downloads across placeholder/live remounts, exposes failed-load recovery, and retains explicit motion choices per tab. LAN previews require a network binding; microphone use on another device requires HTTPS.
+
+The profile's visual state gives audible agent speech priority over microphone activity; listening resumes after agent speech ends if the user is still talking. RTC voice interruption behavior is unchanged.
+
 The Audience column helps agents prioritise: **Use** = consuming the repo behavior, **Maintain** = changing internals.
 
 | File | Purpose | Audience |

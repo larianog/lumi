@@ -35,7 +35,7 @@
 
 ## Material Conventions
 
-- Accept only JPEG, PNG, and WebP images whose signatures match the declared MIME type, capped at 8 MB.
+- Accept only JPEG, PNG, and WebP images or PDF files whose signatures match the declared MIME type, capped at 10 MB.
 - Build cache identity from owner scope, child profile, SHA-256, vision model, and extraction prompt version.
 - Never place uploads under `public/`, return storage keys, or log uploaded/extracted content.
 - Load material text on the server before building voice-agent instructions and delimit it as untrusted reference text.

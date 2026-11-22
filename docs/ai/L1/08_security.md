@@ -45,6 +45,11 @@
 
 ## Known Limits
 
+- The optional playground live-test endpoint has the same sample-app authentication limits as the existing invite endpoint and consumes provider usage. Apply the same deployment access controls to it. It bounds prompts, accepts only experiment channel names and the fixed local image, returns sanitized provider errors, and exposes only a credential-availability boolean. `NEXT_LEMONSLICE_API_KEY` stays server-only; exported recipes contain no credentials.
+- Video-state file selections remain browser-local object URLs and are never uploaded or persisted. Accepted local formats are WebP/WebM/MP4/MOV, bounded to 40 MB per clip; actual decoding compatibility is checked by the browser. WebP preview/replay blob URLs are also released after use. Exported manifests contain filenames and production hints, not file bytes or reusable object URLs.
+- Bundled defaults such as `public/assets/lumi/states/lummi-transparente.webp` are public static project assets. They are distinct from browser-local overrides; exported manifests may include their public asset paths.
+- The bundled WebP cache retains only registered public asset Blobs in page memory; it does not retain local uploads or credentials. Profile `sessionStorage` stores only the `lumi-avatar-motion` on/off preference.
+
 - This quickstart is a sample app; it does not implement user auth/tenant isolation.
 - If productionizing, add authenticated route access and per-user authorization checks.
 

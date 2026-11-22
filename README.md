@@ -128,6 +128,8 @@ pnpm run verify         # doctor + lint + typecheck + verify:api + build
 
 Run `pnpm run verify` before shipping changes — it covers local prerequisites, lint, type safety, the core API route contracts, and the production build.
 
+For another device on the same LAN, run `pnpm run dev --hostname 0.0.0.0 --port 3000` and open `http://<computer-ip>:3000`. Binding to `127.0.0.1` only permits this computer. HTTP over a LAN IP supports visual previews but not browser microphone access; use the existing `pnpm run dev:lan` HTTPS mode with a certificate trusted by the testing device for voice. A LAN address is not an internet deployment.
+
 ### Container build
 
 The Docker build definition and its context-specific ignore file live together under `deploy/docker/`:
@@ -159,13 +161,43 @@ Study-material images are uploaded to the authenticated `/api/materials` route. 
 
 ## How It Works
 
+### Lumi animation playground
+
+Open [http://localhost:3000/playground/lumi-animation](http://localhost:3000/playground/lumi-animation) after `pnpm run dev`.
+This standalone lab adds no navigation or styling changes to the main Lumi experience.
+
+- **Vídeos por estado (default):** opens on **Falando** with `public/assets/lumi/states/lummi-transparente.webp`; **Escutando** uses `lummi-transparente-02.webp` in the same directory. Both supplied animated WebPs have 192 frames, about 8 seconds, and alpha, preserved byte-for-byte. Load local WebP/WebM/MP4/MOV overrides for any state, preview animations, pause/replay, inspect backgrounds, and simulate a conversation without API calls. Local overrides stay in page memory across playground tabs; reload or **Restaurar vídeo padrão** restores bundled defaults. The remaining four states await clips. See the [Lumi video production guide](docs/lumi-video-states.md) for the six-state brief and alpha formats.
+- **Local 2D:** preview breathing, listening, thinking, speaking and celebration body motions; adjust intensity/speed, pause, play a sequence and compare with the original image. This is a silent motion study, not lip sync or a prediction of Lemon Slice output. Device reduced-motion preferences are respected.
+- **Lemon Slice:** compare the current prompt with `Mais presente` and `Expressiva`, edit speaking/idle prompts, choose an aspect ratio, then explicitly start a real test conversation. Each test uses its own `lumi-animation-*` channel and ends when its dialog closes. Tests consume Agora/Lemon Slice account usage.
+- **Exportar ajustes:** download the local motion values and Lemon Slice parameters as JSON. Exporting does not apply anything to the main app.
+
+Local preview needs no credentials. Live tests require the existing Agora variables plus the optional server-only `NEXT_LEMONSLICE_API_KEY` in `.env.local`; restart the server after changing it. No key is entered in the browser. The separate `/api/playground/lumi-animation` route uses the existing Lumi image and a fixed test greeting for comparisons. It leaves `/api/invite-agent` unchanged.
+
+Video states are currently simulated, not wired to real Agora state events. Ordinary MP4 does not automatically provide a transparent background; deliver WebM with alpha and an HEVC-alpha variant for compatible Safari devices. The player does not remove backgrounds or convert formats. Clips are muted; the speaking loop is not phoneme lip sync. The video workflow avoids avatar-provider generation, while any future voice session still has its own costs.
+
+In video mode, reduced-motion preferences pause automatic playback but keep **Simular conversa** and manual playback available. Clicking either explicitly enables playback for the current page; reload or a change in the system preference resets that choice. **Parar simulação** stops both the sequence and the current video.
+
+The simulation includes only states with loaded, playable clips. With both bundled assets ready, it runs **Escutando → Falando → Escutando**, skipping **Saudação** and the other missing states. On completion it pauses on **Repouso** if available, otherwise on the last displayed state.
+
+The same tab also accepts static or animated **WebP**, including alpha transparency, up to 40 MB. WebP participates in the state simulation. Pausing or hiding it displays a still first-frame preview; resuming/restarting plays from the beginning. WebP speed and repeat count come from the file, so the video speed control is disabled for it. Manual WebP playback does not automatically return to idle on completion; use state selection or the timed simulation. These files stay browser-local too. See [Google's WebP documentation](https://developers.google.com/speed/webp/faq).
+
+Start with `Mais presente`, repeat the same spoken phrase, then wait silently to observe idle behavior. Motion prompts are suggestions, so evaluate the actual video; they do not guarantee individual gestures. See the [Agora Lemon Slice guide](https://docs.agora.io/en/ai/platform/models/avatar/lemonslice) and [Lemon Slice plugin parameter guidance](https://docs.livekit.io/agents/models/avatar/plugins/lemonslice/). `pnpm run verify:api` includes the playground route contracts without creating real sessions.
+
+### Main conversation
+
+Profile pages (`/profile/[id]`, including `/profile/demo-lia`) use the bundled local Lumi animations under `public/assets/lumi/states/`. Silence/thinking shows a still image; microphone speech plays `lummi-transparente-02.webp` (listening); audible agent speech plays `lummi-transparente.webp` (speaking). The shared WebP renderer preloads both files and animates only the active state; leaving that state stops its animation. The still image is the fallback for missing, failed, paused, or reduced-motion clips. Short audio gaps are smoothed. Agent speech has visual priority over simultaneous microphone activity; once the agent stops, continuing user speech selects listening. Mute/disconnect/blocked audio clear the corresponding speech state. Speech detection uses audio-level thresholds on the existing RTC tracks, so background noise may affect it.
+
+The profile sends `avatar_mode: "local"` to `/api/invite-agent`, which omits Lemon Slice even when its key is configured. Agora voice/STT/LLM/TTS remain active. Omitted or `"provider"` mode preserves the previous provider behavior for other interfaces. Profile animation pauses when the page is hidden; reduced-motion preferences start it still, and the animation button can enable/pause movement without muting voice. Temporary playground uploads do not replace the profile's bundled asset.
+
+Bundled WebP downloads are shared across the placeholder and live avatar, so starting a conversation does not cancel/restart them. A failed animation shows **Recarregar**, which downloads the files again. **Animar Lumi** is visible when movement is disabled; an explicit play/pause choice is kept in this tab's `sessionStorage` across remounts and reloads, and cleared when the system motion preference changes. The playground's own motion controls remain independent.
+
 1. The browser requests an RTC + RTM token from `/api/generate-agora-token`.
 2. The backend invites an Agora cloud agent with `/api/invite-agent`.
 3. The browser joins the channel and publishes mic audio.
 4. The client receives transcript, agent state, and `AGENT_METRICS` (per-stage latency) events over RTM.
 5. On end, the client calls `/api/stop-conversation`, logs out RTM, and unmounts the call view so Agora React hooks clean up RTC publish/join and the local microphone track.
 
-For uploaded study material, the browser sends multipart form data to `/api/materials` and opens the study workspace directly on the profile page, with a visible **Voltar** control in the profile header. The saved `/profile/:profileId/materials/:materialId` route remains available from history. Lumi starts an inline session grounded with server-loaded extracted text. The child explicitly completes the activity; ending the voice session alone does not mark it complete.
+For uploaded study material, the browser sends multipart form data to `/api/materials` and opens the study workspace directly on the profile page, with a visible **Voltar** control in the profile header. The saved `/profile/:profileId/materials/:materialId` route remains available from history. Lumi starts an inline session grounded with server-loaded extracted text and uses the local listening/speaking WebPs, passing `avatar_mode: "local"` with the profile and material IDs. Uploads accept JPEG/PNG/WebP/PDF up to 10 MB and require a family session with an owned child profile, without an additional adult-password step. Family-wide history remains protected by adult verification. The child explicitly completes the activity; ending the voice session alone does not mark it complete.
 
 ## Optional BYOK
 
@@ -192,7 +224,7 @@ NEXT_ELEVENLABS_VOICE_ID=...
 - `app/api/materials/route.ts` — uploads, validates, deduplicates, extracts, and lists study material
 - `app/api/materials/[id]/route.ts` — returns material detail and records completion
 - `app/profile/[id]/history/page.tsx` — child material history
-- `app/profile/[id]/materials/[materialId]/page.tsx` — extracted-text study workspace
+- `app/profile/[id]/materials/[materialId]/page.tsx` — study workspace with the uploaded image and local Lumi animations
 - `config/env/env.local.example` — tracked local environment template
 - `deploy/docker/` — container build definition and Docker-specific ignore rules
 - `docs/assets/architecture/` — light and dark architecture diagrams

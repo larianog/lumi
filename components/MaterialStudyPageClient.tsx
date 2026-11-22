@@ -143,6 +143,7 @@ export default function MaterialStudyPageClient({
               materialId={material.id}
               autoStart
               variant="inline"
+              avatarMode="local"
             />
           ) : (
             <div className="material-lumi-placeholder"><LoaderCircle className="spin" size={38} /></div>
