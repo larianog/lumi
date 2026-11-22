@@ -102,6 +102,36 @@ async function verifyGenerateAgoraTokenReplacesZeroUid() {
   }
 }
 
+async function verifyAgoraParticipantUidBounds() {
+  const { GET } = await import('../app/api/generate-agora-token/route');
+  const { POST } = await import('../app/api/invite-agent/route');
+  const originalToken = RtcTokenBuilder.buildTokenWithRtm;
+  const originalSession = Agent.prototype.createSession;
+  let tokens = 0;
+  let starts = 0;
+  RtcTokenBuilder.buildTokenWithRtm = (() => { tokens++; return 'mock-token'; }) as typeof RtcTokenBuilder.buildTokenWithRtm;
+  Agent.prototype.createSession = function (options) {
+    assert(options.remoteUids?.[0] === '2147483647', 'Invite must preserve the largest supported participant UID');
+    return { start: async () => { starts++; return 'boundary-agent'; } } as ReturnType<Agent['createSession']>;
+  };
+  const invite = (uid: string) => POST(new NextRequest('http://localhost/api/invite-agent', {
+    method: 'POST', body: JSON.stringify({ requester_id: uid, channel_name: 'uid-boundary', avatar_mode: 'local' }),
+  }));
+  try {
+    for (const uid of ['2147483648', '2796831013', '2746931989', '4294967295']) {
+      assert((await GET(new NextRequest(`http://localhost/api/generate-agora-token?uid=${uid}`))).status === 400, 'Reject unsupported token identity without silently changing it');
+      assert((await invite(uid)).status === 400, 'Reject oversized participants before calling Agora');
+    }
+    assert(tokens === 0 && starts === 0, 'Invalid UIDs must not mint tokens or start an agent');
+    const maximum = await GET(new NextRequest('http://localhost/api/generate-agora-token?uid=2147483647'));
+    assert(maximum.status === 200 && (await maximum.json()).uid === '2147483647', 'Maximum participant UID is supported');
+    assert((await invite('2147483647')).status === 200, 'Maximum participant UID reaches the agent contract');
+  } finally {
+    RtcTokenBuilder.buildTokenWithRtm = originalToken;
+    Agent.prototype.createSession = originalSession;
+  }
+}
+
 async function verifyChatCompletionsMissingEnv() {
   const { createChatCompletionsHandler } =
     await import('../lib/chat-completions');
@@ -333,7 +363,7 @@ async function verifyInviteAgentSuccess() {
   try {
     const request = new NextRequest('http://localhost:3000/api/invite-agent', {
       body: JSON.stringify({
-        requester_id: 'user-4321',
+        requester_id: '4321',
         channel_name: 'test-channel',
       }),
       method: 'POST',
@@ -373,7 +403,7 @@ async function verifyInviteAgentSuccess() {
     );
     assert(
       JSON.stringify(sessionConfig.remoteUids) ===
-        JSON.stringify(['user-4321']),
+        JSON.stringify(['4321']),
       'POST /api/invite-agent should scope the session to the requesting user',
     );
   } finally {
@@ -644,6 +674,9 @@ async function verifyMaterialAnalysis() {
 async function main() {
   await verifyGenerateAgoraTokenRoute();
   await verifyGenerateAgoraTokenReplacesZeroUid();
+  await verifyAgoraParticipantUidBounds();
+  const { verifyAgoraRtmSession } = await import('./verify-agora-rtm-session');
+  await verifyAgoraRtmSession();
   await verifyChatCompletionsMissingEnv();
   await verifyChatCompletionsInvalidJson();
   await verifyChatCompletionsSseDone();
@@ -652,6 +685,10 @@ async function main() {
   await verifyLocalAvatarInvite();
   const { verifyLumiSpeech } = await import('./verify-lumi-speech');
   verifyLumiSpeech();
+  const { verifyLumiTransitions } = await import('./verify-lumi-transitions');
+  await verifyLumiTransitions();
+  const { verifyLumiMotion } = await import('./verify-lumi-motion');
+  verifyLumiMotion();
   const { verifyLumiWebP } = await import('./verify-lumi-webp');
   await verifyLumiWebP();
   await verifyStopConversationValidation();

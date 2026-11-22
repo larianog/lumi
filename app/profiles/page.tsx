@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import LumiConversationAvatar from '@/components/LumiConversationAvatar';
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Plus, ShieldCheck } from 'lucide-react';
@@ -108,7 +108,7 @@ export default function ProfilesPage() {
         <p>{messages.profiles.subtitle}</p>
       </div>
       <div className="picker-lumi">
-        <Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={420} height={460} priority />
+        <LumiConversationAvatar state="idle" idleOnly />
       </div>
       <div className="profile-shelf" aria-busy={Boolean(selectedProfile)}>
         <div className="profile-grid">

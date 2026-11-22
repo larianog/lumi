@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import LumiConversationAvatar from '@/components/LumiConversationAvatar';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CalendarDays, CheckCircle2, FileText, Plus, Star } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -88,7 +88,7 @@ export default function ReportPage() {
         <div className="report-content">
           <div className="report-hero">
             <div><span className="eyebrow">{selectedChild?.firstName}</span><strong>{childCompletions.length + completedMaterials.length}</strong><p>{messages.report.completed}</p><small>{pendingMaterials.length} {messages.report.pendingMaterials}</small></div>
-            <Image src="/assets/lumi-avatar.png" alt="" width={180} height={200} />
+            <LumiConversationAvatar state="idle" idleOnly />
           </div>
           <h2>{messages.report.recent}</h2>
           <div className="history-list">

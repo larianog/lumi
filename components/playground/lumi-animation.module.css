@@ -102,7 +102,7 @@
 .dialogHeader h2 { font-size: 1.1rem; font-weight: 700; margin: 0; }
 .dialogHeader button { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #cbd6c4; border-radius: 50%; background: #fff; cursor: pointer; }
 .sessionStart { max-width: 490px; text-align: center; margin: 26px auto 36px; }
-.sessionStart img { width: 150px; height: auto; margin: 0 auto 15px; }
+.sessionStart > :global(.lumi-idle-avatar) { --lumi-idle-width: 150px; margin: 0 auto 15px; }
 .sessionStart p { font-size: 1rem; line-height: 1.65; margin: 16px 0; }
 .sessionStart .primaryButton { margin-top: 24px; }
 .error { color: #a03231; background: #fff0ec; border: 1px solid #e7c2b6; border-radius: 10px; padding: 12px 15px; font-size: .875rem; margin: 12px 0; }

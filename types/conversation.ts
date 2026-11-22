@@ -43,4 +43,6 @@ export interface ConversationComponentProps {
   avatarMode?: 'provider' | 'local';
   /** Called from a user tap after microphone access was denied. */
   onRetryMicrophone?: () => void;
+  /** End the failed session and start a fresh one without leaving the page. */
+  onRetryConversation?: () => void;
 }

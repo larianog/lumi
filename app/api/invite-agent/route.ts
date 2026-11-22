@@ -11,7 +11,7 @@ import {
   MiniMaxTTS,
   OpenAI,
 } from 'agora-agents';
-import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
+import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID, isAgoraParticipantUid } from '@/lib/agora';
 import { getFamilyForSession, getStudyMaterial } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
 import { defaultLiteracyLevel, formatHomeworkBrief } from '@/lib/material-extraction';
@@ -32,6 +32,9 @@ export async function POST(request: NextRequest) {
     const { requester_id: requesterId, channel_name: channelName } = body;
     if (!channelName || !requesterId) {
       return NextResponse.json({ error: 'channel_name and requester_id are required' }, { status: 400 });
+    }
+    if (!isAgoraParticipantUid(requesterId)) {
+      return NextResponse.json({ error: 'requester_id must be a valid numeric participant UID between 1 and 2147483647' }, { status: 400 });
     }
     if (body.avatar_mode !== undefined && body.avatar_mode !== 'provider' && body.avatar_mode !== 'local') {
       return NextResponse.json({ error: 'avatar_mode must be provider or local' }, { status: 400 });

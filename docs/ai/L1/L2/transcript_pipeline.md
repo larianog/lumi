@@ -6,6 +6,8 @@
 
 Transcript and call diagnostics are delivered through AgoraVoiceAI events over RTM, then normalized for UI kit components.
 
+`lib/agora-rtm-session.ts` supplies a shared browser RTM instance through exclusive leases. Login and channel subscription complete before agent invite and `ConversationComponent` mount. On cleanup, component/toolkit listeners are removed and the lease logs out before another channel starts. Reuse the instance/UID but fetch new channel tokens; stale cleanup must not affect a later lease. The per-document UID is independent of profile/family identity and is not persisted across tabs.
+
 Primary pipeline:
 
 1. RTM/RTC data arrives.

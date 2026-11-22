@@ -24,7 +24,8 @@ export async function verifyLumiAnimation() {
 
   try {
     for (const body of [null, [], {}, { ...valid, requester_id: '234567' }, { ...valid, requester_id: '0' },
-      { ...valid, requester_id: '4294967296' }, { ...valid, channel_name: 'production-channel' },
+      { ...valid, requester_id: '4294967296' }, { ...valid, requester_id: '2147483648' },
+      { ...valid, requester_id: '2796831013' }, { ...valid, channel_name: 'production-channel' },
       { ...valid, animation: { ...animation, aspectRatio: '16x9' } },
       { ...valid, animation: { ...animation, idlePrompt: ' ' } },
       { ...valid, animation: { ...animation, speakingPrompt: 'x'.repeat(1601) } }]) {

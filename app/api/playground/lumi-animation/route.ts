@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { NextRequest, NextResponse } from 'next/server';
 import { Agent, AgoraClient, Area, DeepgramSTT, ExpiresIn, LemonSlice, MiniMaxTTS, OpenAI } from 'agora-agents';
-import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
+import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID, isAgoraParticipantUid } from '@/lib/agora';
 import { lemonSliceParameters, readAnimationSettings } from '@/lib/lumi-animation';
 import { messages } from '@/packages/i18n';
 
@@ -29,8 +29,7 @@ export async function POST(request: NextRequest) {
   const settings = readAnimationSettings(body.animation);
   const uid = body.requester_id;
   const channel = body.channel_name;
-  if (!settings || typeof uid !== 'string' || !/^[1-9]\d{0,9}$/.test(uid) || Number(uid) > 4294967295 ||
-    [String(DEFAULT_AGENT_UID), String(DEFAULT_AVATAR_UID)].includes(uid) ||
+  if (!settings || !isAgoraParticipantUid(uid) ||
     typeof channel !== 'string' || !/^lumi-animation-[a-zA-Z0-9-]{1,48}$/.test(channel)) {
     return NextResponse.json({ error: 'Canal, participante ou parâmetros de animação inválidos.' }, { status: 400 });
   }

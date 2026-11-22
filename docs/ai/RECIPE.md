@@ -78,7 +78,7 @@ The optional `/playground/lumi-animation` is an additive experiment using `api.r
 - Required env vars are `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE`.
 - Material extraction additionally requires server-only `OPENAI_API_KEY`.
 - `POST/GET /api/materials` and `GET/PATCH /api/materials/[id]` own material ingestion, history, detail, and completion contracts.
-- `components/LandingPage.tsx` owns pre-call bootstrap and RTM client lifecycle.
+- `components/LandingPage.tsx` and `LumiVoiceAgent.tsx` own pre-call bootstrap and session handles; `lib/agora-rtm-session.ts` owns the shared browser RTM instance and exclusive login/subscription/logout lifecycle.
 - `components/ConversationComponent.tsx` owns joined-session RTC/toolkit lifecycle.
 - `lib/conversation.ts` owns transcript normalization helpers.
 

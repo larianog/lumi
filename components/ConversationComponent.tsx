@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import AgoraRTC, {
   useRTCClient,
@@ -9,6 +8,7 @@ import AgoraRTC, {
   useClientEvent,
   useJoin,
   usePublish,
+  useConnectionState,
   RemoteUser,
   UID,
 } from 'agora-rtc-react';
@@ -40,6 +40,8 @@ import {
 import type { ConversationComponentProps } from '@/types/conversation';
 import LumiConversationAvatar from './LumiConversationAvatar';
 import { useLumiSpeechState } from './useLumiSpeechState';
+import { useLumiIdleSleep } from './useLumiIdleSleep';
+import { isLumiRestingAgentState } from '@/lib/lumi-animation-transition';
 
 // Cap the displayed issues list to avoid overwhelming the UI during a cascade of errors.
 const MAX_CONNECTION_ISSUES = 6;
@@ -94,6 +96,7 @@ export default function ConversationComponent({
   variant = 'full',
   avatarMode = 'provider',
   onRetryMicrophone,
+  onRetryConversation,
 }: ConversationComponentProps) {
   const client = useRTCClient();
   const remoteUsers = useRemoteUsers();
@@ -113,7 +116,9 @@ export default function ConversationComponent({
 
   // Tracks granular RTC connection state for the status dot.
   // Agora states: DISCONNECTED | CONNECTING | CONNECTED | DISCONNECTING | RECONNECTING
-  const [connectionState, setConnectionState] = useState<string>('CONNECTING');
+  const connectionState = useConnectionState(client);
+  const [agentLeft, setAgentLeft] = useState(false);
+  const [connectionTimedOut, setConnectionTimedOut] = useState(false);
   const agentUID = String(DEFAULT_AGENT_UID);
   const avatarUID = String(DEFAULT_AVATAR_UID);
   const [joinedUID, setJoinedUID] = useState<UID>(0);
@@ -127,6 +132,8 @@ export default function ConversationComponent({
     [],
   );
   const addConnectionIssue = useCallback((issue: ConnectionIssue) => {
+    // Log diagnostics only: never transcripts, provider payloads or credentials.
+    console.warn('[Lumi] Voice service issue', { source: issue.source, code: issue.code });
     setConnectionIssues((prev) => {
       const isDuplicate = prev.some(
         (x) =>
@@ -158,7 +165,7 @@ export default function ConversationComponent({
     };
   }, []);
 
-  const { isConnected: joinSuccess } = useJoin(
+  const { isConnected: joinSuccess, error: joinError } = useJoin(
     {
       appid: process.env.NEXT_PUBLIC_AGORA_APP_ID!,
       channel: agoraData.channel,
@@ -176,9 +183,18 @@ export default function ConversationComponent({
   // Do NOT pass `isEnabled` — that ties track lifetime to mute state and breaks the Web Audio
   // graph inside MicButtonWithVisualizer. Mute uses track.setEnabled() only.
   const { localMicrophoneTrack, error: microphoneError } = useLocalMicrophoneTrack(isReady);
+  const lumiConnected = isReady && joinSuccess && isAgentConnected && connectionState === 'CONNECTED';
+  useEffect(() => {
+    if (!isReady || lumiConnected) { setConnectionTimedOut(false); return; }
+    const timer = window.setTimeout(() => setConnectionTimedOut(true), 20_000);
+    return () => window.clearTimeout(timer);
+  }, [isReady, lumiConnected]);
+  useEffect(() => {
+    if (isAgentConnected) setAgentLeft(false);
+  }, [isAgentConnected]);
   const lumiSpeechState = useLumiSpeechState({
     enabled: avatarMode === 'local',
-    connected: isReady && joinSuccess && isAgentConnected && connectionState === 'CONNECTED',
+    connected: lumiConnected,
     microphoneEnabled: isEnabled && !microphoneError,
     agentAudioEnabled: !autoplayBlocked,
     microphone: localMicrophoneTrack,
@@ -390,8 +406,12 @@ export default function ConversationComponent({
     if (user.uid.toString() === agentUID) setIsAgentConnected(true);
   });
 
-  useClientEvent(client, 'user-left', (user) => {
-    if (user.uid.toString() === agentUID) setIsAgentConnected(false);
+  useClientEvent(client, 'user-left', (user, reason) => {
+    if (user.uid.toString() === agentUID) {
+      setIsAgentConnected(false);
+      setAgentLeft(true);
+      console.warn('[Lumi] Agent left the voice channel', { reason });
+    }
   });
 
   // Sync isAgentConnected with remoteUsers (covers cases where user-joined/left are missed)
@@ -401,10 +421,6 @@ export default function ConversationComponent({
     );
     setIsAgentConnected(isAgentInRemoteUsers);
   }, [remoteUsers, agentUID]);
-
-  useClientEvent(client, 'connection-state-change', (curState) => {
-    setConnectionState(curState);
-  });
 
   const connectionSeverity = useMemo<'normal' | 'warning' | 'error'>(() => {
     // RTC transport problems take precedence; otherwise derive severity from captured issues.
@@ -480,8 +496,17 @@ export default function ConversationComponent({
   const displayMessages = currentInProgressMessage
     ? [...messageList, currentInProgressMessage]
     : messageList;
-  const statusLabel =
-    visualizerState === 'listening'
+  const serviceFailed = connectionIssues.some((issue) => getConversationIssueSeverity(issue) === 'error');
+  const voiceUnavailable = Boolean(joinError || agentLeft || connectionTimedOut || serviceFailed);
+  const lumiAnimationState = useLumiIdleSleep(lumiSpeechState,
+    avatarMode === 'local' && lumiConnected && !voiceUnavailable && !microphoneError && !autoplayBlocked
+    && isLumiRestingAgentState(agentState));
+  const failureLabel = serviceFailed ? messages.voice.responseError : messages.voice.connectionLost;
+  const statusLabel = voiceUnavailable
+    ? failureLabel
+    : lumiAnimationState === 'sleeping'
+      ? messages.voice.sleeping
+      : visualizerState === 'listening'
       ? messages.voice.listening
       : visualizerState === 'analyzing'
         ? messages.voice.thinking
@@ -493,6 +518,14 @@ export default function ConversationComponent({
 
   const voiceWarnings = (
     <>
+      {voiceUnavailable && (
+        <div className="voice-warning" role="alert">
+          <p>{failureLabel}</p>
+          {onRetryConversation && <button className="button button-primary" onClick={onRetryConversation}>
+            {messages.voice.reconnect}
+          </button>}
+        </div>
+      )}
       {microphoneError && (
         <div className="voice-warning" role="alert">
           <p>{messages.voice.microphoneBlocked}</p>
@@ -520,10 +553,10 @@ export default function ConversationComponent({
     return (
       <div className="lumi-inline" role="region" aria-label={messages.voice.title}>
         {voiceWarnings}
-        {avatarMode === 'local' ? <LumiConversationAvatar state={lumiSpeechState} /> : avatarUser ? (
+        {avatarMode === 'local' ? <LumiConversationAvatar state={lumiAnimationState} active={lumiConnected} listeningEnabled={isEnabled && !microphoneError} speakingEnabled={!autoplayBlocked} /> : avatarUser ? (
           <div className="lumi-inline-avatar"><RemoteUser user={avatarUser} /></div>
         ) : (
-          <Image className="lumi-inline-fallback" src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={480} height={520} priority />
+          <LumiConversationAvatar state="idle" />
         )}
         {hiddenRemoteAudio}
         <div className="lumi-inline-controls">
@@ -536,8 +569,8 @@ export default function ConversationComponent({
             enabledColor="hsl(var(--primary))"
             disabledColor="hsl(var(--destructive))"
           />
-          <span className="lumi-inline-status" aria-live="polite">{avatarMode === 'local' && isAgentConnected && connectionState === 'CONNECTED'
-            ? lumiSpeechState === 'speaking' ? messages.voice.speaking : lumiSpeechState === 'listening' ? messages.voice.listening : messages.voice.connected
+          <span className="lumi-inline-status" aria-live="polite">{!voiceUnavailable && avatarMode === 'local' && isAgentConnected && connectionState === 'CONNECTED'
+            ? lumiAnimationState === 'sleeping' ? messages.voice.sleeping : lumiSpeechState === 'speaking' ? messages.voice.speaking : lumiSpeechState === 'listening' ? messages.voice.listening : messages.voice.connected
             : statusLabel}</span>
         </div>
       </div>
@@ -560,10 +593,10 @@ export default function ConversationComponent({
           role="region"
           aria-label={messages.accessibility.lumiMascot}
         >
-          {avatarMode === 'local' ? <LumiConversationAvatar state={lumiSpeechState} /> : avatarUser ? (
+          {avatarMode === 'local' ? <LumiConversationAvatar state={lumiAnimationState} active={lumiConnected} listeningEnabled={isEnabled && !microphoneError} speakingEnabled={!autoplayBlocked} /> : avatarUser ? (
             <div className="lumi-live-avatar"><RemoteUser user={avatarUser} /></div>
           ) : (
-            <img className="lumi-avatar-fallback" src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} />
+            <LumiConversationAvatar state="idle" idleOnly className="lumi-avatar-fallback" />
           )}
           {hiddenRemoteAudio}
           <div className="agent-visualizer-shell"><AgentVisualizer state={visualizerState} size="lg" /></div>

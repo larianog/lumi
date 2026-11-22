@@ -153,6 +153,7 @@ export default function LumiVideoStates({ active, reducedMotion }: { active: boo
                 const source = clips[item.id];
                 if (source && isWebPClip(source)) return <LumiWebPClip
                   key={source.url} id={item.id} label={item.label} url={source.url}
+                  fit={source.fit}
                   className={styles.stateVideo}
                   visible={state === item.id && playable} playing={state === item.id && playable && !stopped}
                   replay={replay} onReady={onWebPReady} onError={onWebPError}
@@ -162,6 +163,7 @@ export default function LumiVideoStates({ active, reducedMotion }: { active: boo
                   ref={(element) => { if (element) videos.current[item.id] = element; else delete videos.current[item.id]; }}
                   className={styles.stateVideo}
                   data-visible={state === item.id && playable}
+                  style={{ objectFit: source.fit ?? 'contain' }}
                   data-state={item.id}
                   aria-label={`Vídeo da Lumi: ${item.label}`}
                   aria-hidden={state !== item.id || !playable}
@@ -199,7 +201,7 @@ export default function LumiVideoStates({ active, reducedMotion }: { active: boo
         </section>
 
         <aside className={styles.controls}>
-          <div className={styles.controlTitle}><Film size={19} /><h2>Estados da Lumi</h2><span className={styles.clipCount}>{Object.keys(clips).length}/6</span></div>
+          <div className={styles.controlTitle}><Film size={19} /><h2>Estados da Lumi</h2><span className={styles.clipCount}>{Object.keys(clips).length}/{LUMI_VIDEO_STATES.length}</span></div>
           <p className={styles.helper}>Um clipe para cada momento. Adicione vídeos MP4, WebM, MOV ou imagens WebP, inclusive animadas e com transparência.</p>
           <div className={styles.videoStateGrid} role="group" aria-label="Estado da Lumi">
             {LUMI_VIDEO_STATES.map((item) => <button key={item.id} aria-pressed={state === item.id} onClick={() => chooseState(item.id)}><span aria-hidden="true">{item.icon}</span><strong>{item.label}</strong><small>{clips[item.id] ? statuses[item.id]?.error ? 'Revisar arquivo' : isWebPClip(clips[item.id]) ? clips[item.id]?.source === 'bundled' ? 'WebP padrão' : 'WebP adicionado' : clips[item.id]?.source === 'bundled' ? 'Vídeo padrão' : 'Vídeo adicionado' : 'Sem arquivo'}</small></button>)}
@@ -230,7 +232,7 @@ export default function LumiVideoStates({ active, reducedMotion }: { active: boo
             <p className={styles.helper}><strong>{definition.label} · {definition.duration}</strong><br />{definition.direction}</p>
             <p className={styles.helper}>Mantenha câmera, luz, escala e posição dos pés iguais em todos os clipes. Exporte sem áudio. {definition.loop ? 'Feche o loop sem saltos.' : isWebP ? 'Exporte o WebP com uma única repetição.' : 'Ao terminar, a prévia retorna ao repouso.'}</p>
             <p className={styles.helper}>O fundo precisa estar transparente no arquivo. Para testar, alterne entre o quadriculado e a floresta. MP4 comum não remove o fundo automaticamente.</p>
-            <button className={styles.outlineButton} onClick={exportGuide}><Download size={16} /> Baixar roteiro dos 6 estados</button>
+            <button className={styles.outlineButton} onClick={exportGuide}><Download size={16} /> Baixar roteiro dos {LUMI_VIDEO_STATES.length} estados</button>
           </details>
         </aside>
       </div>

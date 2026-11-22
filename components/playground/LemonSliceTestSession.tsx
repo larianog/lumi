@@ -1,12 +1,13 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
+import LumiConversationAvatar from '@/components/LumiConversationAvatar';
 import { Mic, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RTMClient } from 'agora-rtm';
 import type { AnimationSettings } from '@/lib/lumi-animation';
 import type { AgoraRenewalTokens, AgoraTokenData } from '@/types/conversation';
+import { getBrowserRtmManager, type RtmLease } from '@/lib/agora-rtm-session';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import styles from './lumi-animation.module.css';
 
@@ -22,21 +23,23 @@ const Provider = dynamic(async () => {
   };
 }, { ssr: false });
 
-type Resources = { cancelled: boolean; agentId?: string; rtm?: RTMClient };
+type Resources = { cancelled: boolean; agentId?: string; lease?: RtmLease };
 type LiveSession = { data: AgoraTokenData; rtm: RTMClient };
 
 async function release(resources: Resources) {
-  const rtm = resources.rtm;
-  resources.rtm = undefined;
-  await rtm?.logout().catch(() => {});
-  if (resources.agentId) {
-    const response = await fetch('/api/stop-conversation', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agent_id: resources.agentId }), keepalive: true,
-    });
-    if (!response.ok) throw new Error('Não foi possível confirmar o encerramento. Clique em fechar para tentar novamente.');
-    resources.agentId = undefined;
-  }
+  const results = await Promise.allSettled([
+    resources.lease?.release(),
+    (async () => {
+      if (!resources.agentId) return;
+      const response = await fetch('/api/stop-conversation', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agent_id: resources.agentId }), keepalive: true,
+      });
+      if (!response.ok) throw new Error('Não foi possível confirmar o encerramento. Clique em fechar para tentar novamente.');
+      resources.agentId = undefined;
+    })(),
+  ]);
+  for (const result of results) if (result.status === 'rejected') throw result.reason;
 }
 
 export default function LemonSliceTestSession({ settings, onClose }: {
@@ -64,6 +67,7 @@ export default function LemonSliceTestSession({ settings, onClose }: {
       const current = resources.current;
       if (current) {
         current.cancelled = true;
+        void current.lease?.release().catch(() => {});
         // Do not abort an invite: collect its returned agent ID, then stop that session.
         void (pending.current ?? Promise.resolve()).then(() => release(current)).catch(() => {});
       }
@@ -78,17 +82,8 @@ export default function LemonSliceTestSession({ settings, onClose }: {
     const task = async () => {
       try {
         const channel = `lumi-animation-${crypto.randomUUID()}`;
-        const tokenResponse = await fetch(`/api/generate-agora-token?${new URLSearchParams({ channel })}`);
-        if (!tokenResponse.ok) throw new Error('Não foi possível preparar a conexão Agora.');
-        const data: AgoraTokenData = await tokenResponse.json();
-        if (current.cancelled) return;
-        const { default: AgoraRTM } = await import('agora-rtm');
-        if (current.cancelled) return;
-        const rtm = new AgoraRTM.RTM(process.env.NEXT_PUBLIC_AGORA_APP_ID!, data.uid);
-        current.rtm = rtm;
-        await rtm.login({ token: data.token });
-        if (current.cancelled) return;
-        await rtm.subscribe(data.channel);
+        current.lease = getBrowserRtmManager().acquire(channel);
+        const { data, rtm } = await current.lease.ready;
         if (current.cancelled) return;
         const response = await fetch('/api/playground/lumi-animation', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -121,7 +116,7 @@ export default function LemonSliceTestSession({ settings, onClose }: {
     closing.current = true;
     setEnding(true); setLive(null); setError('');
     const current = resources.current;
-    if (current) current.cancelled = true;
+    if (current) { current.cancelled = true; void current.lease?.release().catch(() => {}); }
     try {
       await pending.current;
       if (current) await release(current);
@@ -152,7 +147,7 @@ export default function LemonSliceTestSession({ settings, onClose }: {
         <p className={styles.liveHint}>Observe a fala e os intervalos de silêncio. A imagem de espera é substituída quando o vídeo do avatar chega.</p>
         <div className={styles.liveHost}><ErrorBoundary><Provider><Conversation agoraData={live.data} rtmClient={live.rtm} onTokenWillExpire={renew} onEndConversation={() => void end()} /></Provider></ErrorBoundary></div>
       </> : <div className={styles.sessionStart}>
-        <Image src="/assets/lumi-avatar.png" alt="Lumi" width={150} height={163} />
+        <LumiConversationAvatar state="idle" idleOnly />
         <p>Converse com a Lumi e observe como ela se movimenta com os prompts escolhidos.</p>
         <p className={styles.footnote}>O teste usa seu microfone e inicia uma sessão real da Agora e do Lemon Slice. Fechar esta janela encerra a sessão.</p>
         <button className={styles.primaryButton} onClick={start} disabled={starting || ending || needsStop}><Mic size={18} />{ending ? 'Encerrando teste…' : starting ? 'Preparando a Lumi…' : 'Iniciar conversa de teste'}</button>

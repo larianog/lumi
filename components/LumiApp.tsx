@@ -6,6 +6,7 @@ import { BookOpen, LoaderCircle, LogIn, Sparkles, Star, UserPlus } from 'lucide-
 import { useEffect, useState } from 'react';
 import { messages } from '@/packages/i18n';
 import Brand from './Brand';
+import LumiConversationAvatar from './LumiConversationAvatar';
 
 export default function LumiApp() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function LumiApp() {
   return (
     <main className="lumi-app">
       <section className="welcome-screen" data-intro={!introFinished || undefined}>
-        <div className="welcome-art" aria-hidden="true">
+        <div className="welcome-art">
           <Image
             className="welcome-forest"
             src="/assets/forest-learning-bg.png"
@@ -60,16 +61,9 @@ export default function LumiApp() {
           <div className="welcome-orbit orbit-one" />
           <div className="welcome-orbit orbit-two" />
           <div className="welcome-mascot">
-            <Image
-              src="/assets/lumi-avatar.png"
-              alt=""
-              width={1199}
-              height={1312}
-              loading="eager"
-              fetchPriority="high"
-              data-ready={artworkReady}
-              onLoad={() => setMascotReady(true)}
-              onError={() => setMascotReady(true)}
+            <LumiConversationAvatar state="idle" idleOnly
+              entranceReady={artworkReady}
+              onVisualReady={() => setMascotReady(true)}
               onAnimationEnd={() => setIntroFinished(true)}
             />
             <div className="floating-card star-card"><Star size={20} fill="currentColor" />+20</div>

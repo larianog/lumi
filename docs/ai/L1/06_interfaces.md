@@ -8,7 +8,7 @@
 
 Query params:
 
-- `uid` optional; invalid/zero resolves to random RTM-safe UID.
+- `uid` optional; missing/non-numeric/nonpositive resolves to a random RTM-safe UID. Numeric values above `2147483647` return `400` rather than silently changing the requested identity.
 - `channel` optional; defaults to generated `ai-conversation-<ts>-<rand>`.
 
 Success response:
@@ -17,7 +17,7 @@ Success response:
 { "token": "...", "uid": "1234", "channel": "ai-conversation-..." }
 ```
 
-Failure response: `{ "error": string, "details"?: string }` with `500`.
+Failure response: `{ "error": string, "details"?: string }` with `400` for oversized UIDs or `500` for server failures.
 
 ### `POST /api/invite-agent`
 
@@ -37,6 +37,8 @@ Success (`AgentResponse`):
 
 Validation failures return `400`; server failures return `500`.
 
+`requester_id` must be a decimal string in `1..2147483647` distinct from the reserved agent/avatar IDs. This is the current Conversational AI numeric participant limit, narrower than RTC's uint32 range. Invalid IDs are rejected before an agent session is created.
+
 ### `POST /api/stop-conversation`
 
 Body (`StopConversationRequest`): `{ "agent_id": "..." }`.
@@ -54,7 +56,7 @@ Optional SSE proxy path (not default runtime path). Requires `NEXT_LLM_API_KEY` 
 ### `/api/playground/lumi-animation`
 
 - `GET`: uncached `{ configured: boolean }` for the three live-test credentials; never returns keys.
-- `POST`: `{ requester_id, channel_name, animation: { speakingPrompt, idlePrompt, aspectRatio } }`. UID must be a nonzero uint32 string distinct from agent/avatar UIDs; channel must start with `lumi-animation-` and have 1–48 alphanumeric/hyphen suffix characters. Prompts must be nonblank and at most 1600 characters each; aspect ratio is `2x3`, `9x16`, or `1x1`. Only the repository Lumi image is used.
+- `POST`: `{ requester_id, channel_name, animation: { speakingPrompt, idlePrompt, aspectRatio } }`. UID must be a decimal string in `1..2147483647` distinct from agent/avatar UIDs; channel must start with `lumi-animation-` and have 1–48 alphanumeric/hyphen suffix characters. Prompts must be nonblank and at most 1600 characters each; aspect ratio is `2x3`, `9x16`, or `1x1`. Only the repository Lumi image is used.
 - Success: `{ agent_id, create_ts, state: 'RUNNING' }`. Invalid JSON/fields: `400`; body over 8000 characters: `413`; absent server credentials: `503`; provider failure: sanitized `502`.
 - Reuses the existing token and stop contracts; all main-app contracts remain unchanged.
 
@@ -99,6 +101,22 @@ Optional material settings are `HOMEWORK_VISION_MODEL` (default `gpt-4.1-mini`) 
 - `scripts/verify-api-contracts.ts` asserts token generation, input validation, env failures, and SSE framing cases.
 
 ## Shared Client-Side Interfaces
+
+`lib/lumi-motion-preference.ts` owns manual playback preferences for avatars and material reading. The v2 key clears the old saved pause once, preserving explicit opt-in and system reduced motion. New pauses/resumes survive remounts/reload, storage failures use memory, and system preference changes clear the override. **Animar Lumi** indicates disabled motion, not an asset error.
+
+`LumiConversationAvatar` optionally accepts `idleOnly`, `className`, `entranceReady`, `onVisualReady` and `onAnimationEnd` for standalone illustrations. `idleOnly` loads only idle and uses a responsive frame; callers may size it through `--lumi-idle-width`. A disconnected call still renders idle, but never keeps its previous listening/speaking loop. Intersection and document visibility pause animation without changing voice lifecycle.
+
+`useLumiIdleSleep(state, enabled)` returns `LumiAnimationState` (`LumiSpeechState | 'sleeping'`). `LumiSpeechDetector` remains audio-only. `LumiConversationAvatar` accepts this presentation state, and `nextLumiAnimationState` immediately exits sleep on interaction; other ending actions retain their current-cycle behavior. `LUMI_IDLE_SLEEP_MS` is 30,000 ms, measured only while enabled, silent and visible. `isLumiRestingAgentState` accepts SDK `idle`, `listening`, `silent` and null; it rejects `thinking`/`speaking`. Passing its boolean result keeps the timer stable across resting-state events.
+
+`getBrowserRtmManager().acquire(channel?)` returns `{ ready, release }`. `ready` supplies combined token data and the shared RTM client; `release` is idempotent for that lease and never releases a newer owner. `startManagedConversation` wraps a lease with an invite callback and agent-stop callback, exposing `{ ready, stop }`. Ready includes `agentJoinError` for the base/Lumi nonfatal invite path. Tokens use a stable per-document numeric UID and a fresh channel unless an isolated playground channel is supplied; endpoint contracts remain unchanged. SDK import/construction stays browser-only.
+
+`MaterialStudyPageClient` accepts optional `embedded`, `initialProfile`, `initialMaterial` and `onBack` props. The profile seeds it with the authorized upload response, so upload success renders in place instead of routing away. History/detail routes omit these props. Processing is polled serially every 1.8 seconds, aborted on cleanup and bounded to two minutes before offering retry. No API request or DTO contract changes are required.
+
+`LumiMaterialLoading` receives `loading` (API pending), `active` (reading presentation enabled) and `onComplete`. Keep it mounted after success with `loading=false` until `onComplete` fires at the next loaded WebP cycle boundary, guaranteeing a full first cycle even for fast responses. Errors cancel the presentation immediately. Motion cancellation, hidden tabs and animation failures bypass the wait; a 15-second asset watchdog prevents stalls. Profile uploads hold a pending response until completion; material polling holds the ready presentation and voice startup until completion, without delaying requests. Retry starts a fresh reading animation.
+
+`LumiConversationAvatar` receives the requested `state` plus `active`, `listeningEnabled` and `speakingEnabled` cancellation flags from the existing RTC lifecycle. Its `data-lumi-state` is the displayed cycle; `data-lumi-requested-state` tracks current speech. `LumiWebPClip.onReady` optionally reports cycle duration in milliseconds and `onCycleEnd` reports loaded playback boundaries. Conversation callers finish cycles except for incoming speech priority or explicit cancellation. Playground callers retain their independent timed simulation.
+
+`LumiVideoClip.fit` optionally selects `contain` (default) or centered `cover` for both players and the exported production manifest. The bundled landscape speaking WebP uses `cover` to crop transparent side margins in portrait containers without modifying its bytes. Local replacements default to `contain`.
 
 The playground file selector accepts WebP/WebM/MP4/MOV up to 40 MB. `LumiVideoClip` represents both images and videos; file extension selects the renderer, and the browser validates decoding. `videoProductionManifest` exports `suggestedWebp` alongside existing video paths; it contains no local file bytes or blob URLs.
 

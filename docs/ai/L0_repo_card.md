@@ -14,19 +14,37 @@
 | Recipe Role | base |
 | Recipe Version | 0.1.0 |
 | Recipe Status | stable |
-| Last Reviewed | 2026-11-21 |
+| Last Reviewed | 2026-11-22 |
 
 ## L1 — Summaries
+
+Motion recovery review on 2026-11-22 centralizes avatar/reading preferences and clears the old tab-wide saved pause once. The v2 preference preserves new manual choices across remounts and respects reduced motion. Browser checks cover recovery, explicit pause/resume and preference changes.
+
+Sleep regression review on 2026-11-22 includes the SDK `silent` state in the inactivity gate. Previously a silent agent could stay awake indefinitely after replying. The countdown remains stable across resting-state events, with browser coverage of sleep and speech wake-up.
+
+Idle review on 2026-11-22 configures the supplied 121-frame, 4033 ms alpha WebP across all app mascot illustrations and voice waiting states. Shared `idleOnly` rendering avoids downloading other clips on non-voice screens; intersection/visibility handling pauses hidden illustrations. Idle immediately yields to conversation actions or sleep, and material analysis keeps reading. The welcome entrance and motion controls remain accessible.
+
+Inactivity review on 2026-11-22 adds sleeping after 30 seconds without speech or page interaction in local conversations. The supplied sleeping loop retains its original bytes (121 frames, 4033 ms, alpha). Interaction or speech wakes immediately; pending responses, failed connections and hidden tabs suspend the countdown. Voice stays connected and material loading keeps reading.
+
+Voice recovery review on 2026-11-22 uses the current RTC snapshot and exposes retry after agent departure, failed join/invite, fatal service errors or a 20-second connection wait. Cleanup precedes a fresh session without navigating away or recreating RTM. Speaking now uses a 600 × 650 derivative retaining all frames, timing and alpha, with the original preserved.
+
+RTM lifecycle review on 2026-11-21 reuses one SDK instance and numeric UID per browser document across Lumi, the base screen and live playground. Lease ownership serializes login/subscription/logout; fresh channel tokens match the same UID. StrictMode auto-start, partial failure and late invite cleanup are covered without live services. Existing browser instances require one full reload after this change.
+
+Participant UID regression review on 2026-11-21 constrains generated identities to `1..2147483647`. The agent join endpoint rejects larger uint32 IDs even when RTM login succeeds. Token/invite guards and tests cover the observed rejected values and maximum random input.
+
+Upload flow review on 2026-11-21 keeps analysis and results inside the profile URL. A reading avatar (`lummi-lendo-transparente.webp`, 118 frames, 3933 ms, alpha) and loading caption replace voice during processing; successful responses wait for a full reading cycle before the embedded study workspace starts a grounded session. Motion cancellation and asset failures bypass this presentation wait. Shared history/detail rendering, PDF preview, explicit completion, bounded polling and retry remain available.
+
+Animation transition review on 2026-11-21 covers normal/demo profiles, material study and activity voice dialogs. Audible speech enters immediately; ending actions complete their current cycle before applying only the latest requested state. WebP ANMF timing and native video completion drive transitions; explicit playback cancellation clears pending work. Source assets and voice lifecycle are unchanged.
 
 Integration review on 2026-11-21 combines the material upload/history/tutoring flow from main with local profile and material-study animations. Invites preserve both material grounding identifiers and `avatar_mode`; upload password removal does not remove the adult check on family-wide history. Local database sessions are preserved separately from the merge commit.
 
 Review scope on 2026-11-21 includes the animation playground, local video/WebP workflow, and profile avatars driven by RTC speech activity. Profiles explicitly request local avatars without Lemon Slice; omitted invite avatar mode preserves provider defaults.
 
-The bundled assets are `lummi-transparente.webp` for speaking and `lummi-transparente-02.webp` for listening (each 192 frames, alpha, approximately 8 seconds), rendered by a shared WebP component in both profiles and the playground. Profiles preload both clips and animate only the active speech state; silence remains still. The earlier MP4 is not the default.
+The bundled assets are `lummi-falando-otimizada.webp` for speaking (143 frames, approximately 6 seconds, 600 × 650) and `lummi-transparente-02.webp` for listening (192 frames, approximately 8 seconds, 768 × 768), both with alpha, rendered by a shared WebP component in profiles and the playground. Speaking uses a 3.95 MB portrait derivative with 81% fewer pixels per frame and the same centered cover framing; the original Full HD `lummi-animacao-transparente-1.webp` is retained unchanged. Profiles preload conversation clips and animate only the displayed state; silence plays the idle loop until the inactivity timer requests sleep. The earlier speaking WebP and MP4 are not the defaults.
 
 The reviewed avatar loading flow shares bundled downloads across placeholder/live remounts, exposes failed-load recovery, and retains explicit motion choices per tab. LAN previews require a network binding; microphone use on another device requires HTTPS.
 
-The profile's visual state gives audible agent speech priority over microphone activity; listening resumes after agent speech ends if the user is still talking. RTC voice interruption behavior is unchanged.
+Conversation animations give incoming audible agent speech immediate priority over microphone activity. After speech ends, the displayed cycle finishes before resuming listening if the user is still talking, or returning to still. RTC voice interruption behavior is unchanged.
 
 The Audience column helps agents prioritise: **Use** = consuming the repo behavior, **Maintain** = changing internals.
 
