@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import AgoraRTC, {
   useRTCClient,
   useLocalMicrophoneTrack,
@@ -42,13 +42,10 @@ import LumiConversationAvatar from './LumiConversationAvatar';
 import { useLumiSpeechState } from './useLumiSpeechState';
 import { useLumiIdleSleep } from './useLumiIdleSleep';
 import { isLumiRestingAgentState } from '@/lib/lumi-animation-transition';
+import { LumiAnswerCelebrationDetector, LumiMaterialCompletionDetector } from '@/lib/lumi-answer-celebration';
 
 // Cap the displayed issues list to avoid overwhelming the UI during a cascade of errors.
 const MAX_CONNECTION_ISSUES = 6;
-
-type AgoraRtcWithParameters = typeof AgoraRTC & {
-  setParameter?: (key: string, value: unknown) => void;
-};
 
 // Payload shape for signaling-level errors forwarded by the agent over RTM.
 // The `module` field identifies which backend subsystem (LLM / ASR / TTS) raised the error.
@@ -95,6 +92,8 @@ export default function ConversationComponent({
   onEndConversation,
   variant = 'full',
   avatarMode = 'provider',
+  celebrateAnswers = false,
+  onMaterialCompleted,
   onRetryMicrophone,
   onRetryConversation,
 }: ConversationComponentProps) {
@@ -201,20 +200,6 @@ export default function ConversationComponent({
     agent: remoteUsers.find((user) => String(user.uid) === agentUID),
   });
 
-  // ENABLE_AUDIO_PTS is a module-level SDK parameter (not on the client instance).
-  // It must be set before publishing audio for transcript timing to be accurate.
-  useEffect(() => {
-    if (!client) return;
-    try {
-      (AgoraRTC as AgoraRtcWithParameters).setParameter?.(
-        'ENABLE_AUDIO_PTS',
-        true,
-      );
-    } catch (error) {
-      console.warn('Could not set ENABLE_AUDIO_PTS:', error);
-    }
-  }, [client]);
-
   // Track the auto-assigned RTC UID for token renewal and agent invite.
   useEffect(() => {
     if (joinSuccess && client) {
@@ -243,6 +228,9 @@ export default function ConversationComponent({
         const ai = await AgoraVoiceAI.init({
           rtcEngine: client,
           rtmEngine: rtmClient,
+          // TEXT uses RTM transcripts and needs no audio PTS. Enabling PTS here
+          // changes encodedInsertableStreams on an existing peer connection,
+          // causing InvalidModificationError on its next configuration update.
           renderMode: TranscriptHelperMode.TEXT,
           enableLog: true,
         });
@@ -498,6 +486,32 @@ export default function ConversationComponent({
     : messageList;
   const serviceFailed = connectionIssues.some((issue) => getConversationIssueSeverity(issue) === 'error');
   const voiceUnavailable = Boolean(joinError || agentLeft || connectionTimedOut || serviceFailed);
+  const celebrationDetector = useRef(new LumiAnswerCelebrationDetector());
+  const materialCompletionDetector = useRef(new LumiMaterialCompletionDetector());
+  const deliveredCompletion = useRef<string | null>(null);
+  const [materialCompletionId, setMaterialCompletionId] = useState<string | null>(null);
+  const [celebrationId, setCelebrationId] = useState<string | null>(null);
+  useEffect(() => {
+    const enabled = celebrateAnswers && avatarMode === 'local' && lumiConnected && !voiceUnavailable && !autoplayBlocked;
+    const event = celebrationDetector.current.observe(transcript, agentUID, String(client.uid), enabled);
+    const completion = materialCompletionDetector.current.observe(transcript, agentUID, String(client.uid), enabled && Boolean(onMaterialCompleted));
+    if (!enabled) setCelebrationId(null);
+    else if (event) setCelebrationId(event);
+    if (!enabled || !onMaterialCompleted) setMaterialCompletionId(null);
+    else if (completion) setMaterialCompletionId(completion);
+  }, [transcript, agentUID, client.uid, celebrateAnswers, avatarMode, lumiConnected, voiceUnavailable, autoplayBlocked, onMaterialCompleted]);
+  const celebrationReady = isLumiRestingAgentState(agentState) && lumiSpeechState !== 'speaking';
+  useEffect(() => {
+    if (!materialCompletionId || deliveredCompletion.current === materialCompletionId || !onMaterialCompleted
+      || !celebrationReady || !lumiConnected || voiceUnavailable || autoplayBlocked) return;
+    // The final transcript can precede the last audio samples. Let the closing
+    // sentence finish before the study workspace unmounts this voice session.
+    const timer = window.setTimeout(() => {
+      deliveredCompletion.current = materialCompletionId;
+      onMaterialCompleted();
+    }, 600);
+    return () => window.clearTimeout(timer);
+  }, [materialCompletionId, onMaterialCompleted, celebrationReady, lumiConnected, voiceUnavailable, autoplayBlocked]);
   const lumiAnimationState = useLumiIdleSleep(lumiSpeechState,
     avatarMode === 'local' && lumiConnected && !voiceUnavailable && !microphoneError && !autoplayBlocked
     && isLumiRestingAgentState(agentState));
@@ -553,7 +567,7 @@ export default function ConversationComponent({
     return (
       <div className="lumi-inline" role="region" aria-label={messages.voice.title}>
         {voiceWarnings}
-        {avatarMode === 'local' ? <LumiConversationAvatar state={lumiAnimationState} active={lumiConnected} listeningEnabled={isEnabled && !microphoneError} speakingEnabled={!autoplayBlocked} /> : avatarUser ? (
+        {avatarMode === 'local' ? <LumiConversationAvatar state={lumiAnimationState} active={lumiConnected && !voiceUnavailable} listeningEnabled={isEnabled && !microphoneError} speakingEnabled={!autoplayBlocked} celebrationId={celebrateAnswers ? celebrationId : undefined} celebrationReady={celebrationReady} /> : avatarUser ? (
           <div className="lumi-inline-avatar"><RemoteUser user={avatarUser} /></div>
         ) : (
           <LumiConversationAvatar state="idle" />
@@ -593,7 +607,7 @@ export default function ConversationComponent({
           role="region"
           aria-label={messages.accessibility.lumiMascot}
         >
-          {avatarMode === 'local' ? <LumiConversationAvatar state={lumiAnimationState} active={lumiConnected} listeningEnabled={isEnabled && !microphoneError} speakingEnabled={!autoplayBlocked} /> : avatarUser ? (
+          {avatarMode === 'local' ? <LumiConversationAvatar state={lumiAnimationState} active={lumiConnected && !voiceUnavailable} listeningEnabled={isEnabled && !microphoneError} speakingEnabled={!autoplayBlocked} celebrationId={celebrateAnswers ? celebrationId : undefined} celebrationReady={celebrationReady} /> : avatarUser ? (
             <div className="lumi-live-avatar"><RemoteUser user={avatarUser} /></div>
           ) : (
             <LumiConversationAvatar state="idle" idleOnly className="lumi-avatar-fallback" />

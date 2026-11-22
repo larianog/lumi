@@ -55,7 +55,7 @@ Do not recreate Agora ConvoAI integration from memory. Provider schemas, SDK bui
 - `api.material-extraction`: change OpenAI request/prompt behavior in `lib/material-extraction.ts`; bump the prompt version when semantics change.
 - `persistence.material-storage`: replace `lib/material-storage.ts` and JSON material persistence with durable private adapters for production deployment.
 - `prompts.system`: edit `ADA_PROMPT` and `GREETING` in `app/api/invite-agent/route.ts`.
-- `pipeline.providers`: adjust the `DeepgramSTT`, `OpenAI`, and `MiniMaxTTS` builder chain, or enable the commented BYOK blocks.
+- `pipeline.providers`: adjust the `DeepgramSTT`, `OpenAI`, and `LumiTTS` builder chain in the invite route. `lib/lumi-tts.ts` wraps managed `MiniMaxTTS` with an explicit Portuguese language setting while preserving SDK model metadata.
 - `ui.conversation`: customize `QuickstartPreCallCard`, `QuickstartConversationLayout`, `QuickstartTranscriptPanel`, and `QuickstartPipelineMetrics`.
 
 The optional `/playground/lumi-animation` is an additive experiment using `api.routes` and UI composition. It reuses the existing conversation lifecycle hooks without changing main-app routes or defaults. Its optional server-only Lemon Slice key is outside the base required environment contract; local motion preview needs no credentials.
@@ -77,7 +77,7 @@ The optional `/playground/lumi-animation` is an additive experiment using `api.r
 - `POST /api/stop-conversation` accepts `{ agent_id }` and treats already-stopping sessions as success.
 - Required env vars are `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE`.
 - Material extraction additionally requires server-only `OPENAI_API_KEY`.
-- `POST/GET /api/materials` and `GET/PATCH /api/materials/[id]` own material ingestion, history, detail, and completion contracts.
+- `POST/GET /api/materials` and `GET/PATCH /api/materials/[id]` own material ingestion, history, detail, and idempotent completion contracts. The existing completion PATCH serves manual actions and explicit whole-material tutor confirmations; ending a voice session alone does not complete a material.
 - `components/LandingPage.tsx` and `LumiVoiceAgent.tsx` own pre-call bootstrap and session handles; `lib/agora-rtm-session.ts` owns the shared browser RTM instance and exclusive login/subscription/logout lifecycle.
 - `components/ConversationComponent.tsx` owns joined-session RTC/toolkit lifecycle.
 - `lib/conversation.ts` owns transcript normalization helpers.

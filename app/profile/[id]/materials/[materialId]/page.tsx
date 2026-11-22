@@ -6,5 +6,5 @@ type MaterialStudyPageProps = {
 
 export default async function MaterialStudyPage({ params }: MaterialStudyPageProps) {
   const { id, materialId } = await params;
-  return <MaterialStudyPageClient profileId={id} materialId={materialId} />;
+  return <MaterialStudyPageClient key={`${id}:${materialId}`} profileId={id} materialId={materialId} />;
 }

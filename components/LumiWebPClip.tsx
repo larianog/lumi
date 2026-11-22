@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import type { LumiVideoClip, LumiVideoState } from '@/lib/lumi-video-states';
 import { forgetLumiWebP, loadLumiWebP } from '@/lib/lumi-webp';
@@ -21,7 +20,7 @@ type Props = {
 };
 
 export default function LumiWebPClip({ id, label, url, className, fit = 'contain', visible, playing, replay, onReady, onError, onCycleEnd }: Props) {
-  const [media, setMedia] = useState<{ blob: Blob; poster: string; timing: ReturnType<typeof readWebPAnimationTiming> } | null>(null);
+  const [media, setMedia] = useState<{ blob: Blob; poster: string; width: number; height: number; timing: ReturnType<typeof readWebPAnimationTiming> } | null>(null);
   const [animationUrl, setAnimationUrl] = useState<string | null>(null);
   const [loadedAnimation, setLoadedAnimation] = useState<{ url: string; startedAt: number } | null>(null);
   const cycleEnd = useRef(onCycleEnd);
@@ -30,39 +29,63 @@ export default function LumiWebPClip({ id, label, url, className, fit = 'contain
   useEffect(() => {
     let cancelled = false;
     let previewUrl: string | undefined;
+    let posterUrl: string | undefined;
+    let bitmap: ImageBitmap | undefined;
     const controller = new AbortController();
-    const preview = new window.Image();
+    let preview: HTMLImageElement | undefined;
     void (async () => {
       try {
         const blob = await loadLumiWebP(url, controller.signal);
         const timing = readWebPAnimationTiming(await blob.arrayBuffer());
         if (cancelled) return;
-        previewUrl = URL.createObjectURL(blob);
-        preview.src = previewUrl;
-        await preview.decode();
+        // Decode only the first frame for inactive clips, without starting a
+        // second animated image or waiting for Image.decode() on every clip.
+        if (typeof createImageBitmap === 'function') {
+          try { bitmap = await createImageBitmap(blob); } catch { /* Try the native image decoder below. */ }
+        }
         if (cancelled) return;
+        if (!bitmap) {
+          const image = new window.Image();
+          preview = image;
+          previewUrl = URL.createObjectURL(blob);
+          await new Promise<void>((resolve, reject) => {
+            image.onload = () => resolve();
+            image.onerror = () => reject(new Error('WebP preview unavailable'));
+            image.src = previewUrl!;
+          });
+        }
+        if (cancelled) return;
+        const width = bitmap?.width ?? preview!.naturalWidth;
+        const height = bitmap?.height ?? preview!.naturalHeight;
         const canvas = document.createElement('canvas');
-        const scale = Math.min(1, 1024 / Math.max(preview.naturalWidth, preview.naturalHeight));
-        canvas.width = Math.max(1, Math.round(preview.naturalWidth * scale));
-        canvas.height = Math.max(1, Math.round(preview.naturalHeight * scale));
+        const scale = Math.min(1, 1024 / Math.max(width, height));
+        canvas.width = Math.max(1, Math.round(width * scale));
+        canvas.height = Math.max(1, Math.round(height * scale));
         const context = canvas.getContext('2d');
         if (!context) throw new Error('WebP preview unavailable');
         // Canvas draws an animated image's default/first frame, preserving alpha.
-        context.drawImage(preview, 0, 0, canvas.width, canvas.height);
-        setMedia({ blob, poster: canvas.toDataURL('image/png'), timing });
+        context.drawImage(bitmap ?? preview!, 0, 0, canvas.width, canvas.height);
+        const poster = await new Promise<Blob>((resolve, reject) => canvas.toBlob(
+          (value) => value ? resolve(value) : reject(new Error('WebP preview unavailable')), 'image/png',
+        ));
+        if (cancelled) return;
+        posterUrl = URL.createObjectURL(poster);
+        setMedia({ blob, poster: posterUrl, width, height, timing });
         onReady(id, url, timing?.durationMs);
       } catch {
         if (!cancelled) { forgetLumiWebP(url); onError(id, url); }
       } finally {
-        preview.src = '';
+        bitmap?.close();
+        if (preview) preview.src = '';
         if (previewUrl) URL.revokeObjectURL(previewUrl);
       }
     })();
     return () => {
       cancelled = true;
       controller.abort();
-      preview.src = '';
+      if (preview) preview.src = '';
       if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (posterUrl) URL.revokeObjectURL(posterUrl);
     };
   }, [id, url, onReady, onError]);
 
@@ -94,10 +117,13 @@ export default function LumiWebPClip({ id, label, url, className, fit = 'contain
   }, [reportCycles, playing, visible, media, animationUrl, loadedAnimation, id, url]);
 
   if (!media) return null;
-  return <Image
+  // Blob animations need the native load event; next/image waits for decode()
+  // before forwarding it, which can strand cycle callbacks on large animations.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img
     src={playing && animationUrl ? animationUrl : media.poster}
     alt={`WebP da Lumi: ${label}`}
-    width={600} height={650} unoptimized loading="eager"
+    width={media.width} height={media.height} decoding="async" loading="eager"
     className={className}
     style={{ objectFit: fit }}
     data-state={id}

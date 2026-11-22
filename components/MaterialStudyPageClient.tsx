@@ -2,10 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, History, LoaderCircle, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
 import LumiMaterialLoading from '@/components/LumiMaterialLoading';
+import LumiConversationAvatar from '@/components/LumiConversationAvatar';
+import avatarStyles from '@/components/lumi-conversation-avatar.module.css';
 import { messages } from '@/packages/i18n';
 import type { Profile } from '@/types/database';
 import type { StudyMaterialDto } from '@/types/materials';
@@ -45,9 +47,31 @@ export default function MaterialStudyPageClient({
   const [loadError, setLoadError] = useState('');
   const [completionError, setCompletionError] = useState('');
   const [completing, setCompleting] = useState(false);
+  const [automaticCompletion, setAutomaticCompletion] = useState(false);
+  const [successAnimationFinished, setSuccessAnimationFinished] = useState(false);
+  const completionRequest = useRef<AbortController | null>(null);
+  const returnedToUpload = useRef(false);
+  const finishSuccessAnimation = useCallback(() => setSuccessAnimationFinished(true), []);
+  const goBack = useCallback(() => {
+    if (onBack) onBack();
+    else if (onClose) onClose();
+    else router.push(`/profile/${profileId}`);
+  }, [onBack, onClose, router, profileId]);
   const [showImageModal, setShowImageModal] = useState(false);
   const [readingPending, setReadingPending] = useState(initialMaterial?.extractionStatus === 'processing');
   const finishReading = useCallback(() => setReadingPending(false), []);
+
+  useEffect(() => () => {
+    const request = completionRequest.current;
+    completionRequest.current = null;
+    request?.abort();
+  }, [materialId]);
+
+  useEffect(() => {
+    if (!automaticCompletion || !material?.completedAt || !successAnimationFinished || returnedToUpload.current) return;
+    returnedToUpload.current = true;
+    goBack();
+  }, [automaticCompletion, material?.completedAt, successAnimationFinished, goBack]);
 
   const loadMaterial = useCallback(async (signal: AbortSignal) => {
     const response = await fetch(`/api/materials/${encodeURIComponent(materialId)}`, { cache: 'no-store', signal });
@@ -116,8 +140,13 @@ export default function MaterialStudyPageClient({
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [showImageModal]);
 
-  const completeMaterial = async () => {
-    if (!material || material.completedAt || completing) return;
+  const completeMaterial = async (automatic = false) => {
+    if (!material || material.extractionStatus !== 'ready' || material.isDidactic === false || material.purgedAt) return;
+    if (automatic) setAutomaticCompletion(true);
+    if (material.completedAt || completionRequest.current) return;
+    const controller = new AbortController();
+    completionRequest.current = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 15_000);
     setCompleting(true);
     setCompletionError('');
     try {
@@ -125,19 +154,24 @@ export default function MaterialStudyPageClient({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ completed: true }),
+        signal: controller.signal,
       });
       const data = await response.json() as StudyMaterialDto & { error?: string };
-      if (!response.ok) throw new Error(data.error || 'Não foi possível concluir a atividade.');
+      if (!response.ok || data.id !== material.id || !data.completedAt) throw new Error('Não foi possível concluir a atividade. Tente novamente.');
+      if (completionRequest.current !== controller) return;
       setMaterial(data);
-    } catch (error) {
-      setCompletionError(error instanceof Error ? error.message : 'Não foi possível concluir a atividade.');
+    } catch {
+      if (completionRequest.current === controller) setCompletionError('Não foi possível salvar a conclusão. Tente novamente.');
     } finally {
-      setCompleting(false);
+      window.clearTimeout(timeout);
+      if (completionRequest.current === controller) {
+        completionRequest.current = null;
+        setCompleting(false);
+      }
     }
   };
 
   if (loading) return <MaterialPageState message={messages.common.loading} />;
-  const goBack = onBack ?? onClose ?? (() => router.push(`/profile/${profileId}`));
   if (!profile || !material) {
     return <MaterialPageState message={loadError || 'Material não encontrado.'} action={goBack} />;
   }
@@ -150,13 +184,24 @@ export default function MaterialStudyPageClient({
       <div className={embedded ? 'home-layout home-material-layout' : 'material-stage'}>
         <aside className={embedded ? 'home-lumi' : 'material-lumi'}>
           <div className="lumi-halo" />
-          {ready ? (
+          {automaticCompletion ? (
+            <div className={`lumi-inline-host ${avatarStyles.host}`}>
+              <div className="lumi-inline">
+                <LumiConversationAvatar state="idle" celebrationId={`material:${material.id}`}
+                  onCelebrationComplete={finishSuccessAnimation} />
+                <div className="lumi-inline-controls" role="status">
+                  <span className="lumi-inline-status">{completing ? messages.materials.completing : material.completedAt ? messages.materials.completed : messages.materials.retryCompletion}</span>
+                </div>
+              </div>
+            </div>
+          ) : ready ? (
             <LumiVoiceAgent
               profileName={profile.firstName}
               age={calculateAge(profile.birthDate)}
               activityTitle={material.title ?? material.originalName}
               profileId={profileId}
               materialId={material.id}
+              onMaterialCompleted={material.completedAt ? undefined : () => { void completeMaterial(true); }}
               autoStart
               variant="inline"
               avatarMode="local"
@@ -223,7 +268,7 @@ export default function MaterialStudyPageClient({
               ) : (
                 <button className="button button-primary material-complete-button" disabled={completing} onClick={() => void completeMaterial()}>
                   {completing ? <LoaderCircle className="spin" size={19} /> : <CheckCircle2 size={19} />}
-                  {messages.materials.complete}
+                  {completionError ? messages.materials.retryCompletion : completing ? messages.materials.completing : messages.materials.complete}
                 </button>
               )}
               {completionError && <p className="form-error" role="alert">{completionError}</p>}

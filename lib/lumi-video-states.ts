@@ -39,11 +39,16 @@ export const BUNDLED_LUMI_VIDEO_CLIPS: Partial<Record<LumiVideoState, LumiVideoC
     source: 'bundled',
   },
   speaking: {
-    file: { name: 'lummi-falando-otimizada.webp', size: 3949272 },
-    url: '/assets/lumi/states/lummi-falando-otimizada.webp',
+    file: { name: 'lummi-falando-asas-web-v1.webp', size: 4808826 },
+    url: '/assets/lumi/states/lummi-falando-asas-web-v1.webp',
     source: 'bundled',
-    // Pre-sized to the portrait viewport; retains the original cover framing.
-    fit: 'cover',
+    // Show the full square frame so portrait containers never crop the wings.
+    fit: 'contain',
+  },
+  celebrating: {
+    file: { name: 'lummi-comemorando-transparente.webp', size: 2533052 },
+    url: '/assets/lumi/states/lummi-comemorando-transparente.webp',
+    source: 'bundled',
   },
 };
 
@@ -53,7 +58,7 @@ export const VIDEO_CONVERSATION_DEMO: { state: LumiVideoState; seconds: number }
   { state: 'thinking', seconds: 3 },
   { state: 'speaking', seconds: 6 },
   { state: 'listening', seconds: 4 },
-  { state: 'celebrating', seconds: 3 },
+  { state: 'celebrating', seconds: 3.033 },
 ];
 
 export function videoFileError(file: Pick<File, 'name' | 'size'>): string | null {

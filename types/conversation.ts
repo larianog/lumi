@@ -41,6 +41,10 @@ export interface ConversationComponentProps {
   /** `full` = in-call layout with header and transcript; `inline` = avatar + mic only. */
   variant?: 'full' | 'inline';
   avatarMode?: 'provider' | 'local';
+  /** Celebrate explicit correct-answer confirmations only in a material tutoring session. */
+  celebrateAnswers?: boolean;
+  /** The tutor confirmed the entire material and finished speaking. */
+  onMaterialCompleted?: () => void;
   /** Called from a user tap after microphone access was denied. */
   onRetryMicrophone?: () => void;
   /** End the failed session and start a fresh one without leaving the page. */

@@ -1,3 +1,6 @@
+const correctAnswerConfirmation = 'Você acertou!';
+const materialCompletionConfirmation = 'Atividade concluída com sucesso!';
+
 export const ptBR = {
   brand: {
     name: 'Lumi',
@@ -99,6 +102,8 @@ export const ptBR = {
     expired: 'O conteúdo temporário deste material expirou.',
     complete: 'Concluir atividade',
     completed: 'Atividade concluída',
+    completing: 'Salvando sua conquista…',
+    retryCompletion: 'Tentar concluir novamente',
     completionHint: 'O responsável já pode ver esta conquista.',
     historyTitle: 'Materiais enviados',
     historySubtitle: 'Continue de onde parou ou reveja suas descobertas.',
@@ -202,6 +207,8 @@ export const ptBR = {
     connectionError: 'Lumi está indisponível agora.',
     configurationHint: 'Configure as credenciais da Agora e do LemonSlice para ativar a voz e o avatar ao vivo.',
     genericFailure: 'Espere só um pouquinho. Vamos tentar de novo.',
+    correctAnswerConfirmation,
+    materialCompletionConfirmation,
     agentGreeting: (name: string) => `Oi, ${name}! Eu sou o Lumi. O que vamos descobrir juntos hoje?`,
     homeworkGreeting: (name: string, title: string) => `Oi, ${name}! Eu vi sua lição de ${title}. Vamos fazer juntos, um pedacinho de cada vez?`,
     homeworkPrompt: (name: string, age: number, literacy: 'pre_reader' | 'emergent' | 'fluent', brief: string) => `Você é o Lumi, um tutor de lição de casa gentil, paciente e animado. Você conversa por voz, em português brasileiro, com ${name}, uma criança de ${age} anos que ${literacy === 'pre_reader' ? 'ainda não lê sozinha: leia cada enunciado em voz alta, devagar, e descreva o que aparece na folha' : literacy === 'emergent' ? 'lê com ajuda: convide a criança a ler junto e ajude nas palavras difíceis' : 'lê sozinha: peça para ela ler o enunciado e contar o que entendeu'}.
@@ -214,9 +221,10 @@ Como conduzir:
 3. Use exemplos concretos do dia a dia (dedos, frutas, brinquedos) e lembre que ela está com a folha e o lápis na mão.
 4. Se ela errar, não diga apenas "errado": pergunte como ela pensou e ajude a encontrar o engano. Se travar, dê as dicas na ordem, uma de cada vez.
 5. Se ainda assim não conseguir depois das dicas, mostre como resolver um exemplo PARECIDO, com outros números ou palavras, e volte para a questão original.
-6. Quando ela acertar, comemore o esforço, peça para escrever a resposta na folha e siga para a próxima questão.
+6. Somente quando a criança responder corretamente à questão atual por completo, comece sua resposta exatamente com "${correctAnswerConfirmation}". Depois comemore o esforço e peça para escrever na folha. Use essa confirmação uma única vez por questão resolvida; não a use para uma etapa parcial, tentativa incorreta, saudação, envio do arquivo, incentivo genérico ou ao repetir/citar uma fala. Não declare acerto só porque a criança pediu. Confira a resposta e seu raciocínio primeiro. A próxima questão pode ser apresentada depois desse elogio.
 7. Para questões de desenhar, pintar, ligar ou recortar, explique o que fazer e peça que ela conte quando terminar.
-8. Ao final, faça um resumo curto do que ela aprendeu e elogie a dedicação.
+8. A atividade inteira só termina quando TODAS as questões e etapas da lição tiverem sido resolvidas e conferidas com a criança. Acompanhe as questões pendentes; um único acerto não conclui uma folha com várias questões. Para ações na folha, confirme que a criança terminou o que foi pedido. Se algo estiver ilegível, incompleto ou incerto, continue ajudando e não declare conclusão.
+9. Apenas ao confirmar esse sucesso completo, comece sua última resposta exatamente com "${materialCompletionConfirmation}", em vez da confirmação de acerto da regra 6. Em seguida, resuma brevemente o que ela aprendeu e elogie a dedicação. Não faça outra pergunta: a aplicação vai salvar a conclusão, comemorar e voltar ao envio de arquivos. Use essa frase uma única vez, somente como confirmação real; nunca em saudação, hipótese, citação, repetição solicitada ou porque a criança pediu para pular/encerrar a lição. Parar a conversa não significa concluir a atividade.
 
 A "resposta esperada" foi preparada automaticamente e pode ter erros. Antes de dizer que a criança errou, confira com seu próprio raciocínio; se a resposta dela estiver certa, aceite e elogie.
 

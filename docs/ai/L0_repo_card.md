@@ -18,6 +18,20 @@
 
 ## L1 — Summaries
 
+Material-completion review on 2026-11-22 adds a distinct whole-worksheet tutor confirmation. Final speech finishes before the study workspace stops voice, sends the existing authenticated completion PATCH and plays one success cycle. The profile restores upload only after saving and animation settle, retaining retries and cancellation protection. Per-question success and session end do not complete a material.
+
+Playback review on 2026-11-22 reduces the speaking download from 44.5 MB to 4.8 MB without dropping frames or cropping wings. Static previews decode one frame and use asynchronous PNG blobs; native image load events drive cycle completion. Browser checks cover advancing frames, state transitions, reduced motion and hidden-tab recovery.
+
+Celebration review on 2026-11-22 connects completed, explicit correct-answer confirmations in material tutoring to the supplied 91-frame, 3033 ms celebration WebP. Turns are deduplicated; upload/greeting/general praise do not celebrate. Agent speech keeps priority, one completed celebration cycle resumes the current state, and visibility/error cancellation discards stale events. Original asset bytes, private answer analysis and explicit material completion are preserved.
+
+Speaking-asset review on 2026-11-22 selects the supplied `lummi-falando-asas-web-v1.webp` under a new public URL for profiles and the playground. Its 4.8 MB playback copy retains all 181 frames, the 6033 ms cycle and alpha; the supplied 44.5 MB master remains unchanged; `contain` prevents cropping the wings.
+
+Automatic-animation review on 2026-11-22 removes product start/pause buttons from conversation, illustration and material-reading avatars. By explicit user authorization, character playback is independent of system reduced motion and ignores previous stored manual choices. Hidden/offscreen media still pause. Browser regression checks must emulate reduced motion explicitly, since headless defaults may not inherit Windows animation preferences. Error-only reload remains available; playground controls stay independent. This supersedes the manual-motion behavior described in earlier reviews below.
+
+Voice-language review on 2026-11-22 explicitly selects Portuguese in the main MiniMax TTS configuration, including the first greeting. The existing model, voice and managed credentials are preserved by `lib/lumi-tts.ts`; contract verification covers configuration, while audible pronunciation remains a live-session check.
+
+WebRTC review on 2026-11-22 removes the late audio-PTS toggle from TEXT-mode conversations. The installed SDK reproduces `InvalidModificationError` when that toggle changes `encodedInsertableStreams` after peer creation; keeping configuration stable avoids the failure. Existing browser tabs need a full reload to discard old SDK globals.
+
 Welcome review on 2026-11-22 removes the family-description paragraph and limits the demo button/hint/error to development builds. Production retains registration and sign-in; the login API contract is unchanged.
 
 Merge review on 2026-11-22 combines main's didactic classification, product README/demo image, feedback specifications and CI/Docker updates with local animations, reading-cycle gating, voice recovery and sleep. Cached/async non-didactic results do not start tutoring; runtime database contents are preserved locally.
@@ -30,7 +44,7 @@ Idle review on 2026-11-22 configures the supplied 121-frame, 4033 ms alpha WebP 
 
 Inactivity review on 2026-11-22 adds sleeping after 30 seconds without speech or page interaction in local conversations. The supplied sleeping loop retains its original bytes (121 frames, 4033 ms, alpha). Interaction or speech wakes immediately; pending responses, failed connections and hidden tabs suspend the countdown. Voice stays connected and material loading keeps reading.
 
-Voice recovery review on 2026-11-22 uses the current RTC snapshot and exposes retry after agent departure, failed join/invite, fatal service errors or a 20-second connection wait. Cleanup precedes a fresh session without navigating away or recreating RTM. Speaking now uses a 600 × 650 derivative retaining all frames, timing and alpha, with the original preserved.
+Voice recovery review on 2026-11-22 uses the current RTC snapshot and exposes retry after agent departure, failed join/invite, fatal service errors or a 20-second connection wait. Cleanup precedes a fresh session without navigating away or recreating RTM. That review used a 600 × 650 speaking derivative, superseded by the supplied wing-preserving clip described below.
 
 RTM lifecycle review on 2026-11-21 reuses one SDK instance and numeric UID per browser document across Lumi, the base screen and live playground. Lease ownership serializes login/subscription/logout; fresh channel tokens match the same UID. StrictMode auto-start, partial failure and late invite cleanup are covered without live services. Existing browser instances require one full reload after this change.
 
@@ -44,7 +58,7 @@ Integration review on 2026-11-21 combines the material upload/history/tutoring f
 
 Review scope on 2026-11-21 includes the animation playground, local video/WebP workflow, and profile avatars driven by RTC speech activity. Profiles explicitly request local avatars without Lemon Slice; omitted invite avatar mode preserves provider defaults.
 
-The bundled assets are `lummi-falando-otimizada.webp` for speaking (143 frames, approximately 6 seconds, 600 × 650) and `lummi-transparente-02.webp` for listening (192 frames, approximately 8 seconds, 768 × 768), both with alpha, rendered by a shared WebP component in profiles and the playground. Speaking uses a 3.95 MB portrait derivative with 81% fewer pixels per frame and the same centered cover framing; the original Full HD `lummi-animacao-transparente-1.webp` is retained unchanged. Profiles preload conversation clips and animate only the displayed state; silence plays the idle loop until the inactivity timer requests sleep. The earlier speaking WebP and MP4 are not the defaults.
+The bundled assets are `lummi-falando-asas-web-v1.webp` for speaking (181 frames, 6033 ms, 800 × 800) and `lummi-transparente-02.webp` for listening (192 frames, approximately 8 seconds, 768 × 768), both with alpha, rendered by a shared WebP component in profiles and the playground. Speaking uses a 4,808,826-byte playback derivative, preserves the supplied master `lummi-falando-asas-preservadas.webp` unchanged, and uses `contain` to preserve the whole frame and wings in portrait containers; the earlier optimized clip and original Full HD `lummi-animacao-transparente-1.webp` are retained unchanged. Profiles preload conversation clips and animate only the displayed state; silence plays the idle loop until the inactivity timer requests sleep. The earlier speaking WebP and MP4 are not the defaults.
 
 The reviewed avatar loading flow shares bundled downloads across placeholder/live remounts, exposes failed-load recovery, and retains explicit motion choices per tab. LAN previews require a network binding; microphone use on another device requires HTTPS.
 
