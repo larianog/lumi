@@ -9,7 +9,7 @@
 3. The server computes SHA-256 and atomically reserves a material keyed by owner scope, profile, hash, `HOMEWORK_VISION_MODEL`, and `MATERIAL_EXTRACTION_PROMPT_VERSION`.
 4. A fresh processing or ready record is reused. Otherwise `lib/material-storage.ts` stores private bytes and `lib/material-extraction.ts` sends a base64 image plus extraction-only prompt to OpenAI.
 5. The record becomes `ready` with extracted text or `failed` with a bounded error code.
-6. `/profile/[id]/materials/[materialId]` polls processing state, displays retained text, and starts inline Lumi.
+6. The profile page embeds `MaterialStudyPageClient` after upload to poll processing state, display the material, and start inline Lumi. The same component serves `/profile/[id]/materials/[materialId]` for saved history links. The embedded workspace has a visible return action that restores submission controls.
 7. `LumiVoiceAgent` sends only `profile_id` and `material_id`; `/api/invite-agent` reloads authorized text and delimits it as untrusted reference material.
 8. The child explicitly PATCHes `{ completed: true }`. Child history and adult report read the same record.
 

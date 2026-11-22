@@ -165,7 +165,7 @@ Study-material images are uploaded to the authenticated `/api/materials` route. 
 4. The client receives transcript, agent state, and `AGENT_METRICS` (per-stage latency) events over RTM.
 5. On end, the client calls `/api/stop-conversation`, logs out RTM, and unmounts the call view so Agora React hooks clean up RTC publish/join and the local microphone track.
 
-For uploaded study material, the browser sends multipart form data to `/api/materials`, navigates to `/profile/:profileId/materials/:materialId`, and starts an inline Lumi session grounded with server-loaded extracted text. The child explicitly completes the activity; ending the voice session alone does not mark it complete.
+For uploaded study material, the browser sends multipart form data to `/api/materials` and opens the study workspace directly on the profile page, with a visible **Voltar ao perfil** control. The saved `/profile/:profileId/materials/:materialId` route remains available from history. Lumi starts an inline session grounded with server-loaded extracted text. The child explicitly completes the activity; ending the voice session alone does not mark it complete.
 
 ## Optional BYOK
 

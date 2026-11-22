@@ -19,6 +19,7 @@ import {
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
+import MaterialStudyPageClient from '@/components/MaterialStudyPageClient';
 import { calculateAge } from '@/lib/age';
 import { prepareUploadFile } from '@/lib/prepare-upload';
 import { messages } from '@/packages/i18n';
@@ -53,6 +54,7 @@ export default function ProfilePage() {
   const [completions, setCompletions] = useState<ActivityCompletion[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<ActivityId>('school');
   const [selectedMaterial, setSelectedMaterial] = useState<File | null>(null);
+  const [activeMaterial, setActiveMaterial] = useState<{ id: string; profileId: string } | null>(null);
   const [materialUploadState, setMaterialUploadState] = useState<'idle' | 'uploading'>('idle');
   const [materialError, setMaterialError] = useState('');
   const [materialWarning, setMaterialWarning] = useState('');
@@ -168,7 +170,9 @@ export default function ProfilePage() {
         setMaterialWarning('Esse material não é didático. Ele foi salvo no perfil do responsável.');
         setMaterialUploadState('idle');
       } else {
-        router.push(`/profile/${targetProfileId}/materials/${payload.material.id}`);
+        setSelectedMaterial(null);
+        setMaterialUploadState('idle');
+        setActiveMaterial({ id: payload.material.id, profileId: targetProfileId });
       }
     } catch (error) {
       setMaterialError(error instanceof Error ? error.message : messages.home.materialError);
@@ -227,7 +231,7 @@ export default function ProfilePage() {
   const selectedLiteracy = literacyLevel ?? defaultLiteracy(age);
 
   return (
-    <section className="forest-screen home-screen">
+    <section className={`forest-screen home-screen${activeMaterial ? ' home-screen-study' : ''}`}>
       <div className="forest-overlay forest-overlay-home" />
       <header className="home-header">
         <Brand size="medium" />
@@ -244,7 +248,16 @@ export default function ProfilePage() {
           </button>
         </div>
       </header>
-      <div className="home-layout">
+      {activeMaterial ? (
+        <MaterialStudyPageClient
+          key={activeMaterial.id}
+          profileId={activeMaterial.profileId}
+          materialId={activeMaterial.id}
+          initialProfile={activeMaterial.profileId === profileId ? profile : undefined}
+          embedded
+          onClose={() => setActiveMaterial(null)}
+        />
+      ) : <div className="home-layout">
         <aside className="home-lumi">
           <div className="lumi-halo" />
           {/* Lumi greets the child as soon as the profile screen opens. */}
@@ -354,7 +367,7 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       {cameraOpen && (
         <div className="camera-modal" role="dialog" aria-modal="true" aria-labelledby="camera-title">
