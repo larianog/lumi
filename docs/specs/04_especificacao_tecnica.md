@@ -1,6 +1,6 @@
 # Sofia — Especificação Técnica e guia de implementação para Codex
 
-**Versão:** 1.0 pós-pivot | **Data:** 21/11/2026 | **Status:** proposta; verificar repositório e SDKs reais.
+**Versão:** 1.1 pós-pivot e feedback | **Data:** 21/11/2026 | **Status:** proposta; verificar repositório e SDKs reais.
 
 ## 1. Diretrizes
 
@@ -247,3 +247,28 @@ Leia os quatro documentos Sofia pós-pivot em docs/. Inspecione o repositório a
 ## 16. Pendências técnicas
 
 Confirmar SDK/plano/região Agora, provider de voz pt-BR, formato de tools, eventos de legendas e interrupção; stack existente, deploy e suporte a SSE; autenticação, storage e TTL; orçamento e limites; autorização para materiais; revisão legal e política de segurança. Não declarar produção pronta antes dessas verificações.
+
+## 17. Insights de feedback: evidência e privacidade
+
+O feedback de mentoria de 21/11/2026 orienta perguntas de validação, não um requisito de adicionar recursos nem evidência de que a abordagem funciona.
+
+### Evidência pedagógica observável
+
+- Não usar duração, número de turnos ou satisfação como proxy de aprendizagem.
+- Para cada tentativa confirmada, manter separado: resposta, estratégia verbal observada (quando necessária), status da avaliação, ajuda já oferecida e resultado de transferência. Não inferir diagnóstico cognitivo nem persistir transcrição integral por padrão.
+- Comparar pergunta orientadora com explicação direta por cenário e evidência; não obrigar roteiro completo se a criança já demonstrou compreensão.
+- Transferência deve usar item novo com contexto/números distintos quando possível e ser registrada separadamente da conclusão da atividade original. Resultado representa a sessão e não domínio duradouro.
+- Ensaios com adultos e fixtures verificam extração, transições, consistência e limites; não demonstram eficácia com crianças. Metas quantitativas devem ser definidas após baseline, sem fabricar resultados.
+
+### Minimização e governança
+
+- Em demo, usar somente adultos e material fictício/autorizado. Não coletar gravações identificáveis de menores para acelerar prototipação.
+- Enviar a cada provedor apenas os dados necessários à etapa; separar arquivo de origem, extração, plano privado, contexto de voz e evidência. Registrar fornecedores, finalidade, retenção, região e configuração real de armazenamento antes de operação com menores.
+- Definir acesso e exclusão para cada dado e explicar finalidade e retenção de forma adequada ao público. Revisar papéis de responsáveis, base legal e melhor interesse com assessoria competente; menção à LGPD aqui não é parecer jurídico nem declaração de conformidade.
+- A [LGPD (Lei 13.709/2018)](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm) inclui finalidade, adequação, necessidade, transparência, segurança e prevenção entre princípios do tratamento; o art. 14 dispõe especificamente sobre dados de crianças e adolescentes e melhor interesse. Validar redação vigente e orientações da ANPD antes do lançamento.
+
+### Perguntas a manter abertas
+
+1. Em que estágio e para quais tipos de erro uma pergunta orientadora melhora a qualidade da tentativa seguinte?
+2. Que combinação de explicação oral, resposta e transferência é suficientemente informativa sem coletar mais dados do que o necessário?
+3. O que criança e responsável consideram valioso, e que necessidades docentes só devem ser consideradas em um recorte futuro?
