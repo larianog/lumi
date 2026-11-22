@@ -49,9 +49,9 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - Deploy the repository as a single Next.js app.
 - Set `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE` in the deployment target.
 - Set the OpenAI analysis variables when the material workflow is enabled.
-- The bundled JSON database and local file cache are not durable on serverless Vercel; use persistent database/object-storage adapters for production material history.
+- Vercel uses `lib/hosted-db.ts` (PostgreSQL JSONB state with row-locked writes) and `lib/private-file-storage.ts` (private Vercel Blob) when `LUMI_STORAGE_BACKEND=hosted` or `VERCEL=1`. Configure pooled `DATABASE_URL` and connect a private Blob store (`BLOB_STORE_ID`; OIDC auth is automatic). Local/container mode keeps `data/`.
 - Keep `NEXT_AGORA_APP_CERTIFICATE` server-side only.
-- `.github/workflows/deploy-vercel.yml` deploys production on pushes to `main` using GitHub repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
+- The connected Vercel Git integration deploys production on pushes to `infrastructure`; set the Vercel Production Branch to `infrastructure` after pushing the branch to GitHub.
 - Avoid duplicate production deployments if the Vercel Git integration is also enabled.
 
 ## Routing / Ownership
@@ -109,7 +109,7 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `lib/conversation.ts`: transcript normalization and visualizer state mapping.
 - `lib/material-extraction.ts`: server-only multimodal extraction request and response validation.
 - Homework tutoring: `analyzeMaterial` returns a child-safe `extractedText` and a server-only `analysis` (expected answers, steps, hints). Never add `analysis` to DTOs. `invite-agent` switches to `messages.voice.homeworkPrompt` when a material has an analysis. Uploads require a family session and owned child profile, without an additional adult-password step; family-wide history is available to the signed-in family session; the parent area has no separate password. The study workspace passes the child's selected avatar mode/ID alongside `profileId` and `materialId`.
-- `lib/material-storage.ts`: private temporary local file cache.
+- `lib/material-storage.ts` and `lib/recording-storage.ts`: private local file or Vercel Blob storage through `lib/private-file-storage.ts`.
 - `lib/study-materials.ts`: ownership, shared-demo isolation, DTO, and expiry helpers.
 - `config/env/env.local.example`: local environment template.
 - `deploy/docker/`: container build definition and Docker-specific ignore rules.

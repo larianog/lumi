@@ -52,7 +52,8 @@
 - Family-only ownership leaks uploads between users of the shared demo family; demo session ID is mandatory.
 - Sending extracted text from the browser into `/api/invite-agent` makes the prompt tamperable; load it server-side by material ID.
 - Treating voice-session end, generic praise or a single correct answer as material completion produces false positives. Only manual completion or the reserved whole-material tutor confirmation can send the authenticated PATCH. Never reset the upload form before saving succeeds; preserve error retry and abort/late-response protection.
-- `data/` writes are not durable on serverless Vercel and cannot be the production material store.
+- `data/` writes fail or disappear on serverless Vercel. The hosted backend needs `DATABASE_URL` and a connected private Blob store; adding credentials without selecting the hosted backend still leaves local writes. Private Blob bytes must be read only after route-level family/demo ownership checks. The single PostgreSQL state row serializes all writes and should be replaced with normalized tables if the family population grows substantially.
+- Vercel Functions limit request and response payloads to 4.5 MB. The current server-mediated 10 MB material and 30 MB recording routes therefore cannot transfer their full configured size on Vercel; larger files need direct client-to-private-Blob upload and a bounded download path.
 - A crashed `processing` reservation must age out; only fresh processing entries are reusable.
 
 ## Docs/Process Pitfalls

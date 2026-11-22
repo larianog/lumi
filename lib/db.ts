@@ -2,6 +2,8 @@ import { promises as fs } from 'node:fs';
 import { createHash, randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { readHostedDb, updateHostedDb } from '@/lib/hosted-db';
+import { usesHostedStorage } from '@/lib/storage-backend';
 import type {
   ActivityCompletion,
   Database,
@@ -102,6 +104,7 @@ async function ensureDbExists() {
 }
 
 async function readDb(): Promise<Database> {
+  if (usesHostedStorage()) return readHostedDb(initialDb);
   await ensureDbExists();
   const content = await fs.readFile(DB_PATH, 'utf8');
   const parsed = JSON.parse(content) as Partial<Database> & {
@@ -159,6 +162,7 @@ async function writeDb(db: Database) {
 }
 
 export async function updateDb<T>(mutate: (db: Database) => Promise<T> | T): Promise<T> {
+  if (usesHostedStorage()) return updateHostedDb(initialDb, mutate);
   const operation = writeQueue.then(async () => {
     const db = await readDb();
     const result = await mutate(db);

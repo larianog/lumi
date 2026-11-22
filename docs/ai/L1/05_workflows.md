@@ -76,7 +76,7 @@ Before upload, **Remover** clears a selected file or camera photo and its error/
 
 The two-step sign-up form posts an adult account first, then up to eight child profiles in one request. The lesson page displays child-safe question cards, answer blanks and a private original-file viewer; spoken or typed answers can be checked with Lumi.
 
-The bundled JSON database and `data/material-cache/` adapter are suitable for local or persistent-container development. Select durable database/private object storage adapters before serverless production deployment.
+The JSON database and `data/` file adapters are suitable for local or persistent-container development. Vercel selects PostgreSQL and private Blob; connect both stores and set the Production storage variables before deployment.
 
 After a didactic upload, the profile page embeds `MaterialStudyPageClient` in place of the submission controls. Its **Voltar ao perfil** action restores the submission view. Saved materials from history still use `/profile/[id]/materials/[materialId]`.
 
@@ -86,12 +86,13 @@ After a didactic upload, the profile page embeds `MaterialStudyPageClient` in pl
 2. Confirm docs alignment (`README`, guides, `AGENTS`, `docs/ai`).
 3. Use conventional commit and branch naming.
 
-## Deploy to Vercel from GitHub Actions
+## Deploy to Vercel from the Connected Git Repository
 
-1. Link the Vercel project locally with `vercel link` to obtain `orgId` and `projectId` from `.vercel/project.json`.
-2. Set GitHub repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
-3. Set `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE` in the Vercel project's Production environment.
-4. Push to `main`; `.github/workflows/deploy-vercel.yml` runs `vercel deploy --prod`.
+1. Connect the GitHub repository to the Vercel project.
+2. Set `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE` in the Vercel project's Production environment, along with hosted storage variables.
+3. Push `infrastructure` to GitHub.
+4. Set the Vercel Production Branch to `infrastructure` under Settings → Environments → Production → Branch Tracking.
+5. Push further commits to `infrastructure`; Vercel deploys them as production.
 
 ## Build the Container Image
 

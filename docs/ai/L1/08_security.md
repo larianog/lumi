@@ -71,7 +71,7 @@
 - School material may contain child personal data; file/text retention defaults to seven days and metadata persists only for history/completion.
 - Shared demo uploads require session isolation to avoid cross-visitor disclosure.
 - Extracted text is untrusted prompt data and is explicitly delimited from agent instructions.
-- The local JSON/filesystem adapters are not a production-grade secret/data store on serverless platforms.
+- Vercel stores metadata in PostgreSQL and files in a private Blob store; file routes check the family and demo session before reading bytes. Local JSON/files remain for local or persistent-container use.
 
 ## Hardening Steps for Productionization
 
@@ -80,15 +80,15 @@
 - Add rate limiting for token and invite endpoints.
 - Add request tracing IDs for security incident investigation.
 - Add environment-specific secret rotation policy and monitoring.
-- Replace local material storage with encrypted private object storage and a persistent database; add deletion/export controls and rate limiting.
+- Keep the private hosted database and Blob store connected; add deletion/export controls and rate limiting.
 
 ## Deployment Secret Checklist (Vercel)
 
 - `NEXT_PUBLIC_AGORA_APP_ID` set for all required environments.
 - `NEXT_AGORA_APP_CERTIFICATE` set as server-side secret only.
-- `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` stored as GitHub repository secrets for the production deployment workflow.
 - Optional BYOK keys set only when related provider block is enabled.
 - `OPENAI_API_KEY` set for deployments using material extraction.
+- Pooled `DATABASE_URL` set server-side for hosted persistence; connect only a private Blob store (`BLOB_STORE_ID`, automatic short-lived OIDC) and set `LUMI_STORAGE_BACKEND=hosted`.
 - Preview environments use non-production credentials.
 
 ## Security-Relevant Files
@@ -101,6 +101,8 @@
 - `app/api/materials/[id]/route.ts`
 - `lib/material-extraction.ts`
 - `lib/material-storage.ts`
+- `lib/hosted-db.ts`
+- `lib/private-file-storage.ts`
 - `README.md` environment section
 
 ## Audit Trigger Events

@@ -27,7 +27,7 @@ Profile material UI
 Next.js API routes
   -> agora-token (RtcTokenBuilder.buildTokenWithRtm)
   -> agora-agents (start/stop managed agent)
-  -> private material cache + JSON metadata
+  -> private material files + metadata (local files/JSON or Vercel Blob/PostgreSQL)
   -> OpenAI vision analysis (structured homework brief)
 
 Agora Cloud
@@ -94,6 +94,7 @@ Product avatars and material reading animate automatically, with no start/pause 
 
 - Local development via `pnpm run dev`.
 - Vercel deployment as single Next.js app with server env vars.
+- On Vercel, `lib/hosted-db.ts` stores the existing database shape in one PostgreSQL JSONB row. `SELECT FOR UPDATE` serializes mutations across function instances. `lib/private-file-storage.ts` stores authenticated material and recording files in a private Vercel Blob store. The local/container path keeps the JSON database and private files under `data/`.
 
 ## Data and Control Boundaries
 

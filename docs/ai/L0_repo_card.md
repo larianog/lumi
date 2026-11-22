@@ -16,6 +16,8 @@
 | Recipe Status | stable |
 | Last Reviewed | 2026-11-22 |
 
+The infrastructure branch uses PostgreSQL JSONB for transactional Vercel metadata and private Vercel Blob for material and recording bytes. Local development retains `data/`. The Vercel Git integration deploys pushes to `infrastructure` as production.
+
 ## L1 — Summaries
 
 Material-completion review on 2026-11-22 adds a distinct whole-worksheet tutor confirmation. Final speech finishes before the study workspace stops voice, sends the existing authenticated completion PATCH and plays one success cycle. The profile restores upload only after saving and animation settle, retaining retries and cancellation protection. Per-question success and session end do not complete a material.

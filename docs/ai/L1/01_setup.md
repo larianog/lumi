@@ -31,6 +31,9 @@ agora project doctor --deep
 - `NEXT_PUBLIC_AGORA_APP_ID`: Agora project App ID.
 - `NEXT_AGORA_APP_CERTIFICATE`: Agora App Certificate (server only).
 - `OPENAI_API_KEY`: OpenAI key for homework (material) analysis (server only).
+- `DATABASE_URL`: PostgreSQL connection string for the hosted backend on Vercel.
+- `BLOB_STORE_ID`: injected by the connected private Vercel Blob store; Vercel supplies short-lived OIDC auth automatically.
+- `LUMI_STORAGE_BACKEND=hosted`: explicit hosted-storage selection; Vercel's `VERCEL=1` also selects it.
 - `HOMEWORK_VISION_MODEL`: optional vision model (default `gpt-4.1-mini`); also participates in the extraction cache key.
 
 Optional material setting: `LUMI_MATERIAL_RETENTION_HOURS` (168-hour default). The tracked template is `config/env/env.local.example`; agent behavior defaults live in code, and optional voice BYOK examples are documented later in the root README.
@@ -101,11 +104,11 @@ Local:
 Vercel:
 
 - Requires environment vars configured per environment scope.
-- Requires durable database and private object storage adapters for production material history; the bundled JSON/filesystem adapters are local/container oriented.
+- Uses PostgreSQL for a single transactional JSONB state row and private Vercel Blob for material/recording files. Connect both stores and set pooled `DATABASE_URL` and `LUMI_STORAGE_BACKEND=hosted` in Production; the Blob connection injects `BLOB_STORE_ID` for OIDC authentication.
 - Keep `NEXT_AGORA_APP_CERTIFICATE` private server variable.
 - Use `pnpm run build` locally before pushing deployment changes.
-- `.github/workflows/deploy-vercel.yml` deploys to production on pushes to `main` using `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` GitHub repository secrets.
-- Avoid a second deployment from the Vercel Git integration when using the Actions workflow.
+- The connected Vercel Git integration deploys production on pushes to `infrastructure`.
+- Set the project's Production Branch to `infrastructure` after the branch exists on GitHub.
 
 ## Setup Change Checklist
 

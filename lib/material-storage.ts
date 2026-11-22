@@ -1,7 +1,4 @@
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-
-const MATERIAL_CACHE_DIR = path.join(process.cwd(), 'data', 'material-cache');
+import { deletePrivateFiles, readPrivateFile, storePrivateFile } from '@/lib/private-file-storage';
 
 const extensionByMimeType: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -16,17 +13,14 @@ export async function storeMaterialFile(id: string, mimeType: string, bytes: Buf
   const extension = extensionByMimeType[mimeType];
   if (!extension) throw new Error('UNSUPPORTED_MATERIAL_TYPE');
 
-  await fs.mkdir(MATERIAL_CACHE_DIR, { recursive: true });
   const storageKey = `${id}.${extension}`;
-  await fs.writeFile(path.join(MATERIAL_CACHE_DIR, storageKey), bytes, { flag: 'wx' });
-  return storageKey;
+  return storePrivateFile('material-cache', storageKey, mimeType, bytes);
+}
+
+export function readMaterialFile(storageKey: string) {
+  return readPrivateFile('material-cache', storageKey);
 }
 
 export async function deleteMaterialFiles(storageKeys: string[]) {
-  await Promise.all(storageKeys.map(async (storageKey) => {
-    if (path.basename(storageKey) !== storageKey) return;
-    await fs.unlink(path.join(MATERIAL_CACHE_DIR, storageKey)).catch((error: NodeJS.ErrnoException) => {
-      if (error.code !== 'ENOENT') throw error;
-    });
-  }));
+  await deletePrivateFiles('material-cache', storageKeys);
 }

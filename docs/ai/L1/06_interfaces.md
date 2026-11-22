@@ -110,6 +110,8 @@ Required:
 
 Optional material settings are `HOMEWORK_VISION_MODEL` (default `gpt-4.1-mini`) and `LUMI_MATERIAL_RETENTION_HOURS`. Optional voice BYOK snippets use additional variables only when explicitly enabled.
 
+Vercel production additionally requires pooled `DATABASE_URL`, a connected private Vercel Blob store (`BLOB_STORE_ID` and automatic OIDC), and `LUMI_STORAGE_BACKEND=hosted` (or the automatically exposed `VERCEL=1`). These variables remain server-only. HTTP route payloads and browser-safe DTOs are unchanged.
+
 ## Test Coverage for Interfaces
 
 - `scripts/verify-api-contracts.ts` asserts token generation, input validation, env failures, and SSE framing cases.

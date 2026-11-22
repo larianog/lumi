@@ -59,7 +59,9 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `agora.ts`: default constants (`DEFAULT_AGENT_UID`).
 - `conversation.ts`: transcript normalization, spacing cleanup, timestamp normalization, visualizer state mapping.
 - `material-extraction.ts`: OpenAI request, extraction prompt, timeout, and response parsing.
-- `material-storage.ts`: private temporary local file storage.
+- `hosted-db.ts`: PostgreSQL state row with transactional writes for Vercel.
+- `storage-backend.ts`: chooses hosted storage on Vercel or by explicit environment setting.
+- `private-file-storage.ts`, `material-storage.ts`, `recording-storage.ts`: private Blob or local file storage and file-type wrappers.
 - `study-materials.ts`: ownership, DTO, demo isolation, and expiry cleanup.
 
 ## Validation and Tooling

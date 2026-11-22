@@ -1,8 +1,7 @@
-import { promises as fs } from 'node:fs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getFamilyForSession, getRecording } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
-import { recordingFilePath } from '@/lib/recording-storage';
+import { readRecordingFile } from '@/lib/recording-storage';
 import { getDemoSessionScope } from '@/lib/study-materials';
 
 export const runtime = 'nodejs';
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest, context: RecordingFileRouteConte
     const recording = await getRecording(id, result.family.id, getDemoSessionScope(result.session));
     if (!recording) return NextResponse.json({ error: 'Gravação não encontrada.' }, { status: 404 });
 
-    const bytes = await fs.readFile(recordingFilePath(recording.storageKey)).catch(() => null);
+    const bytes = await readRecordingFile(recording.storageKey);
     if (!bytes) return NextResponse.json({ error: 'Arquivo não encontrado.' }, { status: 404 });
 
     const headers = {

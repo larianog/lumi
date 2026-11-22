@@ -1,11 +1,8 @@
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
 import { NextRequest, NextResponse } from 'next/server';
 import { getFamilyForSession, getStudyMaterial } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
+import { readMaterialFile } from '@/lib/material-storage';
 import { ownsStudyMaterial } from '@/lib/study-materials';
-
-const MATERIAL_CACHE_DIR = path.join(process.cwd(), 'data', 'material-cache');
 
 type MaterialFileRouteContext = { params: Promise<{ id: string }> };
 
@@ -28,26 +25,18 @@ export async function GET(request: NextRequest, context: MaterialFileRouteContex
       return NextResponse.json({ error: 'Arquivo não encontrado.' }, { status: 404 });
     }
 
-    const filePath = path.join(MATERIAL_CACHE_DIR, material.storageKey);
+    const fileBuffer = await readMaterialFile(material.storageKey);
+    if (!fileBuffer) return NextResponse.json({ error: 'Arquivo não encontrado.' }, { status: 404 });
 
-    try {
-      const fileBuffer = await fs.readFile(filePath);
-
-      // Determine content type from mimeType or file extension
-      const contentType = material.mimeType || 'application/octet-stream';
-
-      return new NextResponse(fileBuffer, {
-        status: 200,
-        headers: {
-          'Content-Type': contentType,
-          'Content-Disposition': `inline; filename="${encodeURIComponent(material.originalName)}"`,
-          'Cache-Control': 'no-cache',
-        },
-      });
-    } catch (fileError) {
-      console.error('Error reading material file:', fileError);
-      return NextResponse.json({ error: 'Arquivo não encontrado.' }, { status: 404 });
-    }
+    return new NextResponse(new Uint8Array(fileBuffer), {
+      status: 200,
+      headers: {
+        'Content-Type': material.mimeType || 'application/octet-stream',
+        'Content-Disposition': `inline; filename="${encodeURIComponent(material.originalName)}"`,
+        'Cache-Control': 'private, no-store',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
   } catch (error) {
     console.error('Error serving material file:', error);
     return NextResponse.json({ error: 'Não foi possível carregar o arquivo.' }, { status: 500 });

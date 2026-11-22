@@ -177,7 +177,7 @@ Lumi is a single Next.js application containing the browser UI, server route han
 | Voice-agent client | `agora-agent-client-toolkit`, `agora-agent-uikit` | `AgoraVoiceAI`, turn state, transcript helpers, and voice UI |
 | Voice-agent server | `agora-agents` | Managed agent creation, provider configuration, and session lifecycle |
 | Material analysis | Vercel AI SDK and OpenAI | Structured multimodal analysis of images and PDFs |
-| Local persistence | JSON metadata database and private filesystem cache | Families, profiles, sessions, completions, and temporary material content |
+| Persistence | Local JSON/files or PostgreSQL and private Vercel Blob | Families, profiles, sessions, completions, material files, and recordings |
 
 ### Material-analysis pipeline
 
@@ -342,9 +342,9 @@ Run `pnpm run verify` before shipping changes. The `doctor` step requires a conf
 
 - `app/` — Next.js pages, layouts, global styles, and API routes.
 - `components/` — product UI, upload flows, study pages, RTC/RTM lifecycle, and voice controls.
-- `lib/db.ts` — local family, session, completion, and material metadata persistence.
+- `lib/db.ts` and `lib/hosted-db.ts` — family, session, completion, and material metadata persistence.
 - `lib/material-extraction.ts` — multimodal schema, prompt, sanitization, and child-safe transcript generation.
-- `lib/material-storage.ts` — private temporary file storage.
+- `lib/private-file-storage.ts`, `lib/material-storage.ts`, and `lib/recording-storage.ts` — private local files or Vercel Blob storage.
 - `lib/study-materials.ts` — ownership, demo isolation, browser-safe DTOs, and retention cleanup.
 - `lib/conversation.ts` — transcript normalization and agent visual-state mapping.
 - `app/api/invite-agent/route.ts` — tutor instructions, VAD, managed provider pipeline, and agent startup.
@@ -356,12 +356,17 @@ Run `pnpm run verify` before shipping changes. The `doctor` step requires a conf
 
 ## Production and deployment
 
-The repository can be deployed as a single Next.js application. A production deployment must configure the three required environment variables and keep both secrets server-side.
+The repository can be deployed as a single Next.js application. A production deployment must configure the Agora variables and `OPENAI_API_KEY` for material analysis. Keep credentials server-side.
+
+For Vercel, connect a PostgreSQL database (for example, Neon from the Vercel Marketplace) and a **private** Vercel Blob store to the project. Set `DATABASE_URL` and `LUMI_STORAGE_BACKEND=hosted` in Production. The Blob connection supplies `BLOB_STORE_ID`; the current SDK uses Vercel's short-lived OIDC credentials automatically, so no long-lived Blob token is needed on Vercel. Use Neon's pooled `DATABASE_URL`. The app creates its `lumi_state` table on first use; a single JSONB row is locked for each write, so concurrent Vercel instances cannot overwrite each other's changes. This keeps the current database contract but serializes writes and is intended for a modest family population. Local development and persistent single-container deployments continue to use `data/` unless the hosted backend is selected.
+
+The connected Vercel Git integration deploys pushes to `infrastructure` as production. Set the Vercel project's **Production Branch** to `infrastructure` under Settings → Environments → Production → Branch Tracking after the branch exists on GitHub. Existing local `data/` records are not copied into the new PostgreSQL/Blob stores automatically.
+
+Vercel Functions still cap request and response payloads at 4.5 MB. Material uploads above that size and larger recording uploads or downloads need direct client-to-Blob transfer in a future change; the current 10 MB material and 30 MB recording limits apply to local/container deployments.
 
 The included GitHub workflows provide:
 
 - CI verification through [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
-- Production Vercel deployment through [`.github/workflows/deploy-vercel.yml`](.github/workflows/deploy-vercel.yml).
 - Container verification through [`.github/workflows/docker.yml`](.github/workflows/docker.yml).
 
 To build the standalone container locally:
@@ -370,7 +375,7 @@ To build the standalone container locally:
 docker build -f deploy/docker/Dockerfile -t lumi-by-agora .
 ```
 
-The bundled JSON database and private filesystem cache are intended for local development or a persistent single-container deployment. They are not durable on serverless Vercel instances. Before a production launch, replace them with a persistent database and private object storage while preserving the ownership and retention boundaries in `lib/study-materials.ts`.
+Vercel Functions use the PostgreSQL and private Blob adapters at runtime. Uploaded material and recording bytes still pass through the existing authenticated API routes; private Blob URLs are never returned to the browser.
 
 ## Troubleshooting
 
