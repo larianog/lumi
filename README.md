@@ -1,243 +1,332 @@
-# Agora Conversational AI Next.js Quickstart
+# Lumi — AI study companion for children
 
-[![Build](https://github.com/AgoraIO-Conversational-AI/agent-quickstart-nextjs/actions/workflows/build-check.yml/badge.svg)](https://github.com/AgoraIO-Conversational-AI/agent-quickstart-nextjs/actions/workflows/build-check.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![CI](https://github.com/larianog/unmute-by-agora/actions/workflows/ci.yml/badge.svg)](https://github.com/larianog/unmute-by-agora/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org/)
 
-Build a production-style voice agent in minutes with Next.js and the Agora Conversational AI Engine, including voice agent visualizer ([Agent UIKit](https://agoraio-conversational-ai.github.io/agent-uikit/)), live transcript, and real-time pipeline latency via `AGENT_METRICS` ([Agent Toolkit](https://github.com/AgoraIO-Conversational-AI/agent-client-toolkit-ts)).
+Lumi is a voice-first study companion that helps children work through school activities with guidance instead of simply giving them the answers. A child can upload a worksheet or photograph a page, choose their current reading level, and talk to Lumi about the activity in Brazilian Portuguese.
 
-## Prerequisites
+The experience is designed for families. Adults create the family account and child profiles, children study through their own profile, and responsible adults can review materials and completed activities in a protected progress area.
 
-- [Node.js 22+](https://nodejs.org/en/download/)
+This repository is built from Agora's Conversational AI Next.js quickstart and extends it into a complete study-material workflow with multimodal analysis, family profiles, history, completion tracking, and a material-aware voice tutor.
+
+## What Lumi does
+
+A typical study session follows this path:
+
+1. An adult creates a family account and adds one or more child profiles, or opens the built-in demo.
+2. The child selects their profile and adds a school activity as a photo, image, or PDF.
+3. The child selects how independently they currently read: not yet reading, reading with help, or reading independently.
+4. The server validates the file and uses an OpenAI vision model to understand the worksheet.
+5. Lumi identifies the subject, instructions, questions, expected answers, solution steps, and progressive hints.
+6. The profile page opens the material workspace in place, and a private, material-aware voice agent guides the child through the activity. **Voltar ao perfil** returns to submission.
+7. The child explicitly completes the activity. Its status then appears in the child's history and the adult progress report.
+
+Lumi's tutoring prompt is adapted to the child's name, age, reading level, and uploaded activity. Expected answers remain server-side and are used only to check the child's reasoning; the child-facing extracted text does not expose the answer key.
+
+## Run locally
+
+### Prerequisites
+
+- [Node.js 22 or newer](https://nodejs.org/en/download/)
 - [pnpm](https://pnpm.io/installation)
 - [Agora CLI](https://github.com/AgoraIO-Community/cli)
+- An Agora project with Conversational AI enabled
+- An OpenAI API key for worksheet analysis
 
-## Run It
-
-Getting started is quick and easy: install the CLI _(skip if you already have it)_ , scaffold the Next.js quickstart using the Agora CLI, install dependencies, and run.
-
-1. **Install the Agora CLI and sign in**
-   _(skip if `agora` is already on your PATH)_:
-
-   macOS and Linux:
-
-   ```bash
-   curl -fsSL https://raw.githubusercontent.com/AgoraIO/cli/main/install.sh | sh -s -- --add-to-path
-   ```
-
-   Windows PowerShell:
-
-   ```powershell
-   irm https://dl.agora.io/cli/install.ps1 | iex
-   ```
-
-   If the Windows install command fails in PowerShell, try running the macOS/Linux command from [Git Bash](https://git-scm.com/downloads/win), then open a new terminal and run `agora --help` to confirm the CLI is on your PATH.
-
-   Then verify and sign in:
-
-   ```bash
-   agora --help
-   agora login
-   ```
-
-   If `agora --help` is not found after install, close and reopen your terminal, then try again. If it still fails, check that the installer-added Agora CLI location is on your shell `PATH`.
-
-2. **Scaffold and run**
-   `agora init` clones the starter, binds an Agora project, and writes `.env.local`. (replace `my-nextjs-demo` with your own project name):
-
-   ```bash
-   agora init my-nextjs-demo --template nextjs
-   cd my-nextjs-demo
-   pnpm install
-   pnpm dev
-   ```
-
-3. Open [http://localhost:3000](http://localhost:3000) and click **Start conversation**.
-
-If the agent does not join or transcripts do not appear, run **`agora project doctor --deep`** to check credentials, feature enablement, network reachability, and local env binding.
-
-### Working from a clone of this repository
-
-Use this path if you already cloned **this** repo (for example to contribute or fork):
+### 1. Clone and install
 
 ```bash
-git clone https://github.com/AgoraIO-Conversational-AI/agent-quickstart-nextjs.git
-cd agent-quickstart-nextjs
+git clone https://github.com/larianog/unmute-by-agora.git
+cd unmute-by-agora
+pnpm install
+```
+
+### 2. Install and authenticate the Agora CLI
+
+macOS and Linux:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AgoraIO/cli/main/install.sh | sh -s -- --add-to-path
+```
+
+Windows PowerShell:
+
+```powershell
+irm https://dl.agora.io/cli/install.ps1 | iex
+```
+
+Then authenticate and bind the repository to an Agora project:
+
+```bash
 agora login
 agora project use <your-project>
-pnpm install
 agora project env write .env.local
+```
+
+### 3. Configure material analysis
+
+After the Agora CLI writes `.env.local`, add the OpenAI key and optional material settings:
+
+```dotenv
+OPENAI_API_KEY=your_openai_api_key
+# HOMEWORK_VISION_MODEL=gpt-4.1-mini
+# LUMI_MATERIAL_RETENTION_HOURS=168
+```
+
+The complete tracked template is [`config/env/env.local.example`](config/env/env.local.example).
+
+| Variable | Required | Purpose |
+| --- | :---: | --- |
+| `NEXT_PUBLIC_AGORA_APP_ID` | Yes | Public Agora project identifier used by the browser and server |
+| `NEXT_AGORA_APP_CERTIFICATE` | Yes | Server-only Agora signing credential |
+| `OPENAI_API_KEY` | Yes | Server-only credential for image/PDF material analysis |
+| `HOMEWORK_VISION_MODEL` | No | Overrides the material model; defaults to `gpt-4.1-mini` |
+| `LUMI_MATERIAL_RETENTION_HOURS` | No | File/text retention from 1 to 720 hours; defaults to 168 |
+
+Never expose the Agora certificate or OpenAI key through `NEXT_PUBLIC_*` variables.
+
+### 4. Verify and start
+
+```bash
+pnpm run doctor
+pnpm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). You can create a family account or choose the **Enter Demo** option to explore the built-in demo profiles.
+
+If the voice agent does not join or transcripts do not appear, run:
+
+```bash
 agora project doctor --deep
-pnpm dev
 ```
 
-### Deploy to Vercel
+## Features
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAgoraIO-Conversational-AI%2Fagent-quickstart-nextjs&project-name=agent-quickstart-nextjs&repository-name=agent-quickstart-nextjs&env=NEXT_PUBLIC_AGORA_APP_ID,NEXT_AGORA_APP_CERTIFICATE&envDescription=Agora%20credentials%20needed%20to%20run%20the%20app&envLink=https%3A%2F%2Fgithub.com%2FAgoraIO-Conversational-AI%2Fagent-quickstart-nextjs%23run-it&demo-title=Agora%20Conversational%20AI%20Next.js%20Quickstart&demo-description=Official%20Next.js%20quickstart%20for%20building%20browser-based%20voice%20AI%20with%20Agora&demo-image=https%3A%2F%2Fraw.githubusercontent.com%2FAgoraIO-Conversational-AI%2Fagent-quickstart-nextjs%2Fmain%2F.github%2Fassets%2FConversation-Ai-Client.gif)
+### Child study experience
 
-To populate Vercel env vars from your bound Agora project:
+- Dedicated profiles for each child in a family.
+- Camera capture and file upload from the study screen.
+- Support for JPEG, PNG, WebP, and PDF files up to 10 MB.
+- Reading-level selection that changes how Lumi reads and explains the activity.
+- Structured worksheet understanding, including instructions, questions, visual elements, skills, steps, and hints.
+- A live voice tutor grounded in the selected material.
+- Progressive help that encourages the child to reason before receiving more guidance.
+- Material history with processing, pending, failed, and completed states.
+- Explicit activity completion instead of treating the end of a voice call as completion.
 
-```bash
-agora project use <your-project>
-agora project env write .env.local
-rg "^(NEXT_PUBLIC_AGORA_APP_ID|NEXT_AGORA_APP_CERTIFICATE)=" .env.local
-```
+### Family and adult experience
 
-Copy those two values into Vercel Project Settings -> Environment Variables.
+- Family accounts with password-protected sessions.
+- Multiple child profiles under one family.
+- A protected adult area for reviewing progress and submitted materials.
+- Per-child activity history and family-level reporting.
+- A ready-to-use demo family for exploring the product without registration.
 
-To deploy production on every push to `main` through GitHub Actions, configure these repository secrets:
+### Safety and reliability
 
-| Secret | Value |
-| --- | --- |
-| `VERCEL_TOKEN` | A Vercel access token with access to the project. |
-| `VERCEL_ORG_ID` | The `orgId` from `.vercel/project.json` after running `vercel link` locally. |
-| `VERCEL_PROJECT_ID` | The `projectId` from the same file. |
-
-The [deployment workflow](.github/workflows/deploy-vercel.yml) runs `vercel deploy --prod` on each push to `main`. Keep the Agora variables in Vercel Project Settings so they are available to the production build and server routes. If the Vercel Git integration is also deploying this project on pushes, disable its automatic deployments to avoid a second production deployment.
-
-### Environment variables
-
-Defined in [`config/env/env.local.example`](config/env/env.local.example).
-
-| Variable                     | Required | Notes                                                            |
-| ---------------------------- | :------: | ---------------------------------------------------------------- |
-| `NEXT_PUBLIC_AGORA_APP_ID`   |    ✅    | Agora Console → Project → App ID.                                |
-| `NEXT_AGORA_APP_CERTIFICATE` |    ✅    | Agora Console → Project → App Certificate. **Server-side only.** |
-| `OPENAI_API_KEY`             |    ✅    | OpenAI key used only by the material (homework) analysis route.  |
-| `HOMEWORK_VISION_MODEL`      |    ➖    | Vision model for analysis and cache keys. Default `gpt-4.1-mini`. |
-| `LUMI_MATERIAL_RETENTION_HOURS` | ➖ | Temporary file/text retention; defaults to 168 hours.             |
-
-The default voice-agent configuration in [`app/api/invite-agent/route.ts`](app/api/invite-agent/route.ts) uses Agora-managed STT, LLM, and TTS. The separate study-material extraction workflow requires the OpenAI variable above.
-
-## Commands
-
-```bash
-# Dev
-pnpm dev                # start the Next.js dev server
-
-# Quality
-pnpm run lint           # eslint
-pnpm run typecheck      # tsc --noEmit
-pnpm run doctor         # local prereqs + env binding
-
-# CI / pre-ship
-pnpm run verify:api     # API contract checks
-pnpm run build          # production build
-pnpm run verify         # doctor + lint + typecheck + verify:api + build
-```
+- File type and binary-signature validation before analysis.
+- A didactic-content check that keeps unrelated documents out of the child's study flow.
+- Server-side material ownership checks before a voice agent can use extracted content.
+- Cache reuse based on owner, profile, file hash, model, and prompt version.
+- Private temporary file storage; uploads are never placed under `public/`.
+- Child-safe material DTOs that do not expose private storage paths, hashes, or the server-only answer brief.
+- Demo uploads isolated by browser session even though the demo family is shared.
+- Automatic expiry of uploaded bytes and extracted text, with a seven-day default retention period.
 
 Run `pnpm run verify` before shipping changes — it covers local prerequisites, lint, type safety, the core API route contracts, and the production build.
 GitHub CI installs the pnpm version declared in `package.json`.
 
-### Container build
+| Type | Accepted MIME type | Validation |
+| --- | --- | --- |
+| JPEG | `image/jpeg` | JPEG signature |
+| PNG | `image/png` | PNG signature |
+| WebP | `image/webp` | RIFF/WebP signature |
+| PDF | `application/pdf` | `%PDF-` signature |
 
 The Docker build definition and its context-specific ignore file live together under `deploy/docker/`:
 The Dockerfile pins the same pnpm version as `package.json`.
+
+- A child-safe transcription containing the activity title, instructions, and questions.
+- A private tutoring brief containing expected answers, reasoning steps, hints, and pedagogical notes.
+
+The private brief is loaded on the server when the voice session starts. Text supplied by the browser is never trusted as the grounding source.
+
+## Architecture
+
+Lumi is a single Next.js application containing the browser UI, server route handlers, voice-session orchestration, and local development persistence.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/architecture/system-architecture-dark.svg">
+  <img src="./docs/assets/architecture/system-architecture.svg" alt="Lumi system architecture">
+</picture>
+
+### Technology stack
+
+| Layer | Technology | Responsibility |
+| --- | --- | --- |
+| Web application | Next.js 16 App Router, React 19, TypeScript | Pages, client state, API routes, and server rendering |
+| Real-time audio | `agora-rtc-react`, `agora-rtc-sdk-ng` | Browser channel join, microphone track, and audio publication |
+| Real-time events | `agora-rtm` | Transcript, agent state, metrics, and error events |
+| Voice-agent client | `agora-agent-client-toolkit`, `agora-agent-uikit` | `AgoraVoiceAI`, turn state, transcript helpers, and voice UI |
+| Voice-agent server | `agora-agents` | Managed agent creation, provider configuration, and session lifecycle |
+| Material analysis | Vercel AI SDK and OpenAI | Structured multimodal analysis of images and PDFs |
+| Local persistence | JSON metadata database and private filesystem cache | Families, profiles, sessions, completions, and temporary material content |
+
+### Material-analysis pipeline
+
+```text
+Child profile
+  -> POST /api/materials (authenticated multipart upload)
+  -> ownership, size, MIME, and file-signature validation
+  -> SHA-256 cache lookup
+  -> OpenAI vision analysis with a strict structured schema
+  -> child-safe extracted text + private tutoring brief
+  -> private temporary storage + material metadata
+  -> study workspace embedded on the profile page
+```
+
+The default material model is `gpt-4.1-mini`. The extraction result includes a didactic-content flag, title, subject, estimated grade, general instructions, up to 15 questions, expected answers, solution steps, and hints. Non-didactic files are associated with the adult profile rather than entering the child's tutoring flow.
+
+### Voice-agent pipeline
+
+The browser and the managed voice agent join the same Agora channel:
+
+```text
+Child microphone
+  -> Agora RTC
+  -> speech-to-text
+  -> material-aware language model
+  -> text-to-speech
+  -> Agora RTC audio back to the child
+
+Agent transcript, state, metrics, and errors
+  -> Agora RTM
+  -> browser UI
+```
+
+For uploaded study material, the browser sends multipart form data to `/api/materials` and opens the study workspace directly on the profile page, with a visible **Voltar ao perfil** control. The saved `/profile/:profileId/materials/:materialId` route remains available from history. Lumi starts an inline session grounded with server-loaded extracted text. The child explicitly completes the activity; ending the voice session alone does not mark it complete.
+The default managed agent uses:
+
+| Stage | Provider/model |
+| --- | --- |
+| Speech-to-text | Deepgram `nova-3`, Portuguese |
+| Language model | OpenAI `gpt-4o-mini` |
+| Text-to-speech | MiniMax `speech_2_6_turbo` |
+| Optional visual avatar | LemonSlice, when configured |
+
+Voice-session startup works as follows:
+
+1. The browser requests a combined RTC + RTM token from `GET /api/generate-agora-token`.
+2. The browser sends its channel, user ID, profile, and optional material IDs to `POST /api/invite-agent`.
+3. The server verifies the family session and material ownership, then builds age-, literacy-, and worksheet-aware instructions.
+4. The Agora managed agent joins the RTC channel and begins listening after voice activity is detected.
+5. The browser publishes microphone audio and receives agent audio over RTC.
+6. `AgoraVoiceAI` receives transcript, state, latency metrics, and errors over RTM.
+7. `POST /api/stop-conversation` stops the managed session; React hooks own RTC and microphone cleanup.
+
+The voice configuration uses server-side voice activity detection, bounded conversation history, interruption support, and a material-specific greeting. Agora-managed STT, LLM, and TTS do not require separate provider credentials in the default configuration. The `OPENAI_API_KEY` described below is used for material analysis.
+
+### Data and security boundaries
+
+- `NEXT_AGORA_APP_CERTIFICATE` and `OPENAI_API_KEY` are server-only secrets.
+- The browser receives short-lived signed channel tokens, never the Agora certificate.
+- Session tokens are stored in HTTP-only, same-site cookies.
+- Uploaded files live in a private cache outside `public/`.
+- Material access is scoped to the authenticated family and profile.
+- Expected answers and tutoring notes never appear in list or child-facing material responses.
+- Expired file/text content is purged lazily while completion metadata can remain available for history.
+
+## Development commands
+
+```bash
+pnpm run dev          # start the local Next.js server
+pnpm run lint         # run ESLint
+pnpm run typecheck    # run TypeScript without emitting files
+pnpm run verify:api   # verify API contracts
+pnpm run build        # create a production build
+pnpm run verify       # doctor + lint + typecheck + API checks + build
+```
+
+Run `pnpm run verify` before shipping changes. The `doctor` step requires a configured `.env.local`; lint, typecheck, API verification, and build can be run independently when live Agora credentials are unavailable.
+
+## Main application routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Welcome, registration, sign-in, and demo entry |
+| `/profiles` | Family profile selection and adult-area entry |
+| `/profile/[id]` | Child study-material upload and embedded study workspace |
+| `/profile/[id]/history` | Material history for one child |
+| `/profile/[id]/materials/[materialId]` | Saved-material study workspace opened from history |
+| `/report` | Adult family progress report |
+
+## Main API routes
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/login` | Family or demo authentication |
+| `GET/POST /api/profiles` | Profile lookup and family/child creation |
+| `POST /api/adult-access` | Recent adult verification for protected reports |
+| `GET/POST /api/materials` | Material history and authenticated upload/analysis |
+| `GET/PATCH /api/materials/[id]` | Authorized material detail and explicit completion |
+| `GET /api/materials/[id]/file` | Authorized private material bytes |
+| `GET /api/generate-agora-token` | Combined RTC + RTM browser token |
+| `POST /api/invite-agent` | Material-aware managed voice-agent startup |
+| `POST /api/stop-conversation` | Idempotent managed agent shutdown |
+
+## Repository map
+
+- `app/` — Next.js pages, layouts, global styles, and API routes.
+- `components/` — product UI, upload flows, study pages, RTC/RTM lifecycle, and voice controls.
+- `lib/db.ts` — local family, session, completion, and material metadata persistence.
+- `lib/material-extraction.ts` — multimodal schema, prompt, sanitization, and child-safe transcript generation.
+- `lib/material-storage.ts` — private temporary file storage.
+- `lib/study-materials.ts` — ownership, demo isolation, browser-safe DTOs, and retention cleanup.
+- `lib/conversation.ts` — transcript normalization and agent visual-state mapping.
+- `app/api/invite-agent/route.ts` — tutor instructions, VAD, managed provider pipeline, and agent startup.
+- `components/ConversationComponent.tsx` — RTC join, microphone publication, transcript/state events, metrics, and renewals.
+- `config/env/env.local.example` — local environment template.
+- `data/lumi-db.json` — local runtime database; its generated contents should not be committed.
+- `deploy/docker/` — standalone container build.
+- `docs/ai/` — progressive-disclosure architecture and maintenance documentation.
+
+## Production and deployment
+
+The repository can be deployed as a single Next.js application. A production deployment must configure the three required environment variables and keep both secrets server-side.
+
+The included GitHub workflows provide:
+
+- CI verification through [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+- Production Vercel deployment through [`.github/workflows/deploy-vercel.yml`](.github/workflows/deploy-vercel.yml).
+- Container verification through [`.github/workflows/docker.yml`](.github/workflows/docker.yml).
+
+To build the standalone container locally:
 
 ```bash
 docker build -f deploy/docker/Dockerfile -t lumi-by-agora .
 ```
 
-## Architecture
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/architecture/system-architecture-dark.svg">
-  <img src="./docs/assets/architecture/system-architecture.svg" alt="System architecture">
-</picture>
-
-The browser fetches a combined RTC + RTM token (`buildTokenWithRtm`) from this app, joins the channel using a single RTC client, and uses RTM as the data channel for transcript, agent state, metrics, and error events. The Conversational AI Engine joins the same channel as the shared agent UID in [`lib/agora.ts`](lib/agora.ts) and runs the STT → LLM → TTS pipeline in Agora Cloud.
-
-Study-material images are uploaded to the authenticated `/api/materials` route. The server validates and hashes each image, reuses an unexpired extraction with the same profile, model, and prompt version, or sends the image to OpenAI for text extraction. The private file and extracted text expire automatically; metadata and completion state remain available to the child history and adult report.
-
-## What You Get
-
-- browser voice client built with Next.js App Router
-- RTC audio plus RTM transcript and state events
-- server routes for token generation, invite, and stop
-- [`AgentVisualizer`](https://agoraio-conversational-ai.github.io/agent-uikit/) for agent state and a built-in transcript panel for live turns
-- per-stage latency header driven by `AGENT_METRICS`
-- Agora-managed default STT, LLM, and TTS configuration
-- private image upload, cached OpenAI homework analysis, study history, and parent-visible completion state
-
-## How It Works
-
-1. The browser requests an RTC + RTM token from `/api/generate-agora-token`.
-2. The backend invites an Agora cloud agent with `/api/invite-agent`.
-3. The browser joins the channel and publishes mic audio.
-4. The client receives transcript, agent state, and `AGENT_METRICS` (per-stage latency) events over RTM.
-5. On end, the client calls `/api/stop-conversation`, logs out RTM, and unmounts the call view so Agora React hooks clean up RTC publish/join and the local microphone track.
-
-For uploaded study material, the browser sends multipart form data to `/api/materials` and opens the study workspace directly on the profile page, with a visible **Voltar ao perfil** control. The saved `/profile/:profileId/materials/:materialId` route remains available from history. Lumi starts an inline session grounded with server-loaded extracted text. The child explicitly completes the activity; ending the voice session alone does not mark it complete.
-
-## Optional BYOK
-
-The base `.env.local` contract contains only Agora credentials. If you are migrating from a supported provider, uncomment the matching snippet in [`app/api/invite-agent/route.ts`](app/api/invite-agent/route.ts) and add its variables to your local environment.
-
-```bash
-# Deepgram STT
-NEXT_DEEPGRAM_API_KEY=...
-
-# OpenAI-compatible LLM
-NEXT_LLM_URL=https://api.openai.com/v1/chat/completions
-NEXT_LLM_API_KEY=...
-
-# ElevenLabs TTS
-NEXT_ELEVENLABS_API_KEY=...
-NEXT_ELEVENLABS_VOICE_ID=...
-```
-
-## Repo Map
-
-- `app/api/generate-agora-token/route.ts` — issues RTC + RTM tokens
-- `app/api/invite-agent/route.ts` — starts the agent session and configures the pipeline
-- `app/api/stop-conversation/route.ts` — stops the agent session
-- `app/api/materials/route.ts` — uploads, validates, deduplicates, extracts, and lists study material
-- `app/api/materials/[id]/route.ts` — returns material detail and records completion
-- `app/profile/[id]/history/page.tsx` — child material history
-- `app/profile/[id]/materials/[materialId]/page.tsx` — extracted-text study workspace
-- `config/env/env.local.example` — tracked local environment template
-- `deploy/docker/` — container build definition and Docker-specific ignore rules
-- `docs/assets/architecture/` — light and dark architecture diagrams
-- `docs/CONTRIBUTING.md` — contributor setup and conventions
-- `components/LandingPage.tsx` — entry point: token fetch, RTM login, conversation lifecycle
-- `components/ConversationComponent.tsx` — RTC client, transcript state, `AGENT_METRICS`, mic release
-- `components/QuickstartConversationLayout.tsx` — in-call header, transcript rail, controls dock
-- `components/QuickstartPipelineMetrics.tsx` — per-stage latency chips in the header
-- `components/QuickstartTranscriptPanel.tsx` — live transcript rail
-- `components/QuickstartPreCallCard.tsx` — pre-call hero card
-- `lib/chat-completions.ts` — server-side custom LLM SSE handler used by the chat completions route
-- `lib/conversation.ts` — transcript normalization and visualizer state mapping
-- `lib/material-extraction.ts` — server-only OpenAI multimodal extraction client
-- `lib/material-storage.ts` — private temporary file-cache adapter
-- `AGENTS.md` — primary agent-facing guide
-
-Files such as `.npmrc`, `.nvmrc`, `.vercelignore`, `vercel.json`, `next.config.mjs`, and `package.json` intentionally remain at the project root because their tools discover them there.
+The bundled JSON database and private filesystem cache are intended for local development or a persistent single-container deployment. They are not durable on serverless Vercel instances. Before a production launch, replace them with a persistent database and private object storage while preserving the ownership and retention boundaries in `lib/study-materials.ts`.
 
 ## Troubleshooting
 
-- **Agent does not join or transcripts are missing:** run `agora project doctor --deep`.
-- **`pnpm run doctor` fails:** run `agora project env write .env.local`, then retry.
-- **Manual clone / env values:** `agora project use <your-project>` then `agora project env write .env.local`.
-- **RTM login fails:** keep [`app/api/generate-agora-token/route.ts`](app/api/generate-agora-token/route.ts) on `RtcTokenBuilder.buildTokenWithRtm` — RTC-only tokens will not satisfy `rtm.login`.
-- **Transcript speakers inverted:** check the `uid === "0"` remap in [`components/ConversationComponent.tsx`](components/ConversationComponent.tsx).
-- **Agent never appears in channel:** ensure the shared agent UID in [`lib/agora.ts`](lib/agora.ts) is used by both the client and invite route.
+- **Agent does not join:** verify the Agora environment with `pnpm run doctor` and inspect `/api/invite-agent`.
+- **No transcript or agent state:** confirm the token route still uses `RtcTokenBuilder.buildTokenWithRtm`; an RTC-only token cannot authenticate RTM.
+- **Material upload is rejected:** use a JPEG, PNG, WebP, or PDF whose contents match its declared type and is no larger than 10 MB.
+- **Material analysis is unavailable:** confirm `OPENAI_API_KEY` is present in `.env.local` and restart the dev server.
+- **The worksheet is unreadable:** upload a sharper photo taken from above with good lighting, or a shorter PDF containing only the activity pages.
+- **Local data appears stale:** remember that file/text content expires according to `LUMI_MATERIAL_RETENTION_HOURS`, while metadata can remain for history.
 
-## More Docs
+## Further documentation
 
-- [docs/ai/L0_repo_card.md](./docs/ai/L0_repo_card.md)
-- [docs/ai/RECIPE.md](./docs/ai/RECIPE.md)
-- [AGENTS.md](./AGENTS.md)
-
-## Contributing
-
-Pull requests welcome — see [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) for development setup and conventions.
-
-## Security
-
-Uploaded school material can contain personal information. Files are stored outside `public/`, OpenAI credentials remain server-only, demo uploads are isolated by session, and expired content is purged lazily. The bundled JSON database and filesystem cache are for local/container development; use durable private object storage and a persistent database before deploying this workflow to serverless Vercel production.
-
-Please do **not** open public issues for security reports. Email security@agora.io with details and reproduction steps.
+- [`AGENTS.md`](AGENTS.md) — contributor and coding-agent rules.
+- [`docs/ai/L0_repo_card.md`](docs/ai/L0_repo_card.md) — repository identity and documentation index.
+- [`docs/ai/RECIPE.md`](docs/ai/RECIPE.md) — quickstart extension points and invariants.
+- [`docs/ai/L1/02_architecture.md`](docs/ai/L1/02_architecture.md) — runtime architecture.
+- [`docs/ai/L1/L2/material_pipeline.md`](docs/ai/L1/L2/material_pipeline.md) — material ingestion and retention details.
+- [`docs/ai/L1/L2/transcript_pipeline.md`](docs/ai/L1/L2/transcript_pipeline.md) — Agora transcript and RTM behavior.
 
 ## License
 
-Released under the [MIT License](./LICENSE).
+Released under the [MIT License](LICENSE).

@@ -1,12 +1,16 @@
 # Sofia — Documento de Negócios
 
-**Equipe:** newDirections | **Versão:** 1.0 | **Data:** 21/11/2026
+**Equipe:** newDirections | **Versão:** 1.1 | **Data:** 21/11/2026
 
 Status: hipóteses de negócio, não estudo de mercado validado. Base: refinamento do produto e feedback dos mentores. Não há números de demanda, entrevistas, disposição de pagar ou receita comprovados nesta conversa.
 
 ## 1. Dor / problema
 
-[HIPÓTESE] Muitas famílias precisam conciliar a rotina com o acompanhamento das tarefas escolares. Crianças podem ter dificuldades específicas que não são resolvidas pela leitura do enunciado e podem depender de ajuda disponível naquele momento. Responsáveis podem não conhecer a abordagem pedagógica adequada ou não conseguir oferecer atenção individualizada sempre que necessário.
+[CONTEXTO — dado público, não validação da Sofia] Em 2025, 66% dos estudantes da rede pública ao final do 2º ano atingiram o padrão nacional de alfabetização; portanto, 34% ficaram abaixo desse padrão. O indicador é agregado e considera leitura e escrita; isso não significa que todo estudante abaixo do corte “não sabe ler”. A proporção abaixo do padrão caiu de 44% em 2023 para 41% em 2024 e 34% em 2025, então o pitch deve mostrar tanto o avanço quanto a lacuna que permanece. Fonte: [Inep, resultados do Indicador Criança Alfabetizada](https://www.gov.br/inep/pt-br/acesso-a-informacao/perguntas-frequentes/avaliacao-da-alfabetizacao).
+
+[CONTEXTO — etapa seguinte] No Saeb 2025, entre estudantes do 5º ano de todas as redes, 64,3% demonstraram aprendizagem adequada em Língua Portuguesa e 54,4% em Matemática; em outras palavras, 35,7% e 45,6%, respectivamente, não alcançaram o nível adequado usado pelo Anuário. Esses dados descrevem grupos/etapas diferentes, não acompanham longitudinalmente as mesmas crianças do 2º ao 5º ano. Fonte: [Anuário Brasileiro da Educação Básica 2026 — anos iniciais](https://anuario.todospelaeducacao.org.br/2026/capitulo-2-ef-anos-iniciais.html).
+
+[HIPÓTESE] Muitas famílias precisam conciliar a rotina com o acompanhamento das tarefas escolares. Crianças podem ter dificuldades específicas que não são resolvidas pela leitura do enunciado e podem depender de ajuda disponível naquele momento. Responsáveis podem não conhecer a abordagem pedagógica adequada ou não conseguir oferecer atenção individualizada sempre que necessário. Os dados educacionais acima dimensionam contexto e necessidade potencial; não demonstram que falta de reforço familiar causou esses resultados, nem que Sofia os resolverá.
 
 Um chatbot que entrega respostas pode ajudar a terminar a tarefa sem necessariamente desenvolver compreensão. O problema a investigar é a lacuna entre concluir uma lição e entender como resolver problemas semelhantes.
 
@@ -31,30 +35,49 @@ Recorte de entrada: famílias brasileiras com acesso a navegador, internet e mic
 
 ## 4. Mercado
 
-### 4.1 Categoria e concorrência
+### 4.1 Categoria e auditoria competitiva inicial
 
 Sofia se posiciona na interseção de EdTech, reforço escolar, tutoria por IA e ferramentas de apoio à lição. Substitutos incluem professor particular, reforço presencial, apoio familiar, vídeos educativos, plataformas de exercícios e chatbots generalistas.
 
-| Referência | Aprendizado para Sofia | Limite da comparação |
+Auditoria documental inicial feita em 21/11/2026 a partir de páginas públicas oficiais dos fornecedores. Descreve posicionamento e recursos anunciados pelos próprios produtos; não é teste independente, comparação de qualidade, pesquisa de preço no Brasil nem evidência de eficácia.
+
+| Referência | O que comunica/oferece segundo sua página oficial | Implicação a investigar para Sofia | Limite da comparação |
+|---|---|---|---|
+| [Khanmigo para famílias](https://www.khanmigo.ai/parents) | Tutor com orientação em vez de resposta direta, integração ao conteúdo Khan Academy, ferramentas para responsáveis e acesso à conversa/alertas; a página também anuncia voz por fala e leitura. | “Tutor que faz perguntas” e supervisão familiar não são, por si, diferenciais exclusivos. Explorar o fluxo ancorado na folha enviada, questão atual, lousa e transferência observável. | Ecossistema de conteúdo próprio, cobertura ampla e ferramentas parentais diferem do recorte de lição enviada. Recursos, elegibilidade, preço e países atendidos podem mudar; conferir antes de decisões. |
+| [Synthesis Tutor](https://www.synthesis.com/tutor) | Tutor adaptativo de matemática K–5, com orientação individual por problema, atividades multissensoriais/manipulativos e verificações de compreensão, segundo o fornecedor. | Diferenciação possível a investigar: começar no material real da criança e usar voz para ouvir a estratégia e responder a ela. | Currículo estruturado de matemática não equivale a extração de atividades escolares de múltiplas fontes; alegações de eficácia são do fornecedor. |
+| [Photomath](https://photomath.com/) | Digitalização de problemas matemáticos e apresentação de soluções passo a passo, cobrindo níveis de matemática amplos, segundo o fornecedor. | Tornar explícita a diferença entre explicar passos e investigar primeiro o raciocínio da criança; não revelar resposta antes da tentativa. | Foco em matemática e resolução escaneada; a página pública não demonstra o mesmo fluxo de tutor por voz contextualizado à folha. Recursos variam por plano. |
+| Chatbots generalistas | Assistência flexível por texto/voz e possibilidade de receber perguntas abertas. | A orientação pedagógica, a precisão no material-fonte e limites infantis devem ser demonstrados em cenários, não presumidos pelo uso de um modelo. | Categoria heterogênea; modelo, produto, plano e políticas variam. Não comparar sem selecionar versões específicas. |
+| Reforço humano | Diagnóstico contextual, relação e adaptação conduzidos por pessoa. | Usar tutoria humana como referência para desenhar perguntas úteis e supervisão, não como promessa de equivalência. | Custos, disponibilidade e qualidade variam; Sofia é proposta complementar, não substituto comprovado. |
+
+**Leitura estratégica provisória:** perguntas guiadas, tutoria adaptativa, leitura em voz alta e supervisão familiar já aparecem em ofertas existentes. A oportunidade mais específica a testar é combinar (1) a atividade que a família já tem, (2) conversa oral sobre o raciocínio, (3) apoio visual vinculado à questão e (4) evidência limitada de tentativa independente/assistida. Isso é hipótese de diferenciação, não vantagem defensável nem validação de demanda.
+
+**Próxima pesquisa competitiva:** comparar versões acessíveis no Brasil usando tarefas sintéticas equivalentes; observar entrada de material, fidelidade, forma de orientar sem revelar resposta, voz/idioma, acessibilidade, controles parentais, retenção e preço total vigente. Registrar país, data, plano e fonte primária para cada observação. Não inserir dados reais de crianças em contas concorrentes.
+
+### 4.2 Tamanho do problema e universo potencial
+
+O Censo Escolar 2025 registra **14.514.244 matrículas nos anos iniciais (1º–5º ano)**: 11.693.406 na rede pública e 2.820.838 na privada. É um denominador demográfico útil para contextualizar escala, não o número de clientes da Sofia. O recorte de produto proposto é 3º–5º ano; portanto, será necessário obter a contagem específica dessas séries antes de chamar um número de TAM. Fonte: [Inep, Censo Escolar da Educação Básica 2025, tabelas M4/M5](https://download.inep.gov.br/publicacoes/institucionais/estatisticas_e_indicadores/notas_estatisticas_censo_escolar_da_educacao_basica_2025.pdf).
+
+Na distribuição digital, **86% dos domicílios brasileiros tinham acesso à internet em 2025**, segundo a TIC Domicílios. Isso indica alcance potencial, não conexão estável para voz nem acesso uniforme: a pesquisa também registrou limitações de pacote de dados, especialmente relevantes ao desenhar uma experiência de baixo consumo. Fonte: [Cetic.br, TIC Domicílios 2025 — resumo executivo](https://cetic.br/media/docs/publicacoes/2/pt-br/20260511173151/tic_domicilios_2025_resumoexecutivo%20pt.pdf).
+
+### 4.3 TAM/SAM/SOM — método e cenário ilustrativo
+
+Usar abordagem bottom-up e separar contagem de estudantes, famílias compradoras e receita. Matrículas não equivalem a pessoas únicas, necessidade, acesso compatível, disposição de pagar ou assinaturas. A amostra pública de 1º–5º ano excede o recorte de 3º–5º da Sofia; não apresentá-la como SAM ou previsão de vendas.
+
+| Medida | Definição para Sofia | O que falta para estimar |
 |---|---|---|
-| Khanmigo | Perguntas guiadas, supervisão e segurança | Referência mencionada na mentoria; não comprova demanda brasileira |
-| Synthesis Tutor | Especialização em matemática infantil | Alegações do fornecedor não validam Sofia |
-| Chatbots generalistas | Acesso rápido e flexibilidade | Diferenciação pedagógica precisa ser testada |
-| Reforço humano | Acompanhamento individualizado | Sofia é complemento, não substituto equivalente |
+| TAM | Famílias/estudantes do recorte 3º–5º com necessidade compatível, sob uma hipótese de preço declarada | Matrículas por série, definição do comprador (família vs. aluno), frequência de necessidade e evidência de pagamento |
+| SAM | Parcela do TAM que pode ser atendida pelos idiomas, dispositivos, conectividade, matérias e canais realmente disponíveis | Pesquisa de acesso/compatibilidade, limitações de áudio/dados, disponibilidade do serviço e canal de aquisição |
+| SOM | Parcela que a equipe consegue adquirir e atender num horizonte definido | Conversão, retenção, CAC, custo por sessão, capacidade operacional e concorrência |
 
-Não foi realizada auditoria competitiva atualizada. Preço, disponibilidade local e diferenciais dos concorrentes exigem pesquisa própria.
+**Cenário didático, não estimativa:** aplicando R$ 29,90/mês a todas as 14.514.244 matrículas de 1º–5º ano, a multiplicação resulta em cerca de R$ 5,21 bilhões de receita bruta anual teórica. Isso supõe, irrealisticamente, que cada matrícula seja uma assinatura pagante durante 12 meses; não é tamanho observado do mercado nem deve ser chamado de receita endereçável comprovada.
 
-### 4.2 Dimensionamento TAM/SAM/SOM
+Também pode-se modelar a hipótese do material de mentoria (SAM = 20% do universo; SOM = 0,1% desse SAM), mas deixar ambos os percentuais explicitamente como premissas sem validação. Com a mesma mensalidade hipotética e a base ampla de 1º–5º, isso daria aproximadamente 2.903 assinaturas, R$ 86,8 mil de receita bruta mensal e R$ 1,04 milhão anualizado. Antes de usar no pitch, substituir a base por séries 3º–5º e testar os percentuais com pesquisa de necessidade, acesso e disposição de pagar. Receita bruta não é lucro e não desconta cancelamento, inadimplência, impostos, custos de voz/modelos, suporte ou aquisição.
 
-Não atribuir números nacionais inventados. Levantar matrículas por série e região no Censo Escolar/INEP, acesso domiciliar à internet em fontes IBGE/Cetic.br e evidências de compra de reforço escolar. Matrículas não equivalem a famílias pagantes; ajustar duplicidade, acesso, necessidade e disposição de pagar.
+### 4.4 Consequências e tese de oportunidade
 
-- TAM teórico anual = famílias elegíveis no universo definido × receita anual potencial por família.
-- SAM anual = famílias realmente alcançáveis no segmento atendido × receita anual potencial.
-- SOM anual = famílias que podem ser adquiridas e retidas no horizonte definido × receita anual potencial.
+A diferença entre alcançar e não alcançar habilidades fundamentais justifica atenção educacional e acompanhamento das aprendizagens. O UNICEF já documentou que ciclos de alfabetização incompletos podem prejudicar a trajetória escolar, incluindo reprovação e abandono; a fonte disponível nesse recorte é de 2023 e usa resultados do Saeb 2021, portanto não deve ser apresentada como estimativa atual desses desfechos. Fonte: [UNICEF Brasil — desafios da alfabetização](https://www.unicef.org/brazil/comunicados-de-imprensa/volta-as-aulas-56-das-criancas-do-2o-ano-do-ensino-fundamental-nao).
 
-Exemplo puramente aritmético: 1.000 famílias pagantes × R$ 39/mês × 12 = R$ 468 mil/ano de receita bruta recorrente anualizada, se todas permanecerem pagantes. Não representa estimativa de mercado, previsão ou preço validado.
-
-Fontes futuras: https://www.gov.br/inep/ ; https://www.ibge.gov.br/ ; https://cetic.br/ .
+A oportunidade de Sofia é uma hipótese de acesso a apoio individualizado, usando a lição que a família já possui como ponto de entrada. Os indicadores educacionais não provam demanda comercial, causalidade, eficácia ou que a Sofia atenda crianças ainda não alfabetizadas. O produto deve permanecer dentro do recorte pedagógico declarado e encaminhar conteúdo ilegível ou além da capacidade para adulto/professor, sem alegar substituição de intervenção especializada.
 
 ## 5. Modelo de negócio
 
@@ -82,11 +105,14 @@ Hipóteses: demonstrações para responsáveis, comunidades de educação e indi
 
 ## 6. Validação
 
+O feedback de mentoria de 21/11/2026 funciona como provocação qualitativa, não como entrevista com usuários nem evidência de mercado. Ele sugere testar quando uma pergunta orientadora ajuda mais que uma explicação pronta, se o valor percebido muda entre criança e responsável, e que evidência diferencia compreensão de interação longa ou acerto casual.
+
 | Hipótese | Experimento | Evidência desejada |
 |---|---|---|
-| Pistas ajudam mais que respostas | Comparar abordagens e questões novas, com adultos em simulação inicial | Comportamento correto do tutor; aprendizagem infantil exige estudo posterior |
+| Pergunta orientadora ajuda mais que explicação pronta em momentos específicos | Comparar roteiros em cenários roteirizados com adultos; depois desenhar pesquisa apropriada e autorizada | Qualidade da intervenção no ensaio; não inferir aprendizagem infantil |
+| Explicar o raciocínio e resolver uma questão nova sinalizam compreensão melhor que duração ou acerto isolado | Avaliar resposta inicial, estratégia verbal e transferência com números/contexto diferentes | Evidência observável daquela sessão; não prova domínio duradouro |
 | Voz é adequada | Ensaiar hesitação, interrupção, autocorreção | Menos falhas e repetições inadequadas |
-| Responsável percebe valor | Apresentar resumo fictício e entrevistar adultos | Entendimento dos limites e intenção de uso |
+| Criança e responsável percebem valor de formas diferentes | Entrevistar adultos responsáveis e, somente após revisão ética/legal, conduzir pesquisa adequada com usuários menores | Necessidades e linguagem por papel; não equiparar intenção declarada a uso ou compra |
 | Existe disposição de pagar | Entrevistar decisores e testar ofertas transparentes | Evidência de compra, não apenas elogio |
 | Economia é viável | Medir minutos, chamadas, custos e retries | Margem por faixa de uso |
 
@@ -96,4 +122,24 @@ Extração incorreta, respostas erradas, pouca autonomia, custo elevado de voz, 
 
 ## 8. Pitch
 
-Sofia não faz a lição pela criança: ensina a criança a resolvê-la. Demonstrar upload, erro inicial, intervenção visual por voz, nova tentativa, questão de transferência com resultado diferente e um limite bem tratado. Mostrar evidência observada em simulação, não prometer eficácia comprovada.
+### Sequência sugerida
+
+1. **Problema educacional:** apresentar que, em 2025, 34% dos estudantes da rede pública ao fim do 2º ano ficaram abaixo do padrão nacional de alfabetização. Usar a definição do Inep e dizer “abaixo do padrão esperado”, sem afirmar que não sabem ler. Acrescentar os resultados do 5º ano em Português e Matemática para aproximar a narrativa do recorte da Sofia.
+2. **Problema familiar e oportunidade:** mostrar a necessidade hipotética de apoio individualizado e o universo de matrículas dos anos iniciais como contexto demográfico. Explicitar que isso não é o mercado pagante validado; o acesso à internet tampouco garante conectividade adequada ou disposição a pagar.
+3. **Solução:** demonstrar o produto real — envio de uma folha, leitura de uma questão, conversa por voz sobre a estratégia, pista visual, nova tentativa e questão de transferência. Distinguir capacidades implementadas das propostas ainda não construídas.
+
+### Rascunho de narrativa
+
+“No Brasil, em 2025, 34% dos estudantes da rede pública ao final do 2º ano não atingiram o padrão nacional de alfabetização definido pelo Inep. Nos resultados do Saeb 2025 para o 5º ano, 45,6% ficaram abaixo do nível de aprendizagem adequada em Matemática. Esses indicadores mostram uma necessidade educacional ampla; não provam uma causa única nem que uma ferramenta resolva o problema. Ao mesmo tempo, acompanhar cada tarefa de perto pode ser difícil para algumas famílias — uma hipótese que ainda precisamos validar. A Sofia parte de uma atividade que a criança já tem: ela lê uma questão, conversa sobre como a criança pensou, oferece uma pista visual e verifica uma nova tentativa. A proposta é apoiar o raciocínio e a autonomia, não entregar respostas nem substituir professor.”
+
+Usar no slide de escala as **14,5 milhões de matrículas do 1º ao 5º ano** como universo educacional contextual, identificando série, ano e fonte. O produto proposto atende 3º–5º ano, então calcular essa base específica antes de apresentar TAM. Se mencionar preço ou penetração hipotéticos, rotular como cenário matemático, não projeção ou tração. Demonstrar comportamento observado em ensaio adulto com material fictício; não chamar isso de evidência de eficácia infantil.
+
+## 9. Fontes educacionais e de conectividade
+
+| Fonte primária/pública | Uso no pitch | Limite de interpretação |
+|---|---|---|
+| [Inep — Indicador Criança Alfabetizada / perguntas frequentes](https://www.gov.br/inep/pt-br/acesso-a-informacao/perguntas-frequentes/avaliacao-da-alfabetizacao) | Percentual de estudantes da rede pública ao final do 2º ano no padrão nacional: 56% (2023), 59% (2024), 66% (2025). | Indicador agregado de alfabetização; 34% abaixo do padrão em 2025 não quer dizer “não sabem ler”. Não é a mesma coorte entre anos. |
+| [Anuário Brasileiro da Educação Básica 2026 — 5º ano](https://anuario.todospelaeducacao.org.br/2026/capitulo-2-ef-anos-iniciais.html) | Aprendizagem adequada no total das redes em 2025: Português 64,3%, Matemática 54,4%. | “Abaixo do nível adequado” é complemento percentual; não equivale a ausência total de aprendizagem. |
+| [Inep — Censo Escolar 2025, tabelas M4/M5](https://download.inep.gov.br/publicacoes/institucionais/estatisticas_e_indicadores/notas_estatisticas_censo_escolar_da_educacao_basica_2025.pdf) | 14.514.244 matrículas nos anos iniciais: 11.693.406 públicas e 2.820.838 privadas. | Base de 1º–5º ano, mais ampla que o recorte 3º–5º da Sofia; matrícula não é cliente ou pagador. |
+| [Cetic.br — TIC Domicílios 2025, resumo executivo](https://cetic.br/media/docs/publicacoes/2/pt-br/20260511173151/tic_domicilios_2025_resumoexecutivo%20pt.pdf) | 86% dos domicílios com acesso à internet em 2025. | Acesso domiciliar não garante estabilidade, pacote de dados, microfone/dispositivo adequado nem acesso individual da criança. |
+| [UNICEF Brasil — contexto de trajetória escolar](https://www.unicef.org/brazil/comunicados-de-imprensa/volta-as-aulas-56-das-criancas-do-2o-ano-do-ensino-fundamental-nao) | Contexto qualitativo de que ciclos incompletos de alfabetização podem afetar trajetória escolar. | Publicação de 2023 baseada no Saeb 2021; não usar como estimativa atual de reprovação/abandono nem como causalidade atribuída à Sofia. |
