@@ -23,7 +23,7 @@
 ## Authorization
 
 - Every material route requires the HttpOnly family session.
-- Child/detail access verifies family ownership. Family lists require recent adult verification.
+- Child/detail access verifies family ownership. Family lists use the signed-in family session.
 - Because demo sessions share `demo-family`, material records also store and filter `demoSessionId`.
 - Browser DTOs omit family ID, hash, storage key, and list-response extracted text.
 
@@ -41,7 +41,7 @@ The JSON database and `data/material-cache/` adapter support local or persistent
 
 ## Homework tutoring mode
 
-- Uploads require a family session and owned child profile, without an extra adult-password step, and accept JPEG/PNG/WebP or PDF up to 10 MB, plus an optional `literacyLevel` (`pre_reader` | `emergent` | `fluent`, defaulted from age). The literacy level is part of the cache key. Family-wide history still requires recent adult access (`POST /api/adult-access`; `GET` reports `{ verified }`).
+- Uploads require a family session and owned child profile, without an extra adult-password step, and accept JPEG/PNG/WebP or PDF up to 10 MB, plus an optional `literacyLevel` (`pre_reader` | `emergent` | `fluent`, defaulted from age). The literacy level is part of the cache key. Family-wide history uses the signed-in family session.
 - `lib/material-extraction.ts` calls the OpenAI vision model with a strict JSON Schema and stores two things: `extractedText` (child-safe transcript: title, instructions, questions) and `analysis` (server-only: visual elements, skill, expected answer, steps, graded hints). `readable=false` fails the material with code `UNREADABLE` and returns `422`.
 - Detail DTOs also expose child-safe instructions, question statements, support content and answer-slot labels; `analysis` and expected answers never reach the browser.
 - `invite-agent` uses `messages.voice.homeworkPrompt` (step-by-step tutoring that never gives the final answer, adapted to literacy level) and `homeworkGreeting` when the material has an `analysis`; older text-only materials keep `agentPrompt`.

@@ -203,6 +203,7 @@ export default function MaterialStudyPageClient({
               lumiAvatar={profile.lumiAvatar}
               avatarMode={getLumiAvatarMode(profile.lumiAvatar)}
               materialId={material.id}
+              recording={{ profileId, materialId: material.id, title: material.title ?? material.originalName }}
               autoStart
               variant="inline"
             />

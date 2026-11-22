@@ -111,10 +111,32 @@ export type SessionRecord = {
   adultVerifiedUntil?: string;
 };
 
+/** One line of a recorded conversation. */
+export type RecordingTurn = { speaker: 'child' | 'lumi'; text: string };
+
+/** Audio of a Lumi session, recorded in the browser and visible in the parent area. */
+export type SessionRecording = {
+  id: string;
+  familyId: string;
+  profileId: string;
+  demoSessionId?: string;
+  materialId?: string;
+  title: string;
+  mimeType: string;
+  size: number;
+  durationMs: number;
+  storageKey: string;
+  transcript: RecordingTurn[];
+  startedAt: string;
+  createdAt: string;
+  expiresAt: string;
+};
+
 export type Database = {
   families: FamilyRecord[];
   completions: ActivityCompletion[];
   materials: StudyMaterial[];
+  recordings: SessionRecording[];
   sessions: SessionRecord[];
   version: 3;
 };

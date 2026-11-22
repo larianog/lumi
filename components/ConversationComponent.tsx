@@ -51,6 +51,8 @@ import type { ConversationComponentProps } from '@/types/conversation';
 import LumiConversationAvatar from './LumiConversationAvatar';
 import ChromaKeyAvatar from './ChromaKeyAvatar';
 import { getLumiAvatar } from '@/lib/lumi-avatars';
+import { useSessionRecorder } from '@/lib/use-session-recorder';
+import { PhoneOff } from 'lucide-react';
 import { useLumiSpeechState } from './useLumiSpeechState';
 import { useLumiIdleSleep } from './useLumiIdleSleep';
 import { isLumiRestingAgentState } from '@/lib/lumi-animation-transition';
@@ -108,6 +110,7 @@ export default function ConversationComponent({
   variant = 'full',
   avatarMode = 'provider',
   lumiAvatar,
+  recording,
   onRetryMicrophone,
   onRetryConversation,
 }: ConversationComponentProps) {
@@ -467,6 +470,21 @@ export default function ConversationComponent({
     return getCurrentInProgressMessage(transcript);
   }, [transcript]);
 
+  const remoteAudioTracks = useMemo(
+    () => remoteUsers.flatMap((user) => (user.audioTrack ? [user.audioTrack] : [])),
+    [remoteUsers],
+  );
+  const getRecordingTranscript = useCallback(
+    () => [...messageList, ...(currentInProgressMessage ? [currentInProgressMessage] : [])]
+      .filter((message) => message.text.trim())
+      .map((message) => ({
+        speaker: String(message.uid) === agentUID ? 'lumi' as const : 'child' as const,
+        text: message.text,
+      })),
+    [messageList, currentInProgressMessage, agentUID],
+  );
+  useSessionRecorder({ context: recording, micTrack: localMicrophoneTrack, remoteAudioTracks, getTranscript: getRecordingTranscript });
+
   // Publish local mic once the track exists; usePublish waits for RTC connection.
   usePublish([localMicrophoneTrack]);
 
@@ -647,6 +665,9 @@ export default function ConversationComponent({
             ? lumiAnimationState === 'sleeping' ? messages.voice.sleeping : lumiSpeechState === 'speaking' ? messages.voice.speaking : lumiSpeechState === 'listening' ? messages.voice.listening : messages.voice.connected
             : statusLabel}</span>
         </div>
+        <button className="lumi-inline-end" type="button" onClick={() => void handleEndConversation()}>
+          <PhoneOff size={16} />{messages.voice.endSession}
+        </button>
       </div>
     );
   }

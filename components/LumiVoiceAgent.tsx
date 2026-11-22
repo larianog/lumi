@@ -18,6 +18,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { LoadingSkeleton } from './LoadingSkeleton';
 import LumiConversationAvatar from './LumiConversationAvatar';
 import avatarStyles from './lumi-conversation-avatar.module.css';
+import type { SessionRecordingContext } from '@/lib/use-session-recorder';
 
 const ConversationComponent = dynamic(() => import('./ConversationComponent'), {
   ssr: false,
@@ -46,6 +47,7 @@ type LumiVoiceAgentProps = {
   /** Profile/material identifiers let the server ground Lumi without trusting browser-supplied text. */
   profileId?: string;
   materialId?: string;
+  recording?: SessionRecordingContext;
   /** Start the session on mount instead of waiting for the "start" button. */
   autoStart?: boolean;
   /** `modal` = full-screen dialog; `inline` = avatar embedded in the page. */
@@ -61,6 +63,7 @@ export default function LumiVoiceAgent({
   activityTitle,
   profileId,
   materialId,
+  recording,
   autoStart = false,
   variant = 'modal',
   avatarMode = 'provider',
@@ -220,6 +223,7 @@ export default function LumiVoiceAgent({
                   variant="inline"
                   avatarMode={avatarMode}
                   lumiAvatar={lumiAvatar}
+                  recording={recording}
                 />
               </AgoraProvider>
             </ErrorBoundary>
@@ -264,6 +268,7 @@ export default function LumiVoiceAgent({
                 onEndConversation={handleEndConversation}
                 avatarMode={avatarMode}
                 lumiAvatar={lumiAvatar}
+                recording={recording}
               />
             </AgoraProvider>
           </ErrorBoundary>

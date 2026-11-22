@@ -30,7 +30,7 @@
 
 - Route handlers validate required fields and env availability.
 - Errors return structured JSON with bounded detail.
-- Material routes authenticate the family session, verify profile/material ownership, validate size/MIME/signature, and gate family-wide lists behind adult access.
+- Material routes authenticate the family session, verify profile/material ownership, validate size/MIME/signature, and scope family-wide lists to the signed-in family session.
 - `PATCH /api/profiles` authenticates the family session, validates the catalog ID, limits writes to that family's child profiles, and stores demo choices only on the current session, never the shared demo family.
 - Stop route treats already-stopping/not-found agent as idempotent success.
 

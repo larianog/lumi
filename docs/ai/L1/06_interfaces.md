@@ -43,6 +43,14 @@ Validation failures return `400`; server failures return `500`.
 
 An authenticated family session may save `{ "profileId": "...", "lumiAvatar": "plush" }` for one of its child profiles. The avatar ID must be in the catalog. Demo saves update only the current session overlay, leaving the shared demo family unchanged; an unknown or adult profile returns `404`. Existing profiles without `lumiAvatar` resolve to Plush. The picker at `/profile/[id]/avatars` uses this contract.
 
+### `POST /api/profiles`
+
+The two-step sign-up form first creates an adult profile with name, phone and password. Its second request sends `{ "children": [{ "firstName": "...", "lastName": "...", "birthDate": "YYYY-MM-DD" }] }` under that new session. An existing signed-in family uses the same child request; up to eight children are accepted atomically. Child dates must be past dates and under 18 years ago. The demo cannot add profiles.
+
+### `/api/recordings`
+
+The signed-in family session can list recordings (`GET`), upload a completed child voice session (`POST` multipart), play private audio with byte ranges (`GET /[id]/file`), and delete it (`DELETE /[id]`). Demo recordings are scoped to the current session. `LUMI_RECORDING_RETENTION_HOURS` defaults to 168.
+
 ### `POST /api/stop-conversation`
 
 Body (`StopConversationRequest`): `{ "agent_id": "..." }`.
@@ -66,7 +74,7 @@ Optional SSE proxy path (not default runtime path). Requires `NEXT_LLM_API_KEY` 
 
 ### `POST /api/materials`
 
-Authenticated multipart body: `profileId` string plus `file` (`image/jpeg`, `image/png`, `image/webp`, or `application/pdf`, maximum 10 MB), with optional `literacyLevel`. Requires a family-owned child profile; there is no additional adult-password step for uploads. Family-wide history retains its adult verification requirement.
+Authenticated multipart body: `profileId` string plus `file` (`image/jpeg`, `image/png`, `image/webp`, or `application/pdf`, maximum 10 MB), with optional `literacyLevel`. Requires a family-owned child profile; there is no additional adult-password step for uploads. Family-wide history uses the signed-in family session.
 
 - `201`: new extraction completed, `{ material, cached: false }`.
 - `200`: unexpired ready/processing record reused, `{ material, cached: true }`.
@@ -76,7 +84,7 @@ Authenticated multipart body: `profileId` string plus `file` (`image/jpeg`, `ima
 ### `GET /api/materials`
 
 - `?profileId=<id>` returns browser-safe history metadata for a family-owned child.
-- `?scope=family` requires recent adult verification and returns all current-session family material metadata.
+- `?scope=family` returns all current-session family material metadata to the signed-in family session.
 
 List results exclude hashes, private storage keys, and extracted text.
 

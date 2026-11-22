@@ -315,6 +315,7 @@ export default function ProfilePage() {
             autoStart
             variant="inline"
             lumiAvatar={profile.lumiAvatar}
+            recording={profile.type === 'child' ? { profileId: profile.id, title: 'Conversa livre' } : undefined}
             avatarMode={getLumiAvatarMode(profile.lumiAvatar)}
           />}
         </aside>

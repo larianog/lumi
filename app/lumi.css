@@ -218,6 +218,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .lumi-inline-avatar > div, .lumi-inline-avatar video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
 .lumi-inline-fallback { width: min(100%, 480px); height: auto; max-height: calc(100dvh - 210px); object-fit: contain; filter: drop-shadow(0 28px 28px rgba(0,0,0,.25)); }
 .lumi-inline-controls { position: relative; z-index: 2; margin-top: -24px; display: flex; align-items: center; gap: 10px; border-radius: 999px; background: var(--lumi-lime); color: var(--lumi-ink); padding: 6px 18px 6px 6px; font-weight: 900; box-shadow: 0 12px 26px rgba(0,0,0,.18); }
+.lumi-inline-end { position: relative; z-index: 2; min-height: 38px; display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; background: rgba(7,58,51,.55); padding: 0 16px; color: white; font-size: .84rem; font-weight: 900; cursor: pointer; backdrop-filter: blur(10px); transition: background .18s ease, transform .18s ease; }
+.lumi-inline-end:hover { background: #9a3440; transform: translateY(-1px); }
 .lumi-inline-controls:has(> .lumi-inline-status:only-child) { padding: 12px 20px; }
 .lumi-inline-status { white-space: nowrap; }
 .activity-menu, .home-material-layout .material-card { max-width: 720px; max-height: 100%; padding: clamp(18px, 3.5dvh, 48px) clamp(22px, 4vw, 48px); border: 1px solid rgba(255,255,255,.23); border-radius: 34px; background: rgba(5,47,41,.48); backdrop-filter: blur(18px); box-shadow: 0 28px 65px rgba(0,0,0,.2); }

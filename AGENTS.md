@@ -89,6 +89,9 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `app/api/chat/completions/route.ts`: optional OpenAI-compatible SSE proxy for a custom LLM (not wired by default).
 - `app/api/materials/route.ts`: validates and hashes image uploads, reuses cached extraction, calls the OpenAI vision model, and lists material history.
 - `app/api/materials/[id]/route.ts`: returns authorized material detail and records explicit completion.
+- `app/report/page.tsx` and `app/api/recordings/`: the parent report lists session audio, transcripts and linked lesson files. Recording upload/playback/delete use the family session; demo recordings are isolated by session.
+- `components/NewProfileForm.tsx` and `POST /api/profiles`: two-step family sign-up creates the adult account first, then up to eight children in one request. `/profiles` resumes step two if the family has no child yet.
+- `lib/use-session-recorder.ts` reads the child mic and remote audio tracks without stopping them; the parent report's audio and transcripts live in `data/recordings/` for `LUMI_RECORDING_RETENTION_HOURS` (default 168). Keep playback private and demo sessions isolated.
 - `app/profile/[id]/history/page.tsx`: child material history.
 - `app/profile/[id]/materials/[materialId]/page.tsx`: study workspace with question cards, answer blanks, the original-file viewer, and the selected Lumi avatar.
 - The embedded material result shares the upload panel's translucent green surface and responsive styling in `app/lumi.css`; keep light text and legible loading/error/completion states. Scope these styles to `.home-material-layout` so standalone history/detail styling remains independent.
@@ -105,7 +108,7 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `lib/agora.ts`: shared agent UID defaults.
 - `lib/conversation.ts`: transcript normalization and visualizer state mapping.
 - `lib/material-extraction.ts`: server-only multimodal extraction request and response validation.
-- Homework tutoring: `analyzeMaterial` returns a child-safe `extractedText` and a server-only `analysis` (expected answers, steps, hints). Never add `analysis` to DTOs. `invite-agent` switches to `messages.voice.homeworkPrompt` when a material has an analysis. Uploads require a family session and owned child profile, without an additional adult-password step; family-wide history still requires recent adult access. The study workspace passes the child's selected avatar mode/ID alongside `profileId` and `materialId`.
+- Homework tutoring: `analyzeMaterial` returns a child-safe `extractedText` and a server-only `analysis` (expected answers, steps, hints). Never add `analysis` to DTOs. `invite-agent` switches to `messages.voice.homeworkPrompt` when a material has an analysis. Uploads require a family session and owned child profile, without an additional adult-password step; family-wide history is available to the signed-in family session; the parent area has no separate password. The study workspace passes the child's selected avatar mode/ID alongside `profileId` and `materialId`.
 - `lib/material-storage.ts`: private temporary local file cache.
 - `lib/study-materials.ts`: ownership, shared-demo isolation, DTO, and expiry helpers.
 - `config/env/env.local.example`: local environment template.

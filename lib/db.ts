@@ -11,6 +11,7 @@ import type {
   SessionRecord,
   HomeworkAnalysis,
   StudyMaterial,
+  SessionRecording,
 } from '@/types/database';
 
 const DB_PATH = path.join(process.cwd(), 'data', 'lumi-db.json');
@@ -24,6 +25,7 @@ const initialDb: Database = {
   families: [],
   completions: [],
   materials: [],
+  recordings: [],
   sessions: [],
   version: 3,
 };
@@ -111,6 +113,7 @@ async function readDb(): Promise<Database> {
       families: parsed.families as FamilyRecord[] ?? [],
       completions: parsed.completions ?? [],
       materials: parsed.materials ?? [],
+      recordings: parsed.recordings ?? [],
       sessions: parsed.sessions ?? [],
       version: 3,
     };
@@ -140,6 +143,7 @@ async function readDb(): Promise<Database> {
         family.profiles.some((profile) => profile.id === completion.profileId))?.id ?? '',
     })),
     materials: parsed.materials ?? [],
+    recordings: parsed.recordings ?? [],
     sessions: parsed.sessions ?? [],
     version: 3,
   };
@@ -257,6 +261,15 @@ export async function createSession(familyId: string, isDemo = false) {
   });
 
   return token;
+}
+
+/** Logout: forget this browser's session. */
+export async function deleteSession(token: string | undefined) {
+  if (!token) return;
+  const tokenHash = hashToken(token);
+  await updateDb((db) => {
+    db.sessions = db.sessions.filter((session) => session.tokenHash !== tokenHash);
+  });
 }
 
 export async function getSession(token: string | undefined): Promise<SessionRecord | null> {
@@ -473,5 +486,48 @@ export async function purgeExpiredStudyMaterials() {
     }
 
     return storageKeys;
+  });
+}
+
+function belongsToRecordingScope(recording: SessionRecording, familyId: string, demoSessionId?: string) {
+  return recording.familyId === familyId
+    && (demoSessionId ? recording.demoSessionId === demoSessionId : !recording.demoSessionId);
+}
+
+export async function saveRecording(recording: SessionRecording) {
+  return updateDb((db) => {
+    db.recordings.unshift(recording);
+    return recording;
+  });
+}
+
+export async function getRecording(id: string, familyId: string, demoSessionId?: string) {
+  const db = await readDb();
+  return db.recordings.find((recording) =>
+    recording.id === id && belongsToRecordingScope(recording, familyId, demoSessionId)) ?? null;
+}
+
+export async function getRecordingsByFamily(familyId: string, demoSessionId?: string) {
+  const db = await readDb();
+  return db.recordings.filter((recording) => belongsToRecordingScope(recording, familyId, demoSessionId));
+}
+
+export async function deleteRecording(id: string, familyId: string, demoSessionId?: string) {
+  return updateDb((db) => {
+    const recording = db.recordings.find((candidate) =>
+      candidate.id === id && belongsToRecordingScope(candidate, familyId, demoSessionId));
+    if (!recording) return null;
+    db.recordings = db.recordings.filter((candidate) => candidate.id !== id);
+    return recording.storageKey;
+  });
+}
+
+export async function purgeExpiredRecordings() {
+  return updateDb((db) => {
+    const now = Date.now();
+    const expired = db.recordings.filter((recording) => Date.parse(recording.expiresAt) <= now);
+    if (expired.length === 0) return [];
+    db.recordings = db.recordings.filter((recording) => Date.parse(recording.expiresAt) > now);
+    return expired.map((recording) => recording.storageKey);
   });
 }

@@ -124,7 +124,8 @@ agora project doctor --deep
 - Family accounts with password-protected sessions.
 - Multiple child profiles under one family.
 - A protected adult area for reviewing progress and submitted materials.
-- Per-child activity history and family-level reporting.
+- Per-child activity history and a family report with session audio, transcripts and linked lesson files.
+- A two-step sign-up form for an adult account followed by one or more child profiles.
 - A ready-to-use demo family for exploring the product without registration through the development-only welcome button.
 
 ### Safety and reliability
@@ -136,6 +137,7 @@ agora project doctor --deep
 - Private temporary file storage; uploads are never placed under `public/`.
 - Child-safe material DTOs that do not expose private storage paths, hashes, or the server-only answer brief.
 - Demo uploads and avatar choices isolated by browser session even though the demo family is shared.
+- Demo recordings isolated by browser session; session audio defaults to seven-day retention in private storage.
 - Automatic expiry of uploaded bytes and extracted text, with a seven-day default retention period.
 
 Run `pnpm run verify` before shipping changes — it covers local prerequisites, lint, type safety, the core API route contracts, and the production build.
@@ -289,7 +291,7 @@ Bundled WebP downloads are shared across the placeholder and live avatar, so sta
 4. The client receives transcript, agent state, and `AGENT_METRICS` (per-stage latency) events over RTM.
 5. On end, the client calls `/api/stop-conversation`, logs out RTM, and unmounts the call view so Agora React hooks clean up RTC publish/join and the local microphone track.
 
-For uploaded study material, the browser sends multipart form data to `/api/materials` and keeps the result inside `/profile/:profileId`, preserving the header, forest layout and URL. During upload/analysis, Plush Lumi plays `lummi-lendo-transparente.webp` (118 frames, 3933 ms, 800 x 800, alpha) with **Carregando…** below it; the previous voice component unmounts and releases its session. After the response and the end of the current reading cycle (at least one full cycle for fast responses), the embedded study workspace starts a new grounded voice session with `profile_id`, `material_id`, and the child's selected avatar mode and ID. Processing cache hits are polled serially, with cancellation on exit, a two-minute timeout, and visible retry on failure. Reading loops during longer analysis; errors display immediately. Reduced motion, hidden tabs or animation failures bypass the animation wait; a 15-second asset timeout prevents stalls. File replacement and duplicate sends stay disabled through the final reading cycle. The child can complete the activity or choose **Enviar outra atividade** on the same page. Images and PDFs render in the study panel; history links still use `/profile/:profileId/materials/:materialId` and share that component. Uploads accept JPEG/PNG/WebP/PDF up to 10 MB and require a family session with an owned child profile, without an additional adult-password step. Family-wide history remains protected by adult verification. Ending the voice session alone does not mark an activity complete.
+For uploaded study material, the browser sends multipart form data to `/api/materials` and keeps the result inside `/profile/:profileId`, preserving the header, forest layout and URL. During upload/analysis, Plush Lumi plays `lummi-lendo-transparente.webp` (118 frames, 3933 ms, 800 x 800, alpha) with **Carregando…** below it; the previous voice component unmounts and releases its session. After the response and the end of the current reading cycle (at least one full cycle for fast responses), the embedded study workspace starts a new grounded voice session with `profile_id`, `material_id`, and the child's selected avatar mode and ID. Processing cache hits are polled serially, with cancellation on exit, a two-minute timeout, and visible retry on failure. Reading loops during longer analysis; errors display immediately. Reduced motion, hidden tabs or animation failures bypass the animation wait; a 15-second asset timeout prevents stalls. File replacement and duplicate sends stay disabled through the final reading cycle. The child can complete the activity or choose **Enviar outra atividade** on the same page. Images and PDFs render in the study panel; history links still use `/profile/:profileId/materials/:materialId` and share that component. Uploads accept JPEG/PNG/WebP/PDF up to 10 MB and require a family session with an owned child profile, without an additional adult-password step. Family-wide history is available to the signed-in family session. Ending the voice session alone does not mark an activity complete.
 
 The upload and embedded result panels share the same translucent green background and responsive styling, with light text for contrast.
 
@@ -326,7 +328,7 @@ Run `pnpm run verify` before shipping changes. The `doctor` step requires a conf
 | --- | --- |
 | `POST /api/login` | Family or demo authentication |
 | `GET/POST /api/profiles` | Profile lookup and family/child creation |
-| `POST /api/adult-access` | Recent adult verification for protected reports |
+| `/api/recordings` | Save, list, play and delete session recordings for the signed-in family |
 | `GET/POST /api/materials` | Material history and authenticated upload/analysis |
 | `GET/PATCH /api/materials/[id]` | Authorized material detail and explicit completion |
 | `GET /api/materials/[id]/file` | Authorized private material bytes |

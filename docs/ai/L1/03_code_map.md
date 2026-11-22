@@ -28,6 +28,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `chat/completions/route.ts`: optional OpenAI-compatible SSE proxy for custom LLM path.
 - `materials/route.ts`: upload validation, cache reservation, OpenAI analysis, and child/family lists.
 - `materials/[id]/route.ts`: authorized detail and explicit completion.
+- `recordings/` + `logout/`: session audio upload/list/play/delete and sign-out for the restored parent report.
 
 ## Client Ownership (`components`)
 
@@ -51,6 +52,8 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `MaterialStudyPageClient.tsx` + `MaterialQuestion.tsx` + `MaterialViewer.tsx`: shared embedded/standalone worksheet, answer blanks, spoken answer routing, original-file viewer, bounded polling/retry, grounded voice and explicit completion.
 - `LumiMaterialLoading.tsx`: reading avatar and **Carregando…** caption during upload/analysis, without opening a voice session. Reports completion after a full loaded cycle once the API responds; motion cancellation/failure bypasses the wait.
 - `MaterialHistoryPageClient.tsx`: child material history/status list.
+- `NewProfileForm.tsx`: two-step family sign-up with a batch child form.
+- `app/report/page.tsx`: parent report with recording playback, transcript and linked lesson file.
 
 ## Shared Logic (`lib`)
 

@@ -86,7 +86,7 @@
 | Upload rejected | `app/api/materials/route.ts`, `lib/material-storage.ts` |
 | Extraction fails or is empty | `lib/material-extraction.ts`, `OPENAI_API_KEY` |
 | Lumi ignores the material | `components/LumiVoiceAgent.tsx`, `app/api/invite-agent/route.ts` |
-| Parent cannot see history | `/api/materials?scope=family`, adult verification window |
+| Parent cannot see history | Family session cookie, `/api/materials?scope=family`, `/api/recordings` |
 
 ## Sandbox and Local Dev Caveats
 

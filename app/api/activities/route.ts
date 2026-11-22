@@ -3,7 +3,6 @@ import {
   getCompletionsByFamily,
   getCompletionsByProfile,
   getFamilyForSession,
-  hasAdultAccess,
   recordCompletion,
 } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
@@ -32,9 +31,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (familyScope) {
-      if (!(await hasAdultAccess(token))) {
-        return NextResponse.json({ error: 'Confirme a senha do responsável.' }, { status: 403 });
-      }
       return NextResponse.json(await getCompletionsByFamily(result.family.id));
     }
 

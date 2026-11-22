@@ -1,4 +1,5 @@
 import type { RTMClient } from 'agora-rtm';
+import type { SessionRecordingContext } from '@/lib/use-session-recorder';
 
 export interface AgoraTokenData {
   token: string;
@@ -44,6 +45,7 @@ export interface ConversationComponentProps {
   variant?: 'full' | 'inline';
   avatarMode?: 'provider' | 'local';
   lumiAvatar?: string;
+  recording?: SessionRecordingContext;
   /** Called from a user tap after microphone access was denied. */
   onRetryMicrophone?: () => void;
   /** End the failed session and start a fresh one without leaving the page. */
