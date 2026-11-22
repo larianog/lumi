@@ -17,6 +17,7 @@
 - Store secrets in `.env.local` for dev and deployment secret store in Vercel.
 - `config/env/env.local.example` documents expected keys without real values.
 - Keep `OPENAI_API_KEY` server-side and rotate any key pasted into chat, logs, issues, or commits.
+- Keep `NEXT_LEMONSLICE_API_KEY` server-side. The browser sends only a catalog avatar ID; the invite route resolves its provider source and reads the Plush reference image on the server.
 
 ## Token Security Model
 
@@ -29,7 +30,8 @@
 
 - Route handlers validate required fields and env availability.
 - Errors return structured JSON with bounded detail.
-- Material routes authenticate the family session, verify profile/material ownership, validate size/MIME/signature, and gate family-wide lists behind adult access.
+- Material routes authenticate the family session, verify profile/material ownership, validate size/MIME/signature, and scope family-wide lists to the signed-in family session.
+- `PATCH /api/profiles` authenticates the family session, validates the catalog ID, limits writes to that family's child profiles, and stores demo choices only on the current session, never the shared demo family.
 - Stop route treats already-stopping/not-found agent as idempotent success.
 
 ## Agent Behavior Safety

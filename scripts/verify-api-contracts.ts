@@ -390,6 +390,7 @@ async function verifyInviteAgentSuccess() {
     const sessionConfig = capturedSessionConfig as {
       channel?: string;
       agentUid?: string;
+      token?: string;
       remoteUids?: string[];
     };
 
@@ -401,6 +402,8 @@ async function verifyInviteAgentSuccess() {
       sessionConfig.agentUid === '123456',
       'POST /api/invite-agent should use the shared default agent UID',
     );
+    assert(typeof sessionConfig.token === 'string' && sessionConfig.token.length > 0,
+      'POST /api/invite-agent should pass the explicit agent token');
     assert(
       JSON.stringify(sessionConfig.remoteUids) ===
         JSON.stringify(['4321']),
@@ -413,12 +416,15 @@ async function verifyInviteAgentSuccess() {
 
 async function verifyLocalAvatarInvite() {
   const { POST: inviteAgent } = await import('../app/api/invite-agent/route');
+  const { getLumiAvatar, getLumiAvatarMode } = await import('../lib/lumi-avatars');
+  assert(getLumiAvatar().id === 'plush' && getLumiAvatarMode() === 'local', 'Profiles without a saved avatar must start with animated Plush');
+  assert(getLumiAvatarMode('alien') === 'provider', 'Changing to a catalog avatar must retain provider playback');
   const originalCreateSession = Agent.prototype.createSession;
   const originalKey = process.env.NEXT_LEMONSLICE_API_KEY;
   const configurations: ReturnType<Agent['toProperties']>[] = [];
-  const request = (avatarMode: unknown) => new NextRequest('http://localhost:3000/api/invite-agent', {
+  const request = (avatarMode: unknown, avatarId?: unknown) => new NextRequest('http://localhost:3000/api/invite-agent', {
     method: 'POST',
-    body: JSON.stringify({ requester_id: '4321', channel_name: 'local-avatar-contract', avatar_mode: avatarMode }),
+    body: JSON.stringify({ requester_id: '4321', channel_name: 'local-avatar-contract', avatar_mode: avatarMode, avatar_id: avatarId }),
   });
   Agent.prototype.createSession = function (this: Agent) {
     configurations.push(this.toProperties({ channel: 'local-avatar-contract', agentUid: '123456', remoteUids: ['4321'], token: 'mock-token' }));
@@ -434,10 +440,17 @@ async function verifyLocalAvatarInvite() {
       assert(tts.params.language_boost === 'Portuguese', 'Portuguese must be explicit before the greeting is synthesized');
       assert(tts.params.voice_setting.voice_id === 'English_captivating_female1', 'Language selection must preserve the existing voice');
     }
+    assert((await inviteAgent(request('local', 'plush'))).status === 200, 'Selected Plush must start a voice session');
+    assert(!configurations.at(-1)?.avatar, 'Selected Plush must keep the bundled local animation');
+    assert((await inviteAgent(request('provider', 'alien'))).status === 200, 'Selected catalog avatar must start a voice session');
+    const selectedAvatar = configurations.at(-1)?.avatar as { params?: Record<string, unknown> } | undefined;
+    assert(selectedAvatar?.params?.agent_id === 'agent_65ce272168dc785d', 'Selected avatar must retain its LemonSlice dashboard source');
+    assert(typeof selectedAvatar?.params?.agora_token === 'string', 'Selected avatar must receive its RTC publisher token');
     for (const mode of ['unknown', null, 123]) {
       assert((await inviteAgent(request(mode))).status === 400, 'Invalid avatar modes must be rejected');
     }
-    assert(configurations.length === 3, 'Invalid modes must never start sessions');
+    assert((await inviteAgent(request('provider', 'unknown'))).status === 400, 'Unknown avatar IDs must be rejected');
+    assert(configurations.length === 5, 'Invalid modes and avatar IDs must never start sessions');
   } finally {
     Agent.prototype.createSession = originalCreateSession;
     if (originalKey === undefined) delete process.env.NEXT_LEMONSLICE_API_KEY;
@@ -447,10 +460,11 @@ async function verifyLocalAvatarInvite() {
 
 async function verifyLumiTtsConfiguration() {
   const { LumiTTS } = await import('../lib/lumi-tts');
-  const original = new MiniMaxTTS({ model: 'speech_2_6_turbo', voiceId: 'English_captivating_female1' }).toConfig();
+  const original = new MiniMaxTTS({ model: 'speech_2_6_turbo', voiceId: 'English_captivating_female1', skipPatterns: [4] }).toConfig();
   const configured = new LumiTTS().toConfig();
   const { language_boost, ...originalParams } = configured.params;
   assert(language_boost === 'Portuguese', 'Lumi TTS must select Portuguese explicitly');
+  assert(JSON.stringify(configured.skip_patterns) === JSON.stringify([4]), 'Tutor answer-grid commands must remain silent');
   assert(JSON.stringify({ ...configured, params: originalParams }) === JSON.stringify(original),
     'Language selection must preserve managed credentials, model metadata, timbre and playback settings');
 }

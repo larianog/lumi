@@ -9,6 +9,7 @@ import {
   type AgentVisualizerState,
   type IMessageListItem,
 } from 'agora-agent-uikit';
+import { stripFillCommands } from '@/lib/lumi-events';
 
 // Fixes compacted punctuation emitted by some TTS/ASR providers where sentence-ending
 // characters run directly into the next word (e.g. "Hello.World" → "Hello. World").
@@ -96,7 +97,7 @@ export function normalizeTranscript(
     const remappedUID = item.uid === '0' ? localUID : item.uid;
     const normalizedText =
       typeof item.text === 'string'
-        ? normalizeTranscriptSpacing(item.text)
+        ? normalizeTranscriptSpacing(stripFillCommands(item.text))
         : item.text;
     return { ...item, uid: remappedUID, text: normalizedText };
   });

@@ -1,4 +1,5 @@
 import type { RTMClient } from 'agora-rtm';
+import type { SessionRecordingContext } from '@/lib/use-session-recorder';
 
 export interface AgoraTokenData {
   token: string;
@@ -15,6 +16,8 @@ export interface ClientStartRequest {
   age?: number;
   activity_title?: string;
   avatar_mode?: 'provider' | 'local';
+  /** Chosen Lumi avatar; Plush uses the local animation path. */
+  avatar_id?: string;
   material_id?: string;
 }
 
@@ -41,9 +44,11 @@ export interface ConversationComponentProps {
   /** `full` = in-call layout with header and transcript; `inline` = avatar + mic only. */
   variant?: 'full' | 'inline';
   avatarMode?: 'provider' | 'local';
-  /** Celebrate explicit correct-answer confirmations only in a material tutoring session. */
+  lumiAvatar?: string;
+  recording?: SessionRecordingContext;
+  /** Celebrate confirmed answers during material tutoring. */
   celebrateAnswers?: boolean;
-  /** The tutor confirmed the entire material and finished speaking. */
+  /** The tutor confirmed the whole material and finished speaking. */
   onMaterialCompleted?: () => void;
   /** Called from a user tap after microphone access was denied. */
   onRetryMicrophone?: () => void;

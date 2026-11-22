@@ -26,7 +26,7 @@ Celebration review on 2026-11-22 connects completed, explicit correct-answer con
 
 Speaking-asset review on 2026-11-22 selects the supplied `lummi-falando-asas-web-v1.webp` under a new public URL for profiles and the playground. Its 4.8 MB playback copy retains all 181 frames, the 6033 ms cycle and alpha; the supplied 44.5 MB master remains unchanged; `contain` prevents cropping the wings.
 
-Automatic-animation review on 2026-11-22 removes product start/pause buttons from conversation, illustration and material-reading avatars. By explicit user authorization, character playback is independent of system reduced motion and ignores previous stored manual choices. Hidden/offscreen media still pause. Browser regression checks must emulate reduced motion explicitly, since headless defaults may not inherit Windows animation preferences. Error-only reload remains available; playground controls stay independent. This supersedes the manual-motion behavior described in earlier reviews below.
+Automatic-animation review on 2026-11-22 removes product start/pause buttons from conversation, illustration and material-reading avatars. By explicit user authorization, character playback is independent of system reduced motion and ignores previous stored manual choices. Hidden/offscreen media still pause. Browser regression checks must emulate reduced motion explicitly, since headless defaults may not inherit Windows animation preferences. A page reload retries failed assets; playground controls stay independent. This supersedes the manual-motion behavior described in earlier reviews below.
 
 Voice-language review on 2026-11-22 explicitly selects Portuguese in the main MiniMax TTS configuration, including the first greeting. The existing model, voice and managed credentials are preserved by `lib/lumi-tts.ts`; contract verification covers configuration, while audible pronunciation remains a live-session check.
 
@@ -36,11 +36,9 @@ Welcome review on 2026-11-22 removes the family-description paragraph and limits
 
 Merge review on 2026-11-22 combines main's didactic classification, product README/demo image, feedback specifications and CI/Docker updates with local animations, reading-cycle gating, voice recovery and sleep. Cached/async non-didactic results do not start tutoring; runtime database contents are preserved locally.
 
-Motion recovery review on 2026-11-22 centralizes avatar/reading preferences and clears the old tab-wide saved pause once. The v2 preference preserves new manual choices across remounts and respects reduced motion. Browser checks cover recovery, explicit pause/resume and preference changes.
-
 Sleep regression review on 2026-11-22 includes the SDK `silent` state in the inactivity gate. Previously a silent agent could stay awake indefinitely after replying. The countdown remains stable across resting-state events, with browser coverage of sleep and speech wake-up.
 
-Idle review on 2026-11-22 configures the supplied 121-frame, 4033 ms alpha WebP across all app mascot illustrations and voice waiting states. Shared `idleOnly` rendering avoids downloading other clips on non-voice screens; intersection/visibility handling pauses hidden illustrations. Idle immediately yields to conversation actions or sleep, and material analysis keeps reading. The welcome entrance and motion controls remain accessible.
+Idle review on 2026-11-22 configures the supplied 121-frame, 4033 ms alpha WebP across all app mascot illustrations and voice waiting states. Shared `idleOnly` rendering avoids downloading other clips on non-voice screens; intersection/visibility handling pauses hidden illustrations. Idle immediately yields to conversation actions or sleep, and material analysis keeps reading. The welcome entrance remains accessible.
 
 Inactivity review on 2026-11-22 adds sleeping after 30 seconds without speech or page interaction in local conversations. The supplied sleeping loop retains its original bytes (121 frames, 4033 ms, alpha). Interaction or speech wakes immediately; pending responses, failed connections and hidden tabs suspend the countdown. Voice stays connected and material loading keeps reading.
 
@@ -56,11 +54,11 @@ Animation transition review on 2026-11-21 covers normal/demo profiles, material 
 
 Integration review on 2026-11-21 combines the material upload/history/tutoring flow from main with local profile and material-study animations. Invites preserve both material grounding identifiers and `avatar_mode`; upload password removal does not remove the adult check on family-wide history. Local database sessions are preserved separately from the merge commit.
 
-Review scope on 2026-11-21 includes the animation playground, local video/WebP workflow, and profile avatars driven by RTC speech activity. Profiles explicitly request local avatars without Lemon Slice; omitted invite avatar mode preserves provider defaults.
+Review scope on 2026-11-21 includes the animation playground, local video/WebP workflow, and profile avatars driven by RTC speech activity. Plush profiles explicitly request local avatars without Lemon Slice; selected non-Plush profiles use the provider path, while omitted invite settings preserve provider defaults.
 
 The bundled assets are `lummi-falando-asas-web-v1.webp` for speaking (181 frames, 6033 ms, 800 × 800) and `lummi-transparente-02.webp` for listening (192 frames, approximately 8 seconds, 768 × 768), both with alpha, rendered by a shared WebP component in profiles and the playground. Speaking uses a 4,808,826-byte playback derivative, preserves the supplied master `lummi-falando-asas-preservadas.webp` unchanged, and uses `contain` to preserve the whole frame and wings in portrait containers; the earlier optimized clip and original Full HD `lummi-animacao-transparente-1.webp` are retained unchanged. Profiles preload conversation clips and animate only the displayed state; silence plays the idle loop until the inactivity timer requests sleep. The earlier speaking WebP and MP4 are not the defaults.
 
-The reviewed avatar loading flow shares bundled downloads across placeholder/live remounts, exposes failed-load recovery, and retains explicit motion choices per tab. LAN previews require a network binding; microphone use on another device requires HTTPS.
+The reviewed avatar loading flow shares bundled downloads across placeholder/live remounts and retains a still fallback on failure. LAN previews require a network binding; microphone use on another device requires HTTPS.
 
 Conversation animations give incoming audible agent speech immediate priority over microphone activity. After speech ends, the displayed cycle finishes before resuming listening if the user is still talking, or returning to still. RTC voice interruption behavior is unchanged.
 

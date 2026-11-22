@@ -39,6 +39,13 @@ export function toStudyMaterialDto(
     title: material.analysis?.title,
     subject: material.analysis?.subject,
     questionCount: material.analysis?.questions.length,
+    // Send only worksheet content, never the answer key, steps, or hints.
+    instructions: includeExtractedText ? material.analysis?.generalInstructions || undefined : undefined,
+    questions: includeExtractedText
+      ? material.analysis?.questions.map(({ number, statement, supportContent, answerSlots }) => ({
+        number, statement, supportContent, answerSlots,
+      }))
+      : undefined,
     storageKey: material.storageKey,
     isDidactic: material.isDidactic ?? material.analysis?.isDidactic,
   };

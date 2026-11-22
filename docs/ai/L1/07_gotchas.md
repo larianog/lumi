@@ -5,7 +5,7 @@
 ## Critical Runtime Pitfalls
 
 - Conversation avatar requests follow actual RTC audio levels, not the toolkit's generic ready-to-listen state. Silence/thinking becomes stationary after the outgoing cycle finishes. Audible agent speech enters immediately during overlap, including microphone pickup of the speaker; ongoing user speech requests listening after agent speech ends. Mute, lost connection, stopped/blocked playback clear speech activity. Level thresholds are heuristics and may respond to loud background noise. Never create another microphone track or take ownership of SDK cleanup for animation.
-- Profiles, material study and activity dialogs must send `avatar_mode: "local"` for normal and demo accounts; merely hiding a provider video would still create a paid avatar. Playground uploads do not propagate to conversations. Speaking uses `lummi-falando-asas-web-v1.webp` and listening uses `lummi-transparente-02.webp`. Speaking uses a compressed 800 × 800 playback copy with every frame/delay and alpha retained; keep the supplied master byte-for-byte and use `contain` so the wings remain visible. Keep the older assets unchanged and never drop frames/delays to reduce size; never render WebP with `<video>`. Keep ready/error status per clip. Speaking preempts immediately; other changes wait for the current cycle, then use the latest request. Do not restart WebP URLs or cycle timers on every speech-state update. Hidden tabs, disconnect, muted listening, blocked speaking and load failures must cancel the wait, not leave a stale queued action.
+- Plush profiles, material study and activity dialogs must send `avatar_mode: "local"`; a selected non-Plush avatar uses `"provider"` with its validated ID. Demo choices are isolated to the demo session. Playground uploads do not propagate to conversations. Speaking uses `lummi-falando-asas-web-v1.webp` and listening uses `lummi-transparente-02.webp`. Speaking uses a compressed 800 × 800 playback copy with every frame/delay and alpha retained; keep the supplied master byte-for-byte and use `contain` so the wings remain visible. Keep the older assets unchanged and never drop frames/delays to reduce size; never render WebP with `<video>`. Keep ready/error status per clip. Speaking preempts immediately; other changes wait for the current cycle, then use the latest request. Do not restart WebP URLs or cycle timers on every speech-state update. Hidden tabs, disconnect, muted listening, blocked speaking and load failures must cancel the wait, not leave a stale queued action.
 
 - Playground Local 2D is a body-motion study, not Lemon Slice output or phoneme lip sync. Motion prompts influence generated video without guaranteeing gestures. Watch both speech and idle intervals in real sessions.
 - Closing the playground during startup must collect a late invite's agent ID and stop it. Do not abort the invite response and lose that ID. RTM failure prevents inviting an agent; explicit stop failure keeps a retry available.
@@ -31,7 +31,7 @@
 ## Agent Startup Pitfalls
 
 - Missing `NEXT_PUBLIC_AGORA_APP_ID`/`NEXT_AGORA_APP_CERTIFICATE` yields hard 500s on token/invite/stop routes.
-- `agora-agents` 2.15.0 calls `ConvoAITokenBuilder.buildToken` with a role where the token lifetime belongs, producing a one-second token. Keep server start/stop/avatar tokens on `lib/agora-agent-token.ts` until that SDK call is fixed. `RtcTokenBuilder.buildTokenWithRtm` also expects relative lifetime seconds, not a Unix timestamp.
+- `agora-agents` 2.15.0 calls `ConvoAITokenBuilder.buildToken` with a role where the token lifetime belongs, producing a one-second token. Keep invite agent and Lemon Slice avatar tokens on `lib/agora-agent-token.ts` until that SDK call is fixed. `RtcTokenBuilder.buildTokenWithRtm` also expects relative lifetime seconds, not a Unix timestamp.
 - Changing the agent UID outside `lib/agora.ts` can desynchronize the browser and invite route.
 - RTM subscription failures may only surface through SAL status or raw signaling fallback events.
 
@@ -87,7 +87,7 @@
 | Upload rejected | `app/api/materials/route.ts`, `lib/material-storage.ts` |
 | Extraction fails or is empty | `lib/material-extraction.ts`, `OPENAI_API_KEY` |
 | Lumi ignores the material | `components/LumiVoiceAgent.tsx`, `app/api/invite-agent/route.ts` |
-| Parent cannot see history | `/api/materials?scope=family`, adult verification window |
+| Parent cannot see history | Family session cookie, `/api/materials?scope=family`, `/api/recordings` |
 
 ## Sandbox and Local Dev Caveats
 

@@ -7,6 +7,7 @@ type NewProfilePageProps = {
 export default async function NewProfilePage({ searchParams }: NewProfilePageProps) {
   const query = await searchParams;
   const mode = query.mode === 'signin' ? 'signin' : 'signup';
-  const profileType = query.type === 'child' ? 'child' : 'adult';
-  return <NewProfileForm authMode={mode} initialProfileType={profileType} />;
+  // type=child opens signup step 2 (children) for a signed-in family.
+  const initialStep = mode === 'signup' && query.type === 'child' ? 'children' : 'parent';
+  return <NewProfileForm authMode={mode} initialStep={initialStep} />;
 }

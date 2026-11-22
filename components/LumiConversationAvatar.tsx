@@ -1,10 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type AnimationEventHandler } from 'react';
 import { BUNDLED_LUMI_VIDEO_CLIPS, isWebPClip, type LumiVideoState } from '@/lib/lumi-video-states';
-import { forgetLumiWebP } from '@/lib/lumi-webp';
 import { nextLumiAnimationState, type LumiAnimationState } from '@/lib/lumi-animation-transition';
 import LumiWebPClip from './LumiWebPClip';
 import styles from './lumi-conversation-avatar.module.css';
@@ -45,8 +43,6 @@ export default function LumiConversationAvatar({ state, active = true, listening
   const [animationState, setAnimationState] = useState<LumiAnimationState>(state);
   const [visible, setVisible] = useState(true);
   const [playBlocked, setPlayBlocked] = useState(false);
-  const [retry, setRetry] = useState(0);
-  const [loadAttempt, setLoadAttempt] = useState(0);
   const [consumedCelebration, setConsumedCelebration] = useState<string | null>(null);
   const playingCelebration = useRef<string | null>(null);
   const celebrationComplete = useRef(onCelebrationComplete);
@@ -143,7 +139,7 @@ export default function LumiConversationAvatar({ state, active = true, listening
       }
     }
     return () => { cancelled = true; elements.forEach(([, element]) => element.pause()); };
-  }, [playingState, retry]);
+  }, [playingState]);
 
   return (
     <div ref={root} className={`${styles.avatar} ${idleOnly ? 'lumi-idle-avatar' : ''} ${className}`} data-ready={entranceReady}
@@ -155,10 +151,10 @@ export default function LumiConversationAvatar({ state, active = true, listening
         if (!clip) return null;
         const active = showClip && animationState === id;
         return isWebPClip(clip)
-          ? <LumiWebPClip key={`${clip.url}:${loadAttempt}`} id={id} label={label} url={clip.url}
+          ? <LumiWebPClip key={clip.url} id={id} label={label} url={clip.url}
             fit={clip.fit}
-            className={styles.video} visible={active} playing={active} replay={retry} onReady={onReady} onError={onError} onCycleEnd={onCycleEnd} />
-          : <video key={`${clip.url}:${loadAttempt}`} ref={(element) => { if (element) videos.current[id] = element; else delete videos.current[id]; }}
+            className={styles.video} visible={active} playing={active} replay={0} onReady={onReady} onError={onError} onCycleEnd={onCycleEnd} />
+          : <video key={clip.url} ref={(element) => { if (element) videos.current[id] = element; else delete videos.current[id]; }}
             className={styles.video} data-state={id} data-visible={active} src={clip.url}
             style={{ objectFit: clip.fit ?? 'contain' }}
             muted playsInline loop={id !== 'celebrating' && requested === id} preload="auto" aria-hidden="true"
@@ -167,20 +163,6 @@ export default function LumiConversationAvatar({ state, active = true, listening
       })}
       {(failed || playBlocked) && <div className={styles.loadError} role="status">
         <p>Não foi possível reproduzir a animação.</p>
-        <button className={styles.retryButton} type="button" aria-label="Recarregar animações"
-          onClick={() => {
-            if (failed) {
-              for (const { id } of animatedStates) {
-                const clip = BUNDLED_LUMI_VIDEO_CLIPS[id];
-                if (clip) forgetLumiWebP(clip.url);
-              }
-              setStatuses({});
-              setLoadAttempt((value) => value + 1);
-            }
-            setPlayBlocked(false); setRetry((value) => value + 1);
-          }}>
-          <RotateCcw size={15} /> Recarregar
-        </button>
       </div>}
     </div>
   );

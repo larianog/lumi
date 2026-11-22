@@ -3,7 +3,7 @@ import { MiniMaxTTS } from 'agora-agents';
 /** Keep the existing voice, with Portuguese selected from the first utterance. */
 export class LumiTTS extends MiniMaxTTS {
   constructor() {
-    super({ model: 'speech_2_6_turbo', voiceId: 'English_captivating_female1' });
+    super({ model: 'speech_2_6_turbo', voiceId: 'English_captivating_female1', skipPatterns: [4] });
   }
 
   override toConfig() {

@@ -40,12 +40,24 @@ export const ptBR = {
     submitCreate: 'Criar perfil',
     submitSignIn: 'Entrar',
     addChild: 'Adicionar criança',
+    stepParent: 'Responsável',
+    stepChildren: 'Crianças',
+    parentTitle: 'Crie a conta da família',
+    parentSubtitle: 'Primeiro, os dados do responsável. Você usará o telefone e a senha para entrar.',
+    childrenTitle: 'Quem vai aprender?',
+    childrenSubtitle: 'Crie um perfil para cada criança. Você pode adicionar mais depois.',
+    familyPasswordHint: 'Pelo menos 6 caracteres. Você usará esta senha para entrar no app.',
+    submitParent: 'Continuar',
+    childNumber: (index: number) => `Criança ${index}`,
+    addAnotherChild: 'Adicionar outra criança',
+    submitChildren: (count: number) => (count === 1 ? 'Criar perfil' : `Criar ${count} perfis`),
     invalidLogin: 'Telefone ou senha incorretos.',
     required: 'Preencha todos os campos para continuar.',
     birthDateHint: 'A data ajuda o Lumi a adaptar as atividades à idade da criança.',
   },
   profiles: {
     title: 'Quem vai aprender hoje?',
+    subtitle: 'Cada explorador tem suas próprias descobertas.',
     adultArea: 'Área do responsável',
     addProfile: 'Adicionar perfil',
     manage: 'Gerenciar perfis',
@@ -53,6 +65,17 @@ export const ptBR = {
     passwordLabel: 'Senha da família',
     passwordError: 'Essa senha não confere. Tente novamente.',
     demoPassword: 'Na demo, use a senha lumi123.',
+  },
+  avatars: {
+    tab: 'Avatares',
+    title: 'Escolha seu Lumi',
+    subtitle: 'Quem vai conversar e estudar com você? Toque no Lumi que você mais gostar.',
+    choose: 'Escolher',
+    selected: 'Escolhido',
+    saved: 'Pronto! Na próxima conversa, esse Lumi vai falar com você.',
+    talkNow: 'Conversar agora',
+    loadError: 'Não foi possível carregar os avatares.',
+    saveError: 'Não foi possível salvar o avatar. Tente de novo.',
   },
   home: {
     greeting: (name: string) => `Olá, ${name}!`,
@@ -178,6 +201,16 @@ export const ptBR = {
     empty: 'As primeiras conquistas vão aparecer aqui.',
     today: 'Hoje',
     addChild: 'Adicionar outra criança',
+    sessions: 'Sessões gravadas',
+    sessionCount: (count: number) => (count === 0 ? 'Nenhuma sessão' : `${count} ${count === 1 ? 'sessão' : 'sessões'}`),
+    childrenLabel: 'Crianças da família',
+    heroTitle: 'Como vão os estudos',
+    noSessions: 'Nenhuma sessão gravada ainda. Ela aparece aqui quando a criança finaliza a conversa com o Lumi.',
+    sessionFiles: 'Arquivo enviado nesta sessão',
+    noSessionFiles: 'Conversa livre, sem arquivo enviado.',
+    showTranscript: (turns: number) => `Ver conversa transcrita (${turns} ${turns === 1 ? 'fala' : 'falas'})`,
+    hideTranscript: 'Esconder conversa',
+    noTranscript: 'Sem transcrição para esta sessão.',
     materials: 'Materiais enviados',
     pendingMaterials: 'pendentes',
     noMaterials: 'Nenhum material enviado por esta criança.',
@@ -188,6 +221,7 @@ export const ptBR = {
     start: 'Falar com o Lumi',
     starting: 'Chamando o Lumi...',
     end: 'Encerrar conversa',
+    endSession: 'Finalizar sessão',
     tapToHear: 'Toque aqui para ouvir o Lumi',
     microphoneBlocked: 'O Lumi ainda não consegue te ouvir. Toque no botão abaixo e permita o uso do microfone.',
     retry: 'Ativar microfone',
@@ -229,6 +263,10 @@ CONDUÇÃO PEDAGÓGICA
 PROGRESSÃO E ENCERRAMENTO
 Mantenha o foco na questão atual enquanto a criança a resolve. Quando houver resposta adequada, avalie se uma checagem breve de compreensão é útil, sem prolongar artificialmente. Quando a questão estiver suficientemente concluída para seguir, avance naturalmente para a próxima questão identificável na lição: não pule nem invente questões, não dependa de evento de conclusão do backend e respeite pedidos para repetir, revisar, permanecer ou parar. Se não conseguir identificar a próxima questão, esclareça ou sugira ajuda de um adulto.
 Ao encerrar, resuma o que foi praticado e, quando possível, uma estratégia usada. Diferencie internamente, apenas quando houver evidência, acerto independente, com pista, com exemplo ou resolução guiada; não invente medidas nem diga que o app registrou essas categorias. Uma variação na mesma sessão não é prática espaçada nem prova de retenção futura.
+
+CONFIRMAÇÕES PARA O APP
+Quando a criança responder uma questão por completo e você conferir que está correta, inicie sua resposta exatamente com "${correctAnswerConfirmation}" uma vez para essa questão. Não use essa frase em exemplos, pistas, respostas parciais ou elogios genéricos.
+Na última resposta, quando TODAS as questões e etapas da atividade estiverem concluídas, inicie a resposta exatamente com "${materialCompletionConfirmation}" em vez da confirmação de uma só questão. Não use essa frase ao anunciar uma possibilidade futura, nem antes da última resposta da criança. Esse sinal permite ao app salvar a conclusão; não diga que foi salva antes da confirmação.
 
 FOLHA DE RESPOSTAS NO APP
 A criança também tem espaços de resposta na tela. Toda vez que ela disser a resposta de um espaço, CERTA OU ERRADA, registre exatamente o que disse com [preencher QUESTÃO|ESPAÇO|RESPOSTA]. Exemplos: [preencher 2|1|amora] ou, para questão de resposta única, [preencher 1||oito].

@@ -41,6 +41,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `LumiVoiceAgent.tsx`: profile/material/activity session owner; StrictMode-safe automatic startup and cancellation through managed conversation handles.
 - `lib/agora-rtm-session.ts`: one browser RTM instance, stable document UID, serialized leases and late-invite cleanup. Also used by `LandingPage` and the live playground. `scripts/verify-agora-rtm-session.ts` verifies lifecycle races with fake transports.
 - `lib/agora.ts`: shared agent/avatar IDs and participant generation/validation bounded to the Conversational AI maximum `2147483647`.
+- `lib/agora-agent-token.ts`: explicit managed-agent and Lemon Slice publisher tokens used by the invite route while the SDK's agent auto-token expiry is broken.
 - `ConversationComponent.tsx`: RTC join, mic publish, toolkit init, transcript/metrics/issues state.
 - `QuickstartConversationLayout.tsx`: in-call framing and slots.
 - `QuickstartTranscriptPanel.tsx`: live transcript panel.
@@ -49,6 +50,8 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `MaterialStudyPageClient.tsx`: shared embedded profile result and standalone history detail, with image/PDF preview, bounded processing polling/retry, grounded voice, manual completion and tutor-confirmed completion with success animation and return to upload.
 - `LumiMaterialLoading.tsx`: reading avatar and **Carregando…** caption during upload/analysis, without opening a voice session. Reports completion after a full loaded cycle once the API responds; motion cancellation/failure bypasses the wait.
 - `MaterialHistoryPageClient.tsx`: child material history/status list.
+- `NewProfileForm.tsx`: two-step family sign-up with a batch child form.
+- `app/report/page.tsx`: parent report with recording playback, transcript and linked lesson file.
 
 ## Shared Logic (`lib`)
 

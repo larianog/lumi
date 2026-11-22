@@ -1,12 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import LumiWebPClip from './LumiWebPClip';
 import LumiConversationAvatar from './LumiConversationAvatar';
 import { BUNDLED_LUMI_VIDEO_CLIPS } from '@/lib/lumi-video-states';
-import { forgetLumiWebP } from '@/lib/lumi-webp';
 import styles from './lumi-conversation-avatar.module.css';
 import { messages } from '@/packages/i18n';
 
@@ -23,7 +21,6 @@ export default function LumiMaterialLoading({ loading = true, active = true, onC
   const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>('loading');
   const [durationMs, setDurationMs] = useState(0);
   const [visible, setVisible] = useState(true);
-  const [attempt, setAttempt] = useState(0);
   const failed = status === 'failed';
   const showClip = active && status === 'ready';
   const playing = showClip && visible;
@@ -54,7 +51,7 @@ export default function LumiMaterialLoading({ loading = true, active = true, onC
     // An unavailable/undecodable animation must never trap a ready activity.
     const timer = window.setTimeout(() => setStatus('failed'), 15_000);
     return () => window.clearTimeout(timer);
-  }, [active, status, attempt]);
+  }, [active, status]);
 
   useEffect(() => {
     if (loading) return;
@@ -67,18 +64,10 @@ export default function LumiMaterialLoading({ loading = true, active = true, onC
       <div className="lumi-inline">
         <div className={styles.avatar} data-lumi-state={active ? 'reading' : 'idle'} role="group" aria-label={active ? 'Lumi lendo o material' : 'Lumi parada'}>
           <Image className={styles.still} data-visible={!showClip} src="/assets/lumi-avatar.png" alt="" width={480} height={520} priority />
-          {active && <LumiWebPClip key={attempt} id="reading" label="Lendo o material" url={clip.url}
-            className={styles.video} fit={clip.fit} visible={showClip} playing={playing} replay={attempt}
+          {active && <LumiWebPClip id="reading" label="Lendo o material" url={clip.url}
+            className={styles.video} fit={clip.fit} visible={showClip} playing={playing} replay={0}
             onReady={onReady} onError={onError} onCycleEnd={onCycleEnd} />}
-          {failed && <div className={styles.loadError} role="status">
-            <p>Não foi possível carregar a animação.</p>
-            <button className={styles.retryButton} type="button" aria-label="Recarregar animações"
-              onClick={() => {
-                forgetLumiWebP(clip.url); setStatus('loading'); setDurationMs(0); setAttempt((value) => value + 1);
-              }}>
-              <RotateCcw size={15} /> Recarregar
-            </button>
-          </div>}
+          {failed && <p className={styles.loadError} role="status">Não foi possível carregar a animação.</p>}
         </div>
         {active && (
           <div className="lumi-inline-controls lumi-upload-status" role="status" aria-live="polite">

@@ -7,6 +7,8 @@ export type Profile = {
   lastName: string;
   birthDate: string;
   avatar: number;
+  /** Lumi avatar chosen by the child; missing values use the animated Plush. */
+  lumiAvatar?: string;
   createdAt: string;
 };
 
@@ -41,6 +43,10 @@ export type HomeworkQuestion = {
   number: string;
   /** Faithful transcription of the question. */
   statement: string;
+  /** Child-safe text or word box shown beside the question. */
+  supportContent?: string;
+  /** Labels of the answer blanks, in worksheet order. */
+  answerSlots?: string[];
   /** Pictures, diagrams or layout the child needs (e.g. "5 maçãs desenhadas"). */
   visualElements: string;
   skill: string;
@@ -98,15 +104,39 @@ export type SessionRecord = {
   tokenHash: string;
   familyId: string;
   isDemo: boolean;
+  /** Avatar choices are private to this demo visit. */
+  demoLumiAvatars?: Record<string, string>;
   createdAt: string;
   expiresAt: string;
   adultVerifiedUntil?: string;
+};
+
+/** One line of a recorded conversation. */
+export type RecordingTurn = { speaker: 'child' | 'lumi'; text: string };
+
+/** Audio of a Lumi session, recorded in the browser and visible in the parent area. */
+export type SessionRecording = {
+  id: string;
+  familyId: string;
+  profileId: string;
+  demoSessionId?: string;
+  materialId?: string;
+  title: string;
+  mimeType: string;
+  size: number;
+  durationMs: number;
+  storageKey: string;
+  transcript: RecordingTurn[];
+  startedAt: string;
+  createdAt: string;
+  expiresAt: string;
 };
 
 export type Database = {
   families: FamilyRecord[];
   completions: ActivityCompletion[];
   materials: StudyMaterial[];
+  recordings: SessionRecording[];
   sessions: SessionRecord[];
   version: 3;
 };

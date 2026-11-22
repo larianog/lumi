@@ -6,6 +6,7 @@ import { ArrowLeft, CheckCircle2, Mic, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
+import { getLumiAvatarMode } from '@/lib/lumi-avatars';
 import { messages } from '@/packages/i18n';
 import type { Profile } from '@/types/database';
 
@@ -119,7 +120,7 @@ export default function ActivityPageClient({ activityId, profileId }: ActivityPa
           {!voiceOpen && <LumiConversationAvatar state="idle" idleOnly />}
         </aside>
       </div>
-      {voiceOpen && <LumiVoiceAgent profileName={profile.firstName} age={calculateAge(profile.birthDate)} activityTitle={activity.title} avatarMode="local" onClose={() => setVoiceOpen(false)} />}
+      {voiceOpen && <LumiVoiceAgent profileName={profile.firstName} age={calculateAge(profile.birthDate)} activityTitle={activity.title} lumiAvatar={profile.lumiAvatar} avatarMode={getLumiAvatarMode(profile.lumiAvatar)} onClose={() => setVoiceOpen(false)} />}
     </section>
   );
 }
