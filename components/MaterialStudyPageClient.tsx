@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, FileText, History, LoaderCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, History, LoaderCircle } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
@@ -34,6 +34,7 @@ export default function MaterialStudyPageClient({
   const [loadError, setLoadError] = useState('');
   const [completionError, setCompletionError] = useState('');
   const [completing, setCompleting] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const loadMaterial = useCallback(async () => {
     const response = await fetch(`/api/materials/${encodeURIComponent(materialId)}`, { cache: 'no-store' });
@@ -120,7 +121,7 @@ export default function MaterialStudyPageClient({
             <LumiVoiceAgent
               profileName={profile.firstName}
               age={calculateAge(profile.birthDate)}
-              activityTitle={material.originalName}
+              activityTitle={material.title ?? material.originalName}
               profileId={profileId}
               materialId={material.id}
               autoStart
@@ -131,10 +132,8 @@ export default function MaterialStudyPageClient({
           )}
         </aside>
         <article className="material-card">
-          <span className="eyebrow">{messages.materials.eyebrow}</span>
-          <h1>{messages.materials.title}</h1>
-          <div className="material-file-name"><FileText size={20} /><span>{material.originalName}</span></div>
-
+          <h1 className="material-title">{messages.materials.title}</h1>
+          {!material.isDidactic && <span className="material-status-pill status-failed">Não Didático</span>}
           {material.extractionStatus === 'processing' ? (
             <div className="material-state-card">
               <LoaderCircle className="spin" size={30} />
@@ -152,8 +151,24 @@ export default function MaterialStudyPageClient({
             <div className="material-state-card material-state-error"><strong>{messages.materials.expired}</strong></div>
           ) : (
             <>
-              <h2>{messages.materials.extractedText}</h2>
-              <div className="material-extracted-text">{material.extractedText}</div>
+              <div className="material-original-file" onClick={() => setShowImageModal(true)}>
+                <img
+                  src={`/api/materials/${encodeURIComponent(material.id)}/file`}
+                  alt={material.originalName}
+                  loading="lazy"
+                />
+              </div>
+              {showImageModal && (
+                <div className="image-modal-overlay" onClick={() => setShowImageModal(false)}>
+                  <div className="image-modal" onClick={(e) => e.stopPropagation()}>
+                    <img
+                      src={`/api/materials/${encodeURIComponent(material.id)}/file`}
+                      alt={material.originalName}
+                      style={{ maxWidth: '90vw', maxHeight: '90vh' }}
+                    />
+                  </div>
+                </div>
+              )}
               {material.completedAt ? (
                 <div className="completion-banner">
                   <CheckCircle2 size={25} />

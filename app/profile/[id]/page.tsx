@@ -19,8 +19,10 @@ import {
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
+import { calculateAge } from '@/lib/age';
+import { prepareUploadFile } from '@/lib/prepare-upload';
 import { messages } from '@/packages/i18n';
-import type { ActivityCompletion, Profile } from '@/types/database';
+import type { ActivityCompletion, LiteracyLevel, Profile } from '@/types/database';
 import type { MaterialUploadResponse } from '@/types/materials';
 
 type ActivityId = 'school' | 'games' | 'stories' | 'suggest';
@@ -35,13 +37,12 @@ const activities: Array<{ id: ActivityId; icon: typeof BookOpen; accent: string 
 // Keep the original activity cards ready for a one-line rollback.
 const SHOW_ACTIVITY_CARDS = false;
 
-function calculateAge(birthDate: string) {
-  const today = new Date();
-  const birth = new Date(`${birthDate}T12:00:00`);
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDifference = today.getMonth() - birth.getMonth();
-  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birth.getDate())) age -= 1;
-  return Math.max(age, 0);
+const LITERACY_OPTIONS: LiteracyLevel[] = ['pre_reader', 'emergent', 'fluent'];
+
+function defaultLiteracy(age: number): LiteracyLevel {
+  if (age <= 6) return 'pre_reader';
+  if (age === 7) return 'emergent';
+  return 'fluent';
 }
 
 export default function ProfilePage() {
@@ -54,10 +55,13 @@ export default function ProfilePage() {
   const [selectedMaterial, setSelectedMaterial] = useState<File | null>(null);
   const [materialUploadState, setMaterialUploadState] = useState<'idle' | 'uploading'>('idle');
   const [materialError, setMaterialError] = useState('');
+  const [materialWarning, setMaterialWarning] = useState('');
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
+  const [literacyLevel, setLiteracyLevel] = useState<LiteracyLevel | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
@@ -71,12 +75,13 @@ export default function ProfilePage() {
           fetch(`/api/activities?profileId=${encodeURIComponent(profileId)}`, { cache: 'no-store' }),
         ]);
         if (!profileResponse.ok) return;
-        const profileData = await profileResponse.json() as { profile: Profile };
+        const profileData = await profileResponse.json() as { profile: Profile; isDemo?: boolean };
         const completionData = completionsResponse.ok
           ? await completionsResponse.json() as ActivityCompletion[]
           : [];
         if (!cancelled) {
           setProfile(profileData.profile);
+          setIsDemo(Boolean(profileData.isDemo));
           setCompletions(completionData);
         }
       } finally {
@@ -143,25 +148,38 @@ export default function ProfilePage() {
     event.currentTarget.value = '';
   };
 
-  const sendMaterial = async () => {
-    if (!selectedMaterial || materialUploadState === 'uploading') return;
+  const uploadMaterial = async () => {
+    if (!selectedMaterial || !profile) return;
     setMaterialUploadState('uploading');
     setMaterialError('');
 
     try {
       const formData = new FormData();
       formData.set('profileId', profileId);
-      formData.set('file', selectedMaterial);
+      formData.set('literacyLevel', literacyLevel ?? defaultLiteracy(calculateAge(profile.birthDate)));
+      formData.set('file', await prepareUploadFile(selectedMaterial));
       const response = await fetch('/api/materials', { method: 'POST', body: formData });
       const payload = await response.json() as MaterialUploadResponse & { error?: string };
       if (!response.ok || !payload.material?.id) {
         throw new Error(payload.error || messages.home.materialError);
       }
-      router.push(`/profile/${profileId}/materials/${payload.material.id}`);
+      const targetProfileId = payload.profileId ?? profileId;
+      if (payload.isDidactic === false) {
+        setMaterialWarning('Esse material não é didático. Ele foi salvo no perfil do responsável.');
+        setMaterialUploadState('idle');
+      } else {
+        router.push(`/profile/${targetProfileId}/materials/${payload.material.id}`);
+      }
     } catch (error) {
       setMaterialError(error instanceof Error ? error.message : messages.home.materialError);
       setMaterialUploadState('idle');
     }
+  };
+
+  // Send material directly without adult access check
+  const sendMaterial = async () => {
+    if (!selectedMaterial || materialUploadState === 'uploading') return;
+    await uploadMaterial();
   };
 
   const openCamera = () => {
@@ -205,6 +223,8 @@ export default function ProfilePage() {
 
   const streakCount = Math.min(Math.max(completions.length, 2), 30);
   const starCount = completions.length * 10;
+  const age = calculateAge(profile.birthDate);
+  const selectedLiteracy = literacyLevel ?? defaultLiteracy(age);
 
   return (
     <section className="forest-screen home-screen">
@@ -230,7 +250,7 @@ export default function ProfilePage() {
           {/* Lumi greets the child as soon as the profile screen opens. */}
           <LumiVoiceAgent
             profileName={profile.firstName}
-            age={calculateAge(profile.birthDate)}
+            age={age}
             activityTitle={messages.activities[selectedActivity].title}
             autoStart
             variant="inline"
@@ -268,7 +288,7 @@ export default function ProfilePage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
                 hidden
                 onChange={selectMaterial}
               />
@@ -281,6 +301,23 @@ export default function ProfilePage() {
                 onChange={selectMaterial}
               />
               {selectedMaterial && (
+                <fieldset className="study-literacy" disabled={materialUploadState === 'uploading'}>
+                  <legend>{messages.home.literacyLabel}</legend>
+                  {LITERACY_OPTIONS.map((level) => (
+                    <label key={level} className={selectedLiteracy === level ? 'active' : ''}>
+                      <input
+                        type="radio"
+                        name="literacyLevel"
+                        value={level}
+                        checked={selectedLiteracy === level}
+                        onChange={() => setLiteracyLevel(level)}
+                      />
+                      {messages.home.literacy[level]}
+                    </label>
+                  ))}
+                </fieldset>
+              )}
+              {selectedMaterial && !materialWarning ? (
                 <div className="study-source-selection" role="status" aria-live="polite">
                   <div className="study-source-file">
                     <FileCheck2 size={20} />
@@ -298,7 +335,21 @@ export default function ProfilePage() {
                     {materialUploadState === 'uploading' ? messages.home.extractingFile : messages.home.sendFile}
                   </button>
                 </div>
-              )}
+              ) : materialWarning ? (
+                <div className="study-source-warning" role="status" aria-live="polite">
+                  <span>{materialWarning}</span>
+                  <button
+                    className="button button-secondary"
+                    type="button"
+                    onClick={() => {
+                      setMaterialWarning('');
+                      setSelectedMaterial(null);
+                    }}
+                  >
+                    OK
+                  </button>
+                </div>
+              ) : null}
               {materialError && <p className="study-source-error" role="alert">{materialError}</p>}
             </div>
           )}

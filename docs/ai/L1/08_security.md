@@ -7,7 +7,7 @@
 - Browser is untrusted and never receives `NEXT_AGORA_APP_CERTIFICATE`.
 - Next.js server routes hold credentials and mint scoped, expiring tokens.
 - Agora cloud executes managed agent pipeline using server-issued credentials.
-- Feita receives validated material images through a server-only credential.
+- OpenAI receives validated material images and PDFs through a server-only credential.
 - Uploaded bytes stay in private storage; the browser receives only authorized DTOs and retained extracted text.
 
 ## Secret Handling Rules
@@ -16,7 +16,7 @@
 - Do not expose BYOK provider API keys to client bundles.
 - Store secrets in `.env.local` for dev and deployment secret store in Vercel.
 - `config/env/env.local.example` documents expected keys without real values.
-- Keep `FEITA_AI_API_KEY` server-side and rotate any key pasted into chat, logs, issues, or commits.
+- Keep `OPENAI_API_KEY` server-side and rotate any key pasted into chat, logs, issues, or commits.
 
 ## Token Security Model
 
@@ -81,7 +81,7 @@
 - `NEXT_AGORA_APP_CERTIFICATE` set as server-side secret only.
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` stored as GitHub repository secrets for the production deployment workflow.
 - Optional BYOK keys set only when related provider block is enabled.
-- `FEITA_AI_API_KEY` and `FEITA_AI_MODEL` set for deployments using material extraction.
+- `OPENAI_API_KEY` set for deployments using material extraction.
 - Preview environments use non-production credentials.
 
 ## Security-Relevant Files
@@ -92,7 +92,7 @@
 - `config/env/env.local.example`
 - `app/api/materials/route.ts`
 - `app/api/materials/[id]/route.ts`
-- `lib/feita-extraction.ts`
+- `lib/material-extraction.ts`
 - `lib/material-storage.ts`
 - `README.md` environment section
 

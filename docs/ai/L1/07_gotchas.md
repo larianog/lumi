@@ -67,7 +67,7 @@
 | Conversation hangs on end | `components/LandingPage.tsx`, `app/api/stop-conversation/route.ts` |
 | Metrics panel empty | `components/ConversationComponent.tsx`, `components/QuickstartPipelineMetrics.tsx` |
 | Upload rejected | `app/api/materials/route.ts`, `lib/material-storage.ts` |
-| Extraction fails or is empty | `lib/feita-extraction.ts`, Feita env values |
+| Extraction fails or is empty | `lib/material-extraction.ts`, `OPENAI_API_KEY` |
 | Lumi ignores the material | `components/LumiVoiceAgent.tsx`, `app/api/invite-agent/route.ts` |
 | Parent cannot see history | `/api/materials?scope=family`, adult verification window |
 
