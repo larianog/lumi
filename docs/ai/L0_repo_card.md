@@ -18,6 +18,8 @@
 
 ## L1 — Summaries
 
+Welcome review on 2026-11-22 removes the family-description paragraph and limits the demo button/hint/error to development builds. Production retains registration and sign-in; the login API contract is unchanged.
+
 Merge review on 2026-11-22 combines main's didactic classification, product README/demo image, feedback specifications and CI/Docker updates with local animations, reading-cycle gating, voice recovery and sleep. Cached/async non-didactic results do not start tutoring; runtime database contents are preserved locally.
 
 Motion recovery review on 2026-11-22 centralizes avatar/reading preferences and clears the old tab-wide saved pause once. The v2 preference preserves new manual choices across remounts and respects reduced motion. Browser checks cover recovery, explicit pause/resume and preference changes.

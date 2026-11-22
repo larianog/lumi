@@ -4,7 +4,7 @@
 
 ## Sequence
 
-1. `app/profile/[id]/page.tsx` sends `profileId` and an image/PDF as multipart form data to `POST /api/materials`.
+1. `app/profile/[id]/page.tsx` sends `profileId` and an image/PDF as multipart form data to `POST /api/materials`. Before sending, **Remover** clears the local file/photo selection and upload feedback, returning focus to the file picker button. It is disabled during upload and the final reading cycle and does not delete server records.
 2. The route authenticates the family session, confirms an owned child profile, caps the file at 10 MB, and validates JPEG/PNG/WebP/PDF signatures. Uploads do not require a separate adult-password step.
 3. The server computes SHA-256 and atomically reserves a material keyed by owner scope, profile, hash, `HOMEWORK_VISION_MODEL`, and `MATERIAL_EXTRACTION_PROMPT_VERSION`.
 4. A fresh processing or ready record is reused. Otherwise `lib/material-storage.ts` stores private bytes and `lib/material-extraction.ts` sends a base64 image plus extraction-only prompt to OpenAI.

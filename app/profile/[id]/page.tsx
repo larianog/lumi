@@ -66,6 +66,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [literacyLevel, setLiteracyLevel] = useState<LiteracyLevel | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const addFileButtonRef = useRef<HTMLButtonElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
   const uploadController = useRef<AbortController | null>(null);
@@ -164,6 +165,16 @@ export default function ProfilePage() {
     setMaterialUploadState('idle');
     setMaterialError(''); setMaterialWarning('');
     event.currentTarget.value = '';
+  };
+
+  const removeMaterial = () => {
+    if (uploadController.current || materialUploadState === 'uploading') return;
+    setSelectedMaterial(null);
+    setMaterialError('');
+    setMaterialWarning('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+    addFileButtonRef.current?.focus();
   };
 
   const uploadMaterial = async () => {
@@ -319,7 +330,7 @@ export default function ProfilePage() {
             <div className="study-source-panel" aria-busy={materialUploadState === 'uploading'}>
               <p>{messages.home.materialDescription}</p>
               <div className="study-source-actions">
-                <button className="study-source-button" type="button" disabled={materialUploadState === 'uploading'} onClick={() => fileInputRef.current?.click()}>
+                <button ref={addFileButtonRef} className="study-source-button" type="button" disabled={materialUploadState === 'uploading'} onClick={() => fileInputRef.current?.click()}>
                   <span className="study-source-icon accent-mint"><Upload size={30} /></span>
                   <span><strong>{messages.home.addFile}</strong><small>{messages.home.addFileHint}</small></span>
                 </button>
@@ -368,17 +379,28 @@ export default function ProfilePage() {
                     <FileCheck2 size={20} />
                     <span>{messages.home.selectedFile(selectedMaterial.name)}</span>
                   </div>
-                  <button
-                    className="study-send-button"
-                    type="button"
-                    disabled={materialUploadState === 'uploading'}
-                    onClick={() => void sendMaterial()}
-                  >
-                    {materialUploadState === 'uploading'
-                      ? <LoaderCircle className="spin" size={19} />
-                      : <Send size={19} />}
-                    {materialUploadState === 'uploading' ? messages.home.extractingFile : messages.home.sendFile}
-                  </button>
+                  <div className="study-selection-actions">
+                    <button
+                      className="study-remove-button"
+                      type="button"
+                      aria-label={messages.home.removeFileLabel}
+                      disabled={materialUploadState === 'uploading'}
+                      onClick={removeMaterial}
+                    >
+                      <X size={18} aria-hidden="true" />{messages.home.removeFile}
+                    </button>
+                    <button
+                      className="study-send-button"
+                      type="button"
+                      disabled={materialUploadState === 'uploading'}
+                      onClick={() => void sendMaterial()}
+                    >
+                      {materialUploadState === 'uploading'
+                        ? <LoaderCircle className="spin" size={19} />
+                        : <Send size={19} />}
+                      {materialUploadState === 'uploading' ? messages.home.extractingFile : messages.home.sendFile}
+                    </button>
+                  </div>
                 </div>
               )}
               {materialWarning && <div className="study-source-warning" role="status"><p>{materialWarning}</p><button type="button" onClick={() => setMaterialWarning('')}>Entendi</button></div>}

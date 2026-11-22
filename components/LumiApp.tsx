@@ -74,7 +74,6 @@ export default function LumiApp() {
           <Brand size="large" priority />
           <span className="eyebrow">{messages.welcome.eyebrow}</span>
           <h1>{messages.welcome.title}</h1>
-          <p>{messages.welcome.description}</p>
           <div className="welcome-actions">
             <button
               className="button button-primary button-large"
@@ -90,12 +89,14 @@ export default function LumiApp() {
               <LogIn size={20} />
               {messages.welcome.signIn}
             </button>
-            <button className="demo-link" onClick={enterDemo} disabled={demoLoading}>
-              {demoLoading ? <LoaderCircle className="spin" size={17} /> : <Sparkles size={17} />}
-              {demoLoading ? messages.common.loading : messages.welcome.demo}
-              <span>{messages.welcome.demoHint}</span>
-            </button>
-            {demoError && <p className="welcome-error" role="alert">{demoError}</p>}
+            {process.env.NODE_ENV === 'development' && <>
+              <button className="demo-link" onClick={enterDemo} disabled={demoLoading}>
+                {demoLoading ? <LoaderCircle className="spin" size={17} /> : <Sparkles size={17} />}
+                {demoLoading ? messages.common.loading : messages.welcome.demo}
+                <span>{messages.welcome.demoHint}</span>
+              </button>
+              {demoError && <p className="welcome-error" role="alert">{demoError}</p>}
+            </>}
           </div>
         </div>
       </section>

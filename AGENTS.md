@@ -64,6 +64,7 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 
 ## Key Files
 
+- `components/LumiApp.tsx`: welcome headline and registration/sign-in actions. The old family-description paragraph is removed. Render the demo button, hint and associated error only when `process.env.NODE_ENV === 'development'`; this is a UI visibility rule, not a change to the login API contract.
 - `app/playground/lumi-animation/page.tsx`: additive animation lab; leave the main route/navigation intact when experimenting.
 - `components/playground/`: local motion preview, scoped CSS, and isolated Lemon Slice test-session bootstrap. The existing `ConversationComponent` retains RTC hook ownership.
 - `app/api/playground/lumi-animation/route.ts`: optional live-test route with validated prompts, a fixed local image, and separate `lumi-animation-*` channels. Requires server-only `NEXT_LEMONSLICE_API_KEY` plus Agora credentials; it does not change the base environment contract.
@@ -165,6 +166,7 @@ useEffect(() => {
 
 ### Study Material Pipeline
 
+- The profile's **Remover** action clears only the selected local attachment, file inputs and upload feedback, restoring focus to **Inserir arquivo**. Guard it during upload and the final reading cycle; never delete persisted materials through this control.
 - Accept only signature-validated JPEG, PNG, WebP, or PDF files up to 10 MB.
 - Cache by owner scope, profile, SHA-256, vision model, and extraction prompt version.
 - Load extracted text server-side when grounding Lumi; never trust browser-supplied source text.

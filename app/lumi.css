@@ -205,6 +205,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .activity-menu, .home-material-layout .material-card { max-width: 720px; max-height: 100%; padding: clamp(18px, 3.5dvh, 48px) clamp(22px, 4vw, 48px); border: 1px solid rgba(255,255,255,.23); border-radius: 34px; background: rgba(5,47,41,.48); backdrop-filter: blur(18px); box-shadow: 0 28px 65px rgba(0,0,0,.2); }
 .activity-menu .eyebrow { color: var(--lumi-lime); }
 .activity-menu h1, .home-material-layout .material-card h1 { max-width: 570px; margin: clamp(4px, 1dvh, 10px) 0 clamp(12px, 3dvh, 28px); font-family: var(--font-bricolage), sans-serif; font-size: clamp(2rem, min(4.5vw, 7dvh), 4.5rem); line-height: .98; letter-spacing: -.06em; }
+.activity-menu > h1 { margin-inline: auto; text-align: center; text-wrap: balance; }
 .activity-grid { display: grid; gap: clamp(8px, 1.4dvh, 12px); }
 .activity-card { min-height: clamp(60px, 10dvh, 94px); display: grid; grid-template-columns: 58px 1fr auto; align-items: center; gap: 15px; border: 0; border-radius: 21px; padding: clamp(8px, 1.5dvh, 14px) 16px; background: rgba(255,255,255,.96); color: var(--lumi-ink); text-align: left; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease; }
 .activity-card:hover { transform: translateX(5px); box-shadow: 0 14px 30px rgba(0,0,0,.14); }
@@ -242,9 +243,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .study-source-selection { min-height: 58px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; border: 1px solid rgba(223,244,139,.4); border-radius: 17px; background: rgba(223,244,139,.14); padding: 8px 9px 8px 14px; color: white; font-weight: 900; }
 .study-source-file { min-width: 0; display: flex; align-items: center; gap: 10px; overflow-wrap: anywhere; }
 .study-source-file svg { flex: 0 0 auto; color: var(--lumi-lime); }
-.study-send-button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: var(--lumi-lime); padding: 0 17px; color: var(--lumi-ink); font-weight: 900; cursor: pointer; transition: transform .18s ease, opacity .18s ease; }
-.study-send-button:hover:not(:disabled) { transform: translateY(-2px); }
-.study-send-button:disabled { cursor: default; opacity: .72; }
+.study-selection-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 8px; }
+.study-send-button, .study-remove-button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: var(--lumi-lime); padding: 0 17px; color: var(--lumi-ink); font-weight: 900; cursor: pointer; transition: transform .18s ease, opacity .18s ease; }
+.study-remove-button { border: 1px solid rgba(255,255,255,.45); background: transparent; color: white; }
+.study-send-button svg, .study-remove-button svg { flex-shrink: 0; }
+.study-send-button:hover:not(:disabled), .study-remove-button:hover:not(:disabled) { transform: translateY(-2px); }
+.study-send-button:disabled, .study-remove-button:disabled { cursor: default; opacity: .72; }
 .study-literacy { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; border: 0; padding: 0; }
 .study-literacy legend { float: left; margin-right: 4px; padding: 0; font-size: .86rem; font-weight: 900; }
 .study-literacy label { display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: rgba(255,255,255,.1); padding: 7px 13px; font-size: .84rem; font-weight: 800; cursor: pointer; }
@@ -532,6 +536,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .study-source-selection,
   .study-source-panel .study-source-warning { min-height: 42px; grid-template-columns: 1fr; padding: 9px; font-size: .82rem; }
   .study-source-file { padding: 2px 3px; }
+  .study-selection-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .study-send-button,
   .study-source-panel .study-source-warning button { width: 100%; }
   .camera-modal { padding: 8px; }

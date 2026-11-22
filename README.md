@@ -16,7 +16,7 @@ This repository is built from Agora's Conversational AI Next.js quickstart and e
 
 A typical study session follows this path:
 
-1. An adult creates a family account and adds one or more child profiles, or opens the built-in demo.
+1. An adult creates a family account and adds one or more child profiles; development builds also offer the built-in demo.
 2. The child selects their profile and adds a school activity as a photo, image, or PDF.
 3. The child selects how independently they currently read: not yet reading, reading with help, or reading independently.
 4. The server validates the file and uses an OpenAI vision model to understand the worksheet.
@@ -97,7 +97,7 @@ pnpm run doctor
 pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). You can create a family account or choose the **Enter Demo** option to explore the built-in demo profiles.
+Open [http://localhost:3000](http://localhost:3000). You can create a family account or choose **Entrar na Demo** to explore the built-in demo profiles. The welcome demo button and its hint appear only with `NODE_ENV=development` (`pnpm run dev`); production builds omit them.
 
 If the voice agent does not join or transcripts do not appear, run:
 
@@ -125,7 +125,7 @@ agora project doctor --deep
 - Multiple child profiles under one family.
 - A protected adult area for reviewing progress and submitted materials.
 - Per-child activity history and family-level reporting.
-- A ready-to-use demo family for exploring the product without registration.
+- A ready-to-use demo family for exploring the product without registration through the development-only welcome button.
 
 ### Safety and reliability
 
@@ -293,6 +293,8 @@ For uploaded study material, the browser sends multipart form data to `/api/mate
 
 The upload and embedded result panels share the same translucent green background and responsive styling, with light text for contrast.
 
+Before sending a selected file or captured photo, **Remover** clears the attachment and any upload error, then focuses **Inserir arquivo** so another material can be chosen. Removal stays disabled during upload and the final reading cycle; it does not delete saved material history.
+
 
 ## Development commands
 
@@ -311,7 +313,7 @@ Run `pnpm run verify` before shipping changes. The `doctor` step requires a conf
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Welcome, registration, sign-in, and demo entry |
+| `/` | Welcome, registration, sign-in, and development-only demo entry |
 | `/profiles` | Family profile selection and adult-area entry |
 | `/profile/[id]` | Child study-material upload and embedded study workspace |
 | `/profile/[id]/history` | Material history for one child |

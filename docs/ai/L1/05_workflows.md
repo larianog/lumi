@@ -63,6 +63,8 @@ Bootstrap behavior:
 
 ## Change Study Material Extraction
 
+Before upload, **Remover** clears a selected file or camera photo and its error/warning, with keyboard focus returning to **Inserir arquivo**. Verify removal, selecting the same file again, and removal after a failed upload. Removal is locked during the request and the final reading cycle; existing history is unaffected.
+
 1. Update provider request/prompt handling in `lib/material-extraction.ts`.
 2. Increment `MATERIAL_EXTRACTION_PROMPT_VERSION` when extraction semantics change so stale text is not reused.
 3. Keep upload validation and authenticated ownership in `app/api/materials/route.ts`.

@@ -31,6 +31,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 
 ## Client Ownership (`components`)
 
+- `LumiApp.tsx`: welcome headline and sign-up/sign-in actions, without the former family-description paragraph. Demo entry, its hint and errors are rendered only in development (`NODE_ENV === 'development'`); the login API contract is unchanged.
 - `LumiConversationAvatar.tsx` + `lumi-conversation-avatar.module.css`: shared conversation idle/listening/speaking playback for profiles, materials and activities; completes outgoing cycles with immediate speaking priority, independent readiness and motion controls.
 - `lib/lumi-animation-transition.ts` + `lib/lumi-webp-timing.ts`: latest-state transition policy and RIFF/ANMF timing; `scripts/verify-lumi-transitions.ts` checks both via `verify:api`.
 - `useLumiSpeechState.ts` + `lib/lumi-speech.ts`: samples existing RTC tracks and smooths speech activity; `scripts/verify-lumi-speech.ts` exercises silence, noise, overlap, mute, blocked audio, and reconnect behavior through `verify:api`.

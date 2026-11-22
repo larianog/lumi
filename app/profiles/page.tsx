@@ -105,7 +105,6 @@ export default function ProfilesPage() {
       <header className="forest-header"><Brand size="medium" /></header>
       <div className="profile-picker-heading">
         <h1>{messages.profiles.title}</h1>
-        <p>{messages.profiles.subtitle}</p>
       </div>
       <div className="picker-lumi">
         <LumiConversationAvatar state="idle" idleOnly />
@@ -145,7 +144,6 @@ export default function ProfilesPage() {
           <form className="password-modal" onSubmit={openAdultArea} onMouseDown={(event) => event.stopPropagation()}>
             <div className="modal-icon"><ShieldCheck size={24} /></div>
             <h2>{messages.profiles.passwordTitle}</h2>
-            <p>{messages.profiles.passwordDescription}</p>
             <label>
               <span>{messages.profiles.passwordLabel}</span>
               <div className="password-input-wrapper">
