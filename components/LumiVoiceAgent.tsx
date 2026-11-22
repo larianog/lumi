@@ -44,6 +44,7 @@ type LumiVoiceAgentProps = {
   /** Profile/material identifiers let the server ground Lumi without trusting browser-supplied text. */
   profileId?: string;
   materialId?: string;
+  onMaterialCompleted?: () => void;
   /** Start the session on mount instead of waiting for the "start" button. */
   autoStart?: boolean;
   /** `modal` = full-screen dialog; `inline` = avatar embedded in the page. */
@@ -58,6 +59,7 @@ export default function LumiVoiceAgent({
   activityTitle,
   profileId,
   materialId,
+  onMaterialCompleted,
   autoStart = false,
   variant = 'modal',
   avatarMode = 'provider',
@@ -214,6 +216,8 @@ export default function LumiVoiceAgent({
                   onEndConversation={handleEndConversation}
                   variant="inline"
                   avatarMode={avatarMode}
+                  celebrateAnswers={Boolean(materialId)}
+                  onMaterialCompleted={materialId ? onMaterialCompleted : undefined}
                 />
               </AgoraProvider>
             </ErrorBoundary>
@@ -255,6 +259,8 @@ export default function LumiVoiceAgent({
                 onTokenWillExpire={handleTokenWillExpire}
                 onEndConversation={handleEndConversation}
                 avatarMode={avatarMode}
+                celebrateAnswers={Boolean(materialId)}
+                onMaterialCompleted={materialId ? onMaterialCompleted : undefined}
               />
             </AgoraProvider>
           </ErrorBoundary>

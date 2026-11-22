@@ -1,4 +1,4 @@
-import { AgoraClient, Agent } from 'agora-agents';
+import { AgoraClient, Agent, MiniMaxTTS } from 'agora-agents';
 import { RtcTokenBuilder } from 'agora-token';
 import { NextRequest } from 'next/server';
 
@@ -429,6 +429,10 @@ async function verifyLocalAvatarInvite() {
     for (const mode of [undefined, 'provider', 'local']) {
       assert((await inviteAgent(request(mode))).status === 200, 'Supported avatar modes must start a voice session');
       assert(Boolean(configurations.at(-1)?.avatar) === (mode !== 'local'), 'Local mode must omit Lemon Slice even when its key exists; other modes preserve the provider');
+      const tts = configurations.at(-1)?.tts;
+      assert(tts?.vendor === 'minimax', 'Lumi must retain its managed MiniMax voice');
+      assert(tts.params.language_boost === 'Portuguese', 'Portuguese must be explicit before the greeting is synthesized');
+      assert(tts.params.voice_setting.voice_id === 'English_captivating_female1', 'Language selection must preserve the existing voice');
     }
     for (const mode of ['unknown', null, 123]) {
       assert((await inviteAgent(request(mode))).status === 400, 'Invalid avatar modes must be rejected');
@@ -439,6 +443,16 @@ async function verifyLocalAvatarInvite() {
     if (originalKey === undefined) delete process.env.NEXT_LEMONSLICE_API_KEY;
     else process.env.NEXT_LEMONSLICE_API_KEY = originalKey;
   }
+}
+
+async function verifyLumiTtsConfiguration() {
+  const { LumiTTS } = await import('../lib/lumi-tts');
+  const original = new MiniMaxTTS({ model: 'speech_2_6_turbo', voiceId: 'English_captivating_female1' }).toConfig();
+  const configured = new LumiTTS().toConfig();
+  const { language_boost, ...originalParams } = configured.params;
+  assert(language_boost === 'Portuguese', 'Lumi TTS must select Portuguese explicitly');
+  assert(JSON.stringify({ ...configured, params: originalParams }) === JSON.stringify(original),
+    'Language selection must preserve managed credentials, model metadata, timbre and playback settings');
 }
 
 async function verifyStopConversationValidation() {
@@ -693,12 +707,13 @@ async function main() {
   await verifyInviteAgentValidation();
   await verifyInviteAgentSuccess();
   await verifyLocalAvatarInvite();
+  await verifyLumiTtsConfiguration();
   const { verifyLumiSpeech } = await import('./verify-lumi-speech');
   verifyLumiSpeech();
   const { verifyLumiTransitions } = await import('./verify-lumi-transitions');
   await verifyLumiTransitions();
-  const { verifyLumiMotion } = await import('./verify-lumi-motion');
-  verifyLumiMotion();
+  const { verifyLumiCelebration } = await import('./verify-lumi-celebration');
+  verifyLumiCelebration();
   const { verifyLumiWebP } = await import('./verify-lumi-webp');
   await verifyLumiWebP();
   await verifyStopConversationValidation();

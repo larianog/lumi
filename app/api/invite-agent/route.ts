@@ -8,7 +8,6 @@ import {
   DeepgramSTT,
   ExpiresIn,
   LemonSlice,
-  MiniMaxTTS,
   OpenAI,
 } from 'agora-agents';
 import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID, isAgoraParticipantUid } from '@/lib/agora';
@@ -16,6 +15,7 @@ import { getFamilyForSession, getStudyMaterial } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
 import { defaultLiteracyLevel, formatHomeworkBrief } from '@/lib/material-extraction';
 import { ownsStudyMaterial } from '@/lib/study-materials';
+import { LumiTTS } from '@/lib/lumi-tts';
 import type { HomeworkAnalysis, LiteracyLevel } from '@/types/database';
 import { messages } from '@/packages/i18n';
 import type { AgentResponse, ClientStartRequest } from '@/types/conversation';
@@ -130,12 +130,7 @@ export async function POST(request: NextRequest) {
           params: { max_tokens: 500, temperature: 0.65, top_p: 0.95 },
         }),
       )
-      .withTts(
-        new MiniMaxTTS({
-          model: 'speech_2_6_turbo',
-          voiceId: 'English_captivating_female1',
-        }),
-      );
+      .withTts(new LumiTTS());
 
     const lemonSliceApiKey = process.env.NEXT_LEMONSLICE_API_KEY;
     if (lemonSliceApiKey && body.avatar_mode !== 'local') {

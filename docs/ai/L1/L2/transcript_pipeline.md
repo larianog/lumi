@@ -31,6 +31,8 @@ If the first agent turn is interrupted and omitted, `messageList` can remain emp
 
 ## Agent Visualizer Mapping
 
+Uploaded-material sessions opt into `celebrateAnswers`. After normalization, `LumiAnswerCelebrationDetector` recognizes the tutor's reserved first sentence **Você acertou!** only in `END` agent turns following a completed user answer. It deduplicates agent turn IDs and consumes interrupted/disabled-context turns without celebrating. The prompt uses this sentence only after checking a complete answer; generic encouragement and partial steps do not qualify. This is a visual cue from the existing tutor, not an independent answer validator or persistence event. The avatar waits for speech/preparation to finish, completes one celebration cycle and resumes the latest normal state; cancellation drops stale cues. No transcript content or answer analysis is logged or added to browser DTOs.
+
 Profile local avatars use a separate RTC audio activity path (`useLumiSpeechState` / `LumiSpeechDetector`). A session's generic `listening` event is not proof the user is speaking. Existing mic/remote agent levels drive idle/listening/speaking with short attack/release windows; audible agent speech wins visual overlap, and continuing user speech resumes listening once agent audio ends. Disabled mic, lost connection, or inaudible remote playback clears the corresponding activity. Transcript rendering, voice interruption behavior, and the visualizer mapping below are unchanged.
 
 `mapAgentVisualizerState` prioritizes RTC transport state before agent semantic state:
@@ -61,3 +63,5 @@ Fallback parser:
 - `components/QuickstartTranscriptPanel.tsx`: transcript render sink.
 - `components/QuickstartPipelineMetrics.tsx`: metrics render sink.
 - `components/ConnectionStatusPanel.tsx`: surfaced connection diagnostics.
+
+The separate **Atividade concluída com sucesso!** first sentence is reserved for the entire checked worksheet. `LumiMaterialCompletionDetector` accepts only completed agent turns after a user answer, with the same interrupted/disabled/duplicate protection. `ConversationComponent` waits for agent rest and no audible speech for 600 ms before calling the material-specific callback. The study workspace then owns persistence, voice unmount, one success animation and return to upload. Per-question confirmation, ending a call and text spoken by the user never substitute for the final tutor verdict. This is the existing tutor's judgment, not an independent server grader.
