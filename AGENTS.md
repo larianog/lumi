@@ -185,6 +185,8 @@ pnpm run build
 
 ## Verification Safety
 
+- Keep the pnpm version in `package.json` as the single source for GitHub CI; match it in `deploy/docker/Dockerfile`.
+
 - Safe without live Agora credentials:
   - `pnpm run lint`
   - `pnpm run typecheck`

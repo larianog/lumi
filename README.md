@@ -127,10 +127,12 @@ pnpm run verify         # doctor + lint + typecheck + verify:api + build
 ```
 
 Run `pnpm run verify` before shipping changes — it covers local prerequisites, lint, type safety, the core API route contracts, and the production build.
+GitHub CI installs the pnpm version declared in `package.json`.
 
 ### Container build
 
 The Docker build definition and its context-specific ignore file live together under `deploy/docker/`:
+The Dockerfile pins the same pnpm version as `package.json`.
 
 ```bash
 docker build -f deploy/docker/Dockerfile -t lumi-by-agora .

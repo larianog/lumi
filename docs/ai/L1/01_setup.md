@@ -68,6 +68,8 @@ Requires env/project binding:
 
 ## CI Expectations
 
+- `pnpm/action-setup` reads the exact pnpm version from `package.json`; do not also set its `version` input.
+- The Dockerfile pins that same version in both install stages.
 - Build workflow badge exists in root `README.md`.
 - Pre-ship expectation: `pnpm run verify` passes.
 - Route contract tests are executed by `scripts/verify-api-contracts.ts`.
