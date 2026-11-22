@@ -32,6 +32,57 @@
   "completions": [],
   "materials": [
     {
+      "id": "ec0708c3-3f7a-4043-9712-19f34eb81f3d",
+      "familyId": "demo-family",
+      "profileId": "demo-lia",
+      "demoSessionId": "4be3f108-141d-4b6d-b96b-f38180764928",
+      "originalName": "Screenshot From 2026-11-21 18-35-15.jpg",
+      "mimeType": "image/jpeg",
+      "size": 89494,
+      "sha256": "6221be192eba6cf6076292b8bc714f676a9d414efc28a3d4439469a8c4f5d5ff",
+      "literacyLevel": "fluent",
+      "extractionModel": "gpt-4.1-mini",
+      "promptVersion": "material-tutor-v2",
+      "expiresAt": "2026-11-29T02:47:43.510Z",
+      "extractionStatus": "ready",
+      "createdAt": "2026-11-22T02:47:43.512Z",
+      "updatedAt": "2026-11-22T02:47:49.932Z",
+      "storageKey": "ec0708c3-3f7a-4043-9712-19f34eb81f3d.jpg",
+      "extractedText": "Ordem alfabética\nLeia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate\n1 a 27) Coloque as palavras em ordem alfabética: pepino, mel, tangerina, amora, manga, cebola, nabo, kiwi, repolho, ovos, uvas, batata, limão, salsinha, damasco, vagem, espinafre, hortelã, figo, quiabo, carambola, inhame, goiaba, melão, jaca, brócolis, tomate.",
+      "analysis": {
+        "readable": true,
+        "unreadableReason": "",
+        "title": "Ordem alfabética",
+        "subject": "Português",
+        "estimatedGrade": "3º ano",
+        "generalInstructions": "Leia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate",
+        "notesForTutor": "A criança já lê com autonomia, então os passos e dicas devem incentivar a organização e o uso do alfabeto para ordenar as palavras, sem revelar as respostas. É importante que ela reconheça as letras iniciais e compare letra a letra quando necessário.",
+        "isDidactic": true,
+        "questions": [
+          {
+            "number": "1 a 27",
+            "statement": "Coloque as palavras em ordem alfabética: pepino, mel, tangerina, amora, manga, cebola, nabo, kiwi, repolho, ovos, uvas, batata, limão, salsinha, damasco, vagem, espinafre, hortelã, figo, quiabo, carambola, inhame, goiaba, melão, jaca, brócolis, tomate.",
+            "visualElements": "Desenho de uma pessoa vendendo frutas e verduras em uma banca, com caixas e cestos de frutas ao redor.",
+            "skill": "Ordenação alfabética de palavras",
+            "expectedAnswer": "1. amora\n2. batata\n3. brócolis\n4. carambola\n5. cebola\n6. damasco\n7. espinafre\n8. figo\n9. goiaba\n10. hortelã\n11. inhame\n12. jaca\n13. kiwi\n14. limão\n15. manga\n16. mel\n17. melão\n18. nabo\n19. ovos\n20. pepino\n21. quiabo\n22. repolho\n23. salsinha\n24. tangerina\n25. tomate\n26. uvas\n27. vagem",
+            "steps": [
+              "Leia todas as palavras com atenção.",
+              "Observe a primeira letra de cada palavra e pense na ordem do alfabeto (A, B, C, D...).",
+              "Separe as palavras que começam com a mesma letra e compare a segunda letra para ordenar.",
+              "Continue comparando letra por letra até organizar todas as palavras.",
+              "Escreva as palavras na ordem correta nos espaços indicados."
+            ],
+            "hints": [
+              "Pense na ordem das letras do alfabeto para começar a organizar.",
+              "Se duas palavras começam com a mesma letra, veja a segunda letra para decidir qual vem primeiro.",
+              "Leia as palavras em voz alta para ajudar a perceber a ordem correta."
+            ]
+          }
+        ]
+      },
+      "isDidactic": true
+    },
+    {
       "id": "d6e8db11-9b67-4e07-b9d3-61eabae65ef8",
       "familyId": "demo-family",
       "profileId": "demo-lia",
@@ -925,6 +976,14 @@
       "isDemo": true,
       "createdAt": "2026-11-21T23:45:41.112Z",
       "expiresAt": "2026-12-21T23:45:41.112Z"
+    },
+    {
+      "id": "4be3f108-141d-4b6d-b96b-f38180764928",
+      "tokenHash": "bc3df98425f6565109dc44433c4e1b72d0b0c14bbc9f137dfe9923302c8bb122",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-22T02:47:35.129Z",
+      "expiresAt": "2026-12-22T02:47:35.129Z"
     }
   ],
   "version": 3

@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import {
+  ArrowLeft,
   BookOpen,
   Camera,
   FileCheck2,
@@ -234,7 +235,13 @@ export default function ProfilePage() {
     <section className={`forest-screen home-screen${activeMaterial ? ' home-screen-study' : ''}`}>
       <div className="forest-overlay forest-overlay-home" />
       <header className="home-header">
-        <Brand size="medium" />
+        {activeMaterial ? (
+          <button className="home-material-back" type="button" onClick={() => setActiveMaterial(null)}>
+            <ArrowLeft size={19} />{messages.common.back}
+          </button>
+        ) : (
+          <Brand size="medium" />
+        )}
         <div className="home-stats">
           <span><Flame size={18} />{streakCount} dias explorando</span>
           <span><Star size={18} fill="currentColor" />{starCount} estrelas</span>
@@ -255,7 +262,6 @@ export default function ProfilePage() {
           materialId={activeMaterial.id}
           initialProfile={activeMaterial.profileId === profileId ? profile : undefined}
           embedded
-          onClose={() => setActiveMaterial(null)}
         />
       ) : <div className="home-layout">
         <aside className="home-lumi">

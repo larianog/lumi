@@ -14,7 +14,6 @@ type MaterialStudyPageClientProps = {
   materialId: string;
   initialProfile?: Profile;
   embedded?: boolean;
-  onClose?: () => void;
 };
 
 function calculateAge(birthDate: string) {
@@ -31,7 +30,6 @@ export default function MaterialStudyPageClient({
   materialId,
   initialProfile,
   embedded = false,
-  onClose,
 }: MaterialStudyPageClientProps) {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(initialProfile ?? null);
@@ -41,7 +39,7 @@ export default function MaterialStudyPageClient({
   const [completionError, setCompletionError] = useState('');
   const [completing, setCompleting] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
-  const close = onClose ?? (() => router.push(`/profile/${profileId}`));
+  const close = () => router.push(`/profile/${profileId}`);
 
   const loadMaterial = useCallback(async () => {
     const response = await fetch(`/api/materials/${encodeURIComponent(materialId)}`, { cache: 'no-store' });
@@ -112,9 +110,9 @@ export default function MaterialStudyPageClient({
     }
   };
 
-  if (loading) return <MaterialPageState message={messages.common.loading} action={embedded ? close : undefined} embedded={embedded} />;
+  if (loading) return <MaterialPageState message={messages.common.loading} embedded={embedded} />;
   if (!profile || !material) {
-    return <MaterialPageState message={loadError || 'Material não encontrado.'} action={close} embedded={embedded} />;
+    return <MaterialPageState message={loadError || 'Material não encontrado.'} action={embedded ? undefined : close} embedded={embedded} />;
   }
 
   const ready = material.extractionStatus === 'ready' && Boolean(material.extractedText) && !material.purgedAt;
@@ -122,15 +120,17 @@ export default function MaterialStudyPageClient({
 
   return (
     <section className={embedded ? 'profile-material-workspace' : 'material-screen'}>
-      <header className="activity-header material-header">
-        <button className="back-button" type="button" onClick={close}>
-          <ArrowLeft size={19} />{embedded ? 'Voltar ao perfil' : messages.common.back}
-        </button>
-        {!embedded && <Brand size="small" />}
-        <button className="material-history-link" type="button" onClick={() => router.push(`/profile/${profileId}/history`)}>
-          <History size={18} />{messages.materials.history}
-        </button>
-      </header>
+      {!embedded && (
+        <header className="activity-header material-header">
+          <button className="back-button" type="button" onClick={close}>
+            <ArrowLeft size={19} />{messages.common.back}
+          </button>
+          <Brand size="small" />
+          <button className="material-history-link" type="button" onClick={() => router.push(`/profile/${profileId}/history`)}>
+            <History size={18} />{messages.materials.history}
+          </button>
+        </header>
+      )}
       <div className="material-stage">
         <aside className="material-lumi">
           <div className="lumi-halo" />
@@ -160,9 +160,7 @@ export default function MaterialStudyPageClient({
           ) : material.extractionStatus === 'failed' ? (
             <div className="material-state-card material-state-error">
               <strong>{messages.materials.failed}</strong>
-              <button className="button button-secondary" onClick={close}>
-                {embedded ? 'Voltar ao perfil' : messages.common.back}
-              </button>
+              {!embedded && <button className="button button-secondary" onClick={close}>{messages.common.back}</button>}
             </div>
           ) : material.purgedAt || !material.extractedText ? (
             <div className="material-state-card material-state-error"><strong>{messages.materials.expired}</strong></div>

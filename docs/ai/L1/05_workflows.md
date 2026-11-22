@@ -62,7 +62,7 @@ Bootstrap behavior:
 
 The bundled JSON database and `data/material-cache/` adapter are suitable for local or persistent-container development. Select durable database/private object storage adapters before serverless production deployment.
 
-After a didactic upload, the profile page embeds `MaterialStudyPageClient` in place of the submission controls. Its **Voltar ao perfil** action restores the submission view. Saved materials from history still use `/profile/[id]/materials/[materialId]`.
+After a didactic upload, the profile page embeds `MaterialStudyPageClient` in place of the submission controls. The profile header's **Voltar** action restores the submission view. Saved materials from history still use `/profile/[id]/materials/[materialId]`.
 
 ## Ship-Readiness Workflow
 
