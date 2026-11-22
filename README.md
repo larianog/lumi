@@ -85,6 +85,7 @@ The complete tracked template is [`config/env/env.local.example`](config/env/env
 | `OPENAI_API_KEY` | Yes | Server-only credential for image/PDF material analysis |
 | `HOMEWORK_VISION_MODEL` | No | Overrides the material model; defaults to `gpt-4.1-mini` |
 | `LUMI_MATERIAL_RETENTION_HOURS` | No | File/text retention from 1 to 720 hours; defaults to 168 |
+| `LUMI_RECORDING_RETENTION_HOURS` | No | Session-recording retention from 1 to 720 hours; defaults to 168 |
 
 Never expose the Agora certificate or OpenAI key through `NEXT_PUBLIC_*` variables.
 
@@ -261,18 +262,20 @@ Run `pnpm run verify` before shipping changes. The `doctor` step requires a conf
 | `/profile/[id]` | Child study-material upload and embedded study workspace |
 | `/profile/[id]/history` | Material history for one child |
 | `/profile/[id]/materials/[materialId]` | Saved-material study workspace opened from history |
-| `/report` | Adult family progress report |
+| `/report` | Adult family progress report with recorded sessions (audio, transcript, linked file, delete) |
 
 ## Main API routes
 
 | Endpoint | Purpose |
 | --- | --- |
 | `POST /api/login` | Family or demo authentication |
-| `GET/POST /api/profiles` | Profile lookup and family/child creation |
-| `POST /api/adult-access` | Recent adult verification for protected reports |
+| `POST /api/logout` | Sign out: deletes the server session and clears the cookie |
+| `GET/POST /api/profiles` | Profile lookup; signup step 1 (parent account) and step 2 (one or more children) |
 | `GET/POST /api/materials` | Material history and authenticated upload/analysis |
 | `GET/PATCH /api/materials/[id]` | Authorized material detail and explicit completion |
 | `GET /api/materials/[id]/file` | Authorized private material bytes |
+| `GET/POST /api/recordings` | Adult list / child-session upload of session audio + transcript |
+| `GET /api/recordings/[id]/file`, `DELETE /api/recordings/[id]` | Family-session playback (Range) and deletion |
 | `GET /api/generate-agora-token` | Combined RTC + RTM browser token |
 | `POST /api/invite-agent` | Material-aware managed voice-agent startup |
 | `POST /api/stop-conversation` | Idempotent managed agent shutdown |

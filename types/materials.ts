@@ -18,6 +18,14 @@ export type StudyMaterialDto = {
   title?: string;
   subject?: string;
   questionCount?: number;
+  /** Child-safe worksheet content (no answers), sent only with the detail view. */
+  instructions?: string;
+  questions?: Array<{
+    number: string;
+    statement: string;
+    supportContent?: string;
+    answerSlots?: string[];
+  }>;
   storageKey?: string;
   /** Whether the material is related to didactic/educational purposes. */
   isDidactic?: boolean;

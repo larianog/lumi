@@ -2,7 +2,6 @@ import { createHash, randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   getFamilyForSession,
-  hasAdultAccess,
   getStudyMaterialsByFamily,
   getStudyMaterialsByProfile,
   markStudyMaterialFailed,
@@ -82,9 +81,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (familyScope) {
-      if (!(await hasAdultAccess(token))) {
-        return NextResponse.json({ error: 'Confirme a senha do responsável.' }, { status: 403 });
-      }
       const materials = await getStudyMaterialsByFamily(result.family.id, demoSessionId);
       return NextResponse.json(materials.map((material) => toStudyMaterialDto(material)));
     }

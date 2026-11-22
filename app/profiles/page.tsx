@@ -1,11 +1,12 @@
 'use client';
 
 import Image from 'next/image';
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Plus, ShieldCheck } from 'lucide-react';
+import { Plus, ShieldCheck } from 'lucide-react';
 import { messages } from '@/packages/i18n';
 import Brand from '@/components/Brand';
+import LogoutButton from '@/components/LogoutButton';
 import type { Family, Profile } from '@/types/database';
 
 const profileColors = ['#eaf9bb', '#a8e6cf', '#d7c5f4', '#ffd79b', '#ffc9d6'];
@@ -23,10 +24,6 @@ export default function ProfilesPage() {
   const router = useRouter();
   const [family, setFamily] = useState<Family | null>(null);
   const [isDemo, setIsDemo] = useState(false);
-  const [adultPasswordOpen, setAdultPasswordOpen] = useState(false);
-  const [adultPassword, setAdultPassword] = useState('');
-  const [adultPasswordError, setAdultPasswordError] = useState('');
-  const [showAdultPassword, setShowAdultPassword] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
@@ -37,6 +34,11 @@ export default function ProfilesPage() {
         const response = await fetch('/api/profiles', { cache: 'no-store' });
         if (!response.ok) return;
         const data = await response.json() as { family: Family; isDemo: boolean };
+        // Signup stopped after step 1: finish it before choosing a profile.
+        if (!data.isDemo && !data.family.profiles.some((profile) => profile.type === 'child')) {
+          router.replace('/new-profile?mode=signup&type=child');
+          return;
+        }
         if (!cancelled) {
           setFamily(data.family);
           setIsDemo(data.isDemo);
@@ -47,41 +49,19 @@ export default function ProfilesPage() {
     };
     void loadFamily();
     return () => { cancelled = true; };
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!selectedProfile) return;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const timeout = window.setTimeout(() => {
-      if (selectedProfile.type === 'adult') {
-        setAdultPassword('');
-        setAdultPasswordError('');
-        setShowAdultPassword(false);
-        setAdultPasswordOpen(true);
-      } else {
-        router.push(`/profile/${selectedProfile.id}`);
-      }
+      router.push(selectedProfile.type === 'adult' ? '/report' : `/profile/${selectedProfile.id}`);
       setSelectedProfile(null);
     }, reducedMotion ? 0 : 420);
 
     return () => window.clearTimeout(timeout);
   }, [router, selectedProfile]);
-
-  const openAdultArea = async (event: FormEvent) => {
-    event.preventDefault();
-    setAdultPasswordError('');
-    const response = await fetch('/api/adult-access', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: adultPassword }),
-    });
-    if (!response.ok) {
-      setAdultPasswordError(messages.profiles.passwordError);
-      return;
-    }
-    router.push('/report');
-  };
 
   if (loading) {
     return <LoadingProfiles />;
@@ -103,6 +83,7 @@ export default function ProfilesPage() {
     <section className={`forest-screen profile-picker-screen${selectedProfile ? ' profile-is-selecting' : ''}`}>
       <div className="forest-overlay" />
       <header className="forest-header"><Brand size="medium" /></header>
+      <LogoutButton className="is-on-forest" />
       <div className="profile-picker-heading">
         <h1>{messages.profiles.title}</h1>
         <p>{messages.profiles.subtitle}</p>
@@ -140,41 +121,6 @@ export default function ProfilesPage() {
         </div>
       </div>
 
-      {adultPasswordOpen && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => setAdultPasswordOpen(false)}>
-          <form className="password-modal" onSubmit={openAdultArea} onMouseDown={(event) => event.stopPropagation()}>
-            <div className="modal-icon"><ShieldCheck size={24} /></div>
-            <h2>{messages.profiles.passwordTitle}</h2>
-            <p>{messages.profiles.passwordDescription}</p>
-            <label>
-              <span>{messages.profiles.passwordLabel}</span>
-              <div className="password-input-wrapper">
-                <input
-                  type={showAdultPassword ? 'text' : 'password'}
-                  value={adultPassword}
-                  onChange={(event) => setAdultPassword(event.target.value)}
-                  autoComplete="current-password"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowAdultPassword((visible) => !visible)}
-                  aria-label={showAdultPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showAdultPassword ? <EyeOff size={19} /> : <Eye size={19} />}
-                </button>
-              </div>
-            </label>
-            {isDemo && <small>{messages.profiles.demoPassword}</small>}
-            {adultPasswordError && <p className="form-error" role="alert">{adultPasswordError}</p>}
-            <div className="modal-actions">
-              <button type="button" className="button button-ghost" onClick={() => setAdultPasswordOpen(false)}>{messages.common.cancel}</button>
-              <button type="submit" className="button button-primary">{messages.common.continue}</button>
-            </div>
-          </form>
-        </div>
-      )}
     </section>
   );
 }

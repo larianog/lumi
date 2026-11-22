@@ -18,7 +18,8 @@
 ## Agent Startup Pitfalls
 
 - Missing `NEXT_PUBLIC_AGORA_APP_ID`/`NEXT_AGORA_APP_CERTIFICATE` yields hard 500s on token/invite/stop routes.
-- `agora-agents` 2.15.0 calls `ConvoAITokenBuilder.buildToken` with a role where the token lifetime belongs, producing a one-second token. Keep server start/stop/avatar tokens on `lib/agora-agent-token.ts` until that SDK call is fixed. `RtcTokenBuilder.buildTokenWithRtm` also expects relative lifetime seconds, not a Unix timestamp.
+- `agora-agents` 2.15.0 calls `ConvoAITokenBuilder.buildToken` with a role where the token lifetime belongs, producing a one-second token. Keep server start/stop/avatar tokens on `lib/agora-agent-token.ts` until that SDK call is fixed. `RtcTokenBuilder.buildTokenWithRtm` also expects relative lifetime seconds, not a Unix timestamp. The same bug hits the SDK's per-request REST auth token, so `invite-agent` passes `authToken` to `AgoraClient`.
+- With a LemonSlice avatar enabled, the agent's audio is published by the avatar UID. If LemonSlice fails (RTM `message.error`, `module: "avatar"`), the child hears nothing; check the avatar error before debugging TTS.
 - Changing the agent UID outside `lib/agora.ts` can desynchronize the browser and invite route.
 - RTM subscription failures may only surface through SAL status or raw signaling fallback events.
 
@@ -70,7 +71,7 @@
 | Upload rejected | `app/api/materials/route.ts`, `lib/material-storage.ts` |
 | Extraction fails or is empty | `lib/material-extraction.ts`, `OPENAI_API_KEY` |
 | Lumi ignores the material | `components/LumiVoiceAgent.tsx`, `app/api/invite-agent/route.ts` |
-| Parent cannot see history | `/api/materials?scope=family`, adult verification window |
+| Parent cannot see history | `/api/materials?scope=family`, family session cookie |
 
 ## Sandbox and Local Dev Caveats
 
@@ -90,6 +91,10 @@
 - Connection issue deduplication intentionally uses a small time window to avoid noisy cascades.
 - Invite failures are intentionally non-fatal to allow UI fallback state visibility.
 - Raw RTM fallback parsing exists because higher-level hooks may miss some signaling payloads in edge conditions.
+
+## One RTM Client per Tab
+
+The RTM SDK logs `Ins id is N, please pay attention to avoid mutual kick issues` via `console.error` (shown as a Next.js dev "Console Error") whenever a page creates a second `new RTM()`, even after the first logged out. Lumi restarts sessions often (profile → embedded study workspace → back), so `components/LumiVoiceAgent.tsx` uses `lib/rtm-session.ts`: one client and one UID per tab (`getTabUid()`, passed to `/api/generate-agora-token?uid=`), with `acquireRtm` / `releaseRtm` queued so a new session never logs in before the previous one logged out. Never call `new AgoraRTM.RTM` directly in Lumi components.
 
 ## Toolkit 2.10.0 Migration
 

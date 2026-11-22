@@ -29,8 +29,14 @@
 
 - Route handlers validate required fields and env availability.
 - Errors return structured JSON with bounded detail.
-- Material routes authenticate the family session, verify profile/material ownership, validate size/MIME/signature, and gate family-wide lists behind adult access.
+- Material routes authenticate the family session, verify profile/material ownership, validate size/MIME/signature; family-wide lists only need the family session (no separate adult password).
 - Stop route treats already-stopping/not-found agent as idempotent success.
+
+## Session Recordings
+
+- Recordings contain children's voices. There is no separate adult password: anyone using the signed-in family session (including a child on that device) can list, play or delete them. Sign out on shared devices. Demo sessions are isolated by session id.
+- Audio is stored outside `public/` in `data/recordings/`, served with `Cache-Control: private, no-store`, and purged after `LUMI_RECORDING_RETENTION_HOURS` (default 7 days).
+- The inline Lumi always shows a "Gravando" indicator while recording.
 
 ## Agent Behavior Safety
 

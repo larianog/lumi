@@ -1,930 +1,586 @@
 {
   "families": [
     {
-      "id": "390e9fac-3c1e-4fc2-a8ac-999a004f1aa3",
+      "id": "3bae5d10-7907-4482-b875-7a005576006f",
+      "phone": "27995103473",
+      "normalizedPhone": "27995103473",
+      "profiles": [
+        {
+          "id": "cb5fb310-2140-4191-93b1-ede1acccc137",
+          "type": "adult",
+          "firstName": "Willian",
+          "lastName": "Grillo",
+          "birthDate": "",
+          "avatar": 0,
+          "createdAt": "2026-11-22T09:47:27.778Z"
+        },
+        {
+          "id": "80d50dd5-63a6-4cbe-bc05-8ed5379a2ba3",
+          "type": "child",
+          "firstName": "Lucas",
+          "lastName": "Grillo",
+          "birthDate": "2023-11-22",
+          "avatar": 1,
+          "createdAt": "2026-11-22T09:48:04.762Z"
+        }
+      ],
+      "createdAt": "2026-11-22T09:47:27.813Z",
+      "passwordHash": "c390950f887b6ba52ee0cfc4b321ddcf2e35b57a49d132fd29df45828b47d74b4c264225d3b20b6d77f137072c410b0b9ddbf4a57522f86aa91466d34895cbd8",
+      "passwordSalt": "97698574ea313c811911cb59e6e6c9e6"
+    },
+    {
+      "id": "2dd03017-deab-4dfe-a32a-a61dbc4c2dd8",
+      "phone": "279999999999",
+      "normalizedPhone": "279999999999",
+      "profiles": [
+        {
+          "id": "69a9935c-1d3c-4614-894b-14735e345961",
+          "type": "adult",
+          "firstName": "Willian",
+          "lastName": "Grillo",
+          "birthDate": "",
+          "avatar": 0,
+          "createdAt": "2026-11-22T09:49:20.908Z"
+        },
+        {
+          "id": "1645089c-77ca-49cb-9e93-355bf2ad1c52",
+          "type": "child",
+          "firstName": "Lucas",
+          "lastName": "Grillo",
+          "birthDate": "2023-11-25",
+          "avatar": 1,
+          "createdAt": "2026-11-22T09:49:28.943Z"
+        }
+      ],
+      "createdAt": "2026-11-22T09:49:20.969Z",
+      "passwordHash": "b876559a2bd07df7642d2122295a3f6e5f0fbdbefd9b4423312be4dd2b58cc591b21807bb236587e79b3abc69d40f0a8b31664fa856cbb868048e5f6477e1b9d",
+      "passwordSalt": "209f10d366d89f90d585dfd4478354d7"
+    },
+    {
+      "id": "777a281e-a73f-4bb5-b103-ae2f4cb458fe",
+      "phone": "11",
+      "normalizedPhone": "11",
+      "profiles": [
+        {
+          "id": "330280bd-8e4d-4a53-9c1c-1b607763f206",
+          "type": "adult",
+          "firstName": "Willian",
+          "lastName": "Grillo",
+          "birthDate": "",
+          "avatar": 0,
+          "createdAt": "2026-11-22T09:50:23.283Z"
+        },
+        {
+          "id": "f2744fdc-5cff-445e-9256-634e0f84ddd8",
+          "type": "child",
+          "firstName": "Lucas",
+          "lastName": "Grillo",
+          "birthDate": "2023-11-25",
+          "avatar": 1,
+          "createdAt": "2026-11-22T09:50:38.475Z"
+        }
+      ],
+      "createdAt": "2026-11-22T09:50:23.337Z",
+      "passwordHash": "fb07305d1e6524e5d91133c956e8a84c305a185913b4ce709b7834655c49c649472d7a9887bcd547bfbee098808a65103e5c44f7961c63af45ed3d4125fc81c5",
+      "passwordSalt": "6a15d13fb947e11a2a3fb0e3c54881e5"
+    },
+    {
+      "id": "ef34214a-afc5-43ed-894a-6591d74c0af6",
       "phone": "27995103483",
       "normalizedPhone": "27995103483",
       "profiles": [
         {
-          "id": "ba841dbf-9dd2-4919-a624-68d1b4a0e1fd",
-          "type": "child",
-          "firstName": "willian",
-          "lastName": "grillo",
-          "birthDate": "1999-11-25",
-          "avatar": 0,
-          "createdAt": "2026-11-21T22:35:45.080Z"
-        },
-        {
-          "id": "051c9e4e-42af-49e1-b18a-988069d00c32",
-          "type": "child",
+          "id": "e74ae1f0-988e-4147-a20f-9f24c655ca15",
+          "type": "adult",
           "firstName": "Willian",
           "lastName": "Grillo",
-          "birthDate": "1999-11-25",
+          "birthDate": "",
+          "avatar": 0,
+          "createdAt": "2026-11-22T09:58:54.024Z"
+        },
+        {
+          "id": "568384fe-016c-4648-8dde-59258f2d471a",
+          "type": "child",
+          "firstName": "Lucas",
+          "lastName": "Grillo",
+          "birthDate": "2023-11-25",
           "avatar": 1,
-          "createdAt": "2026-11-21T22:35:58.821Z"
+          "createdAt": "2026-11-22T09:59:05.343Z"
         }
       ],
-      "createdAt": "2026-11-21T22:35:45.118Z",
-      "passwordHash": "60092d674e94f8d65136cda0b78d8be4f78f2671d346be2dc99412cefe9e92f37dd6a6dccea8eed529ec4cbe4273d99a4209a2901a29c42abeab898a44121a67",
-      "passwordSalt": "e6b45bf696499c89bb05812f80a30f40"
+      "createdAt": "2026-11-22T09:58:54.068Z",
+      "passwordHash": "eac96712bcb0e9bae877bd622f19a54be990a691ed77bd4fc2680c8bfada7f8631bf2ccbcf249ed01ef2fad663abeecd41dd61ded9a8734ab37994ed1160f22e",
+      "passwordSalt": "63154e2708cdb384d3ba26ea4ebf213f"
     }
   ],
   "completions": [],
   "materials": [
     {
-      "id": "d6e8db11-9b67-4e07-b9d3-61eabae65ef8",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "a036546a-5c5c-4e0c-81ee-4d71d104f26a",
-      "originalName": "Screenshot From 2026-11-14 16-20-48.jpg",
-      "mimeType": "image/jpeg",
-      "size": 151181,
-      "sha256": "f0da834cec1920c2c96a69bc35a418d074c601f67b3008f8b2c6451200bef3c7",
-      "literacyLevel": "fluent",
-      "extractionModel": "gpt-4.1-mini",
-      "promptVersion": "material-tutor-v2",
-      "expiresAt": "2026-11-29T00:07:11.176Z",
-      "extractionStatus": "failed",
-      "createdAt": "2026-11-22T00:07:11.178Z",
-      "updatedAt": "2026-11-22T00:07:14.914Z",
-      "storageKey": "d6e8db11-9b67-4e07-b9d3-61eabae65ef8.jpg",
-      "errorCode": "UNREADABLE"
-    },
-    {
-      "id": "8532432d-40e1-43d5-bf0f-f107661fbd0a",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "a036546a-5c5c-4e0c-81ee-4d71d104f26a",
-      "originalName": "Screenshot From 2026-11-14 16-56-25.jpg",
-      "mimeType": "image/jpeg",
-      "size": 155186,
-      "sha256": "8b71cdd6f873293daf9d29b4dd3274c794602cae2b43d7e4d361386192106e18",
-      "literacyLevel": "fluent",
-      "extractionModel": "gpt-4.1-mini",
-      "promptVersion": "material-tutor-v2",
-      "expiresAt": "2026-11-28T23:55:35.880Z",
-      "extractionStatus": "ready",
-      "createdAt": "2026-11-21T23:55:35.883Z",
-      "updatedAt": "2026-11-21T23:55:43.037Z",
-      "storageKey": "8532432d-40e1-43d5-bf0f-f107661fbd0a.jpg",
-      "extractedText": "Locais de pouso em Marte\nObserve o mapa de Marte com os locais de pouso das sondas e leia as informações ao lado.\n1) Quais são os nomes dos quatro locais de pouso indicados no mapa?\n2) Qual missão está associada ao local chamado Gale Crater e desde quando ela está lá?\n3) Qual local de pouso é conhecido por ser um delta de um rio antigo?",
-      "analysis": {
-        "readable": true,
-        "unreadableReason": "",
-        "title": "Locais de pouso em Marte",
-        "subject": "Ciências",
-        "estimatedGrade": "3º ano",
-        "generalInstructions": "Observe o mapa de Marte com os locais de pouso das sondas e leia as informações ao lado.",
-        "notesForTutor": "A criança deve conseguir ler e compreender as informações básicas sobre os locais de pouso em Marte, relacionando nomes e descrições.",
-        "isDidactic": true,
-        "questions": [
-          {
-            "number": "1",
-            "statement": "Quais são os nomes dos quatro locais de pouso indicados no mapa?",
-            "visualElements": "Mapa de Marte com quatro locais marcados: Gale Crater, Jezero Crater, Meridiani Planum e Gusev Crater.",
-            "skill": "Leitura e identificação de informações em mapa e texto.",
-            "expectedAnswer": "Gale Crater, Jezero Crater, Meridiani Planum e Gusev Crater.",
-            "steps": [
-              "Leia os nomes marcados no mapa.",
-              "Leia os nomes listados na legenda ao lado.",
-              "Compare os nomes do mapa com os da legenda.",
-              "Liste os quatro nomes que aparecem em ambos.",
-              "Confirme que são os quatro locais indicados."
-            ],
-            "hints": [
-              "Olhe os círculos brancos no mapa com nomes.",
-              "Leia os títulos em negrito na lista ao lado.",
-              "Procure os nomes que aparecem tanto no mapa quanto na lista."
-            ]
-          },
-          {
-            "number": "2",
-            "statement": "Qual missão está associada ao local chamado Gale Crater e desde quando ela está lá?",
-            "visualElements": "Texto ao lado do mapa com informações sobre Gale Crater: \"Curiosity (Mars Science Laboratory), since 2012\".",
-            "skill": "Compreensão de texto informativo.",
-            "expectedAnswer": "A missão Curiosity (Mars Science Laboratory), desde 2012.",
-            "steps": [
-              "Leia o nome Gale Crater na lista.",
-              "Leia a informação logo abaixo do nome.",
-              "Identifique o nome da missão associada.",
-              "Observe o ano em que começou a missão.",
-              "Formule a resposta com esses dados."
-            ],
-            "hints": [
-              "Leia com atenção o texto em vermelho e branco.",
-              "Procure o nome da missão entre parênteses.",
-              "Veja o ano indicado após 'since'."
-            ]
-          },
-          {
-            "number": "3",
-            "statement": "Qual local de pouso é conhecido por ser um delta de um rio antigo?",
-            "visualElements": "Texto ao lado do mapa com informações sobre Jezero Crater: \"The delta of an ancient river, one of the best places to look for signs of past life.\"",
-            "skill": "Interpretação de texto descritivo.",
-            "expectedAnswer": "Jezero Crater.",
-            "steps": [
-              "Leia as descrições dos locais na lista.",
-              "Procure a frase que menciona 'delta of an ancient river'.",
-              "Identifique o local associado a essa descrição.",
-              "Leia o nome do local no título da descrição.",
-              "Responda com o nome do local."
-            ],
-            "hints": [
-              "Leia cada descrição com calma.",
-              "Procure palavras relacionadas a água antiga.",
-              "Delta é uma formação de rio, lembre disso."
-            ]
-          }
-        ]
-      },
-      "isDidactic": true
-    },
-    {
-      "id": "39313635-5bd8-402d-a33d-cadff080adb0",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "a036546a-5c5c-4e0c-81ee-4d71d104f26a",
-      "originalName": "Screenshot From 2026-11-15 20-40-33.jpg",
-      "mimeType": "image/jpeg",
-      "size": 263465,
-      "sha256": "4f31f066c2dd54bc82740e19acddf73c524786ec3504c691e1f7b73482d9edb3",
-      "literacyLevel": "fluent",
-      "extractionModel": "gpt-4.1-mini",
-      "promptVersion": "material-tutor-v2",
-      "expiresAt": "2026-11-28T23:50:06.685Z",
-      "extractionStatus": "ready",
-      "createdAt": "2026-11-21T23:50:06.688Z",
-      "updatedAt": "2026-11-21T23:50:17.025Z",
-      "storageKey": "39313635-5bd8-402d-a33d-cadff080adb0.jpg",
-      "extractedText": "Mapa do Cratera Jezero em Marte\nObserve o mapa topográfico da cratera Jezero em Marte, que mostra diferentes elevações e locais de interesse, como os voos do helicóptero Ingenuity e o local de pouso do rover Perseverance.\n1) O que o mapa mostra?\n2) Quais cores indicam áreas mais altas e quais indicam áreas mais baixas?\n3) Onde o rover Perseverance pousou?",
-      "analysis": {
-        "readable": true,
-        "unreadableReason": "",
-        "title": "Mapa do Cratera Jezero em Marte",
-        "subject": "Ciências",
-        "estimatedGrade": "3º ano",
-        "generalInstructions": "Observe o mapa topográfico da cratera Jezero em Marte, que mostra diferentes elevações e locais de interesse, como os voos do helicóptero Ingenuity e o local de pouso do rover Perseverance.",
-        "notesForTutor": "A criança pode precisar de explicações sobre o que é uma cratera, o que significa elevação e como interpretar cores em mapas topográficos. É importante relacionar o mapa com conceitos básicos de geografia e exploração espacial.",
-        "isDidactic": true,
-        "questions": [
-          {
-            "number": "1",
-            "statement": "O que o mapa mostra?",
-            "visualElements": "Mapa topográfico colorido da cratera Jezero em Marte, com legendas indicando elevação, locais de amostras, voos do helicóptero Ingenuity e local de pouso do rover Perseverance.",
-            "skill": "Interpretação de mapas e compreensão de informações científicas",
-            "expectedAnswer": "O mapa mostra a cratera Jezero em Marte, com diferentes elevações indicadas por cores, locais onde o rover Perseverance pousou e voos do helicóptero Ingenuity.",
-            "steps": [
-              "Olhe para o título do mapa para saber o que ele representa.",
-              "Veja as cores diferentes e a legenda para entender o que elas significam.",
-              "Observe os pontos marcados no mapa e leia as legendas ao lado.",
-              "Leia o texto que explica o que é a cratera Jezero.",
-              "Junte essas informações para explicar o que o mapa mostra."
-            ],
-            "hints": [
-              "O título do mapa diz o nome do lugar.",
-              "As cores mostram se o terreno é alto ou baixo.",
-              "Existem pontos coloridos que indicam lugares importantes."
-            ]
-          },
-          {
-            "number": "2",
-            "statement": "Quais cores indicam áreas mais altas e quais indicam áreas mais baixas?",
-            "visualElements": "Legenda de cores no mapa indicando elevação: azul para áreas baixas, vermelho e branco para áreas altas.",
-            "skill": "Interpretação de legenda de mapa",
-            "expectedAnswer": "As áreas mais baixas são indicadas pela cor azul, e as áreas mais altas são indicadas pelas cores vermelho e branco.",
-            "steps": [
-              "Olhe para a legenda de cores no mapa.",
-              "Veja qual cor está associada a 'Low' (baixo) e qual está associada a 'High' (alto).",
-              "Leia as cores correspondentes a cada elevação.",
-              "Compare as cores no mapa com a legenda.",
-              "Diga quais cores são para áreas altas e quais para áreas baixas."
-            ],
-            "hints": [
-              "A legenda mostra uma barra de cores de azul a vermelho.",
-              "O azul geralmente indica algo baixo, como água ou vales.",
-              "O vermelho e branco indicam algo alto, como montanhas."
-            ]
-          },
-          {
-            "number": "3",
-            "statement": "Onde o rover Perseverance pousou?",
-            "visualElements": "Ponto marcado no mapa com a legenda 'Base - Octavia E. Butler Landing' próximo a outros pontos marcados como 'Perseverance - sol 2022'.",
-            "skill": "Localização em mapas",
-            "expectedAnswer": "O rover Perseverance pousou no local marcado como 'Base - Octavia E. Butler Landing' no mapa.",
-            "steps": [
-              "Procure no mapa o ponto que tem a legenda 'Base - Octavia E. Butler Landing'.",
-              "Leia o nome para confirmar que é o local de pouso.",
-              "Veja se há outros pontos próximos relacionados ao Perseverance.",
-              "Diga o nome do local onde o rover pousou.",
-              "Use a legenda para confirmar o significado do ponto."
-            ],
-            "hints": [
-              "Procure palavras que indicam pouso ou base.",
-              "O nome do local pode estar perto de pontos do rover.",
-              "Leia as etiquetas próximas aos pontos no mapa."
-            ]
-          }
-        ]
-      },
-      "isDidactic": true
-    },
-    {
-      "id": "33d833e2-bf60-4660-ac49-a8d9c74438d7",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "6923757a-7dad-46f7-94d3-b9ee23221aab",
-      "originalName": "Screenshot From 2026-11-15 20-40-33.jpg",
-      "mimeType": "image/jpeg",
-      "size": 263465,
-      "sha256": "4f31f066c2dd54bc82740e19acddf73c524786ec3504c691e1f7b73482d9edb3",
-      "literacyLevel": "fluent",
-      "extractionModel": "gpt-4.1-mini",
-      "promptVersion": "material-tutor-v2",
-      "expiresAt": "2026-11-28T23:31:13.289Z",
-      "extractionStatus": "failed",
-      "createdAt": "2026-11-21T23:31:13.290Z",
-      "updatedAt": "2026-11-21T23:31:16.185Z",
-      "storageKey": "33d833e2-bf60-4660-ac49-a8d9c74438d7.jpg",
-      "errorCode": "UNREADABLE"
-    },
-    {
-      "id": "832b33c3-5380-46f7-817f-cf27f4330652",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "6923757a-7dad-46f7-94d3-b9ee23221aab",
-      "originalName": "Screenshot From 2026-08-17 21-20-30.jpg",
-      "mimeType": "image/jpeg",
-      "size": 14941,
-      "sha256": "96cbad086d974393196832f7d91e2fda3991ef2a0e9990a1c6ad229b0f89a23a",
-      "literacyLevel": "fluent",
-      "extractionModel": "gpt-4.1-mini",
-      "promptVersion": "material-tutor-v2",
-      "expiresAt": "2026-11-28T23:30:38.639Z",
-      "extractionStatus": "ready",
-      "createdAt": "2026-11-21T23:30:38.642Z",
-      "updatedAt": "2026-11-21T23:30:42.093Z",
-      "storageKey": "832b33c3-5380-46f7-817f-cf27f4330652.jpg",
-      "extractedText": "Questionário sobre organizações\nVocê faz ou já fez parte de alguma dessas organizações? Marque a opção correta.\n1) Você faz ou já fez parte de alguma dessas organizações?",
-      "analysis": {
-        "readable": true,
-        "unreadableReason": "",
-        "title": "Questionário sobre organizações",
-        "subject": "Pesquisa/Questionário",
-        "estimatedGrade": "3º ano",
-        "generalInstructions": "Você faz ou já fez parte de alguma dessas organizações? Marque a opção correta.",
-        "notesForTutor": "A criança deve entender que precisa marcar uma opção que responda à pergunta sobre participação em organizações. É uma atividade de escolha simples, sem cálculos ou leitura complexa.",
-        "isDidactic": true,
-        "questions": [
-          {
-            "number": "1",
-            "statement": "Você faz ou já fez parte de alguma dessas organizações?",
-            "visualElements": "Lista de opções com caixas para marcar: LALA, Ismart, Alpha Lumen, Tocando em Frente, Lidera Nordeste, NOIC, Nenhuma (esta última marcada).",
-            "skill": "Compreensão de perguntas e seleção de resposta adequada",
-            "expectedAnswer": "Nenhuma",
-            "steps": [
-              "Leia a pergunta com atenção para entender o que está sendo perguntado.",
-              "Observe todas as opções disponíveis para marcar.",
-              "Pense se você já participou de alguma dessas organizações.",
-              "Se não participou de nenhuma, escolha a opção 'Nenhuma'.",
-              "Marque a caixa correspondente à sua resposta."
-            ],
-            "hints": [
-              "Pense se você já participou de algum grupo ou organização com esses nomes.",
-              "Se não lembra de ter participado, talvez a resposta seja 'Nenhuma'.",
-              "Lembre-se de marcar só uma opção que responda à pergunta."
-            ]
-          }
-        ]
-      },
-      "isDidactic": true
-    },
-    {
-      "id": "ab47d6ee-50d0-476e-b5cc-4c00a6a38c0e",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "6923757a-7dad-46f7-94d3-b9ee23221aab",
-      "originalName": "Screenshot From 2026-11-15 20-40-33.jpg",
-      "mimeType": "image/jpeg",
-      "size": 263465,
-      "sha256": "4f31f066c2dd54bc82740e19acddf73c524786ec3504c691e1f7b73482d9edb3",
-      "literacyLevel": "fluent",
-      "extractionModel": "gpt-4.1-mini",
-      "promptVersion": "material-tutor-v2",
-      "expiresAt": "2026-11-28T23:28:06.677Z",
-      "extractionStatus": "failed",
-      "createdAt": "2026-11-21T23:28:06.679Z",
-      "updatedAt": "2026-11-21T23:28:09.744Z",
-      "storageKey": "ab47d6ee-50d0-476e-b5cc-4c00a6a38c0e.jpg",
-      "errorCode": "UNREADABLE"
-    },
-    {
-      "id": "7c00f839-b8ae-4a90-8c20-521d8219254c",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "6923757a-7dad-46f7-94d3-b9ee23221aab",
-      "originalName": "Screenshot From 2026-11-21 18-35-15.jpg",
-      "mimeType": "image/jpeg",
-      "size": 89494,
-      "sha256": "6221be192eba6cf6076292b8bc714f676a9d414efc28a3d4439469a8c4f5d5ff",
-      "literacyLevel": "fluent",
-      "extractionModel": "gpt-4.1-mini",
-      "promptVersion": "material-tutor-v2",
-      "expiresAt": "2026-11-28T23:23:22.864Z",
-      "extractionStatus": "ready",
-      "createdAt": "2026-11-21T23:23:22.866Z",
-      "updatedAt": "2026-11-21T23:23:29.615Z",
-      "storageKey": "7c00f839-b8ae-4a90-8c20-521d8219254c.jpg",
-      "extractedText": "Ordem alfabética\nLeia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate\n1 a 27) Coloque as palavras abaixo em ordem alfabética: pepino, mel, tangerina, amora, manga, cebola, nabo, kiwi, repolho, ovos, uvas, batata, limão, salsinha, damasco, vagem, espinafre, hortelã, figo, quiabo, carambola, inhame, goiaba, melão, jaca, brócolis, tomate.",
-      "analysis": {
-        "readable": true,
-        "unreadableReason": "",
-        "title": "Ordem alfabética",
-        "subject": "Português",
-        "estimatedGrade": "3º ano",
-        "generalInstructions": "Leia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate",
-        "notesForTutor": "A criança de 8 anos já lê com autonomia, então os passos e dicas devem incentivar a organização, a comparação das letras iniciais e a revisão da ordem alfabética, sem revelar a resposta final. Pode-se sugerir que ela leia as palavras em voz alta para facilitar a ordenação.",
-        "isDidactic": true,
-        "questions": [
-          {
-            "number": "1 a 27",
-            "statement": "Coloque as palavras abaixo em ordem alfabética: pepino, mel, tangerina, amora, manga, cebola, nabo, kiwi, repolho, ovos, uvas, batata, limão, salsinha, damasco, vagem, espinafre, hortelã, figo, quiabo, carambola, inhame, goiaba, melão, jaca, brócolis, tomate.",
-            "visualElements": "Desenho de uma pessoa vendendo frutas e verduras em uma banca, com caixas e cestos de frutas.",
-            "skill": "Ordenação alfabética de palavras",
-            "expectedAnswer": "1. amora; 2. batata; 3. brócolis; 4. carambola; 5. cebola; 6. damasco; 7. espinafre; 8. figo; 9. goiaba; 10. hortelã; 11. inhame; 12. jaca; 13. kiwi; 14. limão; 15. manga; 16. mel; 17. melão; 18. nabo; 19. ovos; 20. pepino; 21. quiabo; 22. repolho; 23. salsinha; 24. tangerina; 25. tomate; 26. uvas; ",
-            "steps": [
-              "Leia todas as palavras com atenção.",
-              "Observe a primeira letra de cada palavra e veja qual vem primeiro no alfabeto.",
-              "Separe as palavras que começam com a mesma letra e compare a segunda letra delas.",
-              "Continue comparando as letras seguintes até encontrar a ordem correta.",
-              "Escreva as palavras na lista seguindo a ordem alfabética que você encontrou."
-            ],
-            "hints": [
-              "Pense na ordem das letras do alfabeto: A, B, C, D...",
-              "Se duas palavras começam com a mesma letra, compare a segunda letra para decidir qual vem primeiro.",
-              "Leia as palavras em voz alta para ajudar a perceber a ordem das letras."
-            ]
-          }
-        ]
-      },
-      "isDidactic": true
-    },
-    {
-      "id": "fc18ff1c-c5a6-4694-b882-d91c35c05a14",
-      "familyId": "390e9fac-3c1e-4fc2-a8ac-999a004f1aa3",
-      "profileId": "051c9e4e-42af-49e1-b18a-988069d00c32",
+      "id": "c081950f-b861-40ff-9d18-d1b4fe01c407",
+      "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
+      "profileId": "568384fe-016c-4648-8dde-59258f2d471a",
       "originalName": "OFICINA DE REFORÇO 3º ANO - MATERIAIS PEDAGÓGICOS.pdf",
       "mimeType": "application/pdf",
       "size": 2610129,
       "sha256": "18391eb03b5b7c2036a41212e5b3c4cf8e44b908ab0324c83452dd6b19438f3d",
-      "literacyLevel": "fluent",
+      "literacyLevel": "pre_reader",
       "extractionModel": "gpt-4.1-mini",
-      "promptVersion": "material-tutor-v2",
-      "expiresAt": "2026-11-28T22:42:55.441Z",
+      "promptVersion": "material-tutor-v5",
+      "expiresAt": "2026-11-29T10:01:52.867Z",
       "extractionStatus": "ready",
-      "createdAt": "2026-11-21T22:42:55.442Z",
-      "updatedAt": "2026-11-21T22:43:35.200Z",
-      "storageKey": "fc18ff1c-c5a6-4694-b882-d91c35c05a14.pdf",
-      "extractedText": "Oficina de Reforço Escolar - 3º ano - Língua Portuguesa e Matemática\nInstruções gerais não especificadas, atividades de reforço escolar para o 3º ano do Ensino Fundamental.\n1) Leia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate.\n2) Classifique as palavras do quadro de acordo com o número de sílabas.\n3) Complete as palavras com g ou j, reescreva-as e ligue-as ao seu respectivo desenho: jiboia, gelatina, pajé, girino, girassol.\n4) Organize as letras fora de ordem para formar palavras: sandália, pilha, espantalho, família, orelha, milho.\n5) Complete as palavras com x ou ch, pinte os círculos de acordo com a legenda e ilustre como no exemplo.\n6) Encontre as palavras no caça-palavras e complete o quadro com as palavras encontradas e acrescente mais três palavras de acordo com o grupo: lh, ch, nh.\n7) Complete o quadro com o feminino das palavras masculinas: cão, boi, leão, bode, carneiro, cavalo, elefante, rei, príncipe, compadre, padrasto, padrinho, ator, autor, anão, irmão.\n8) Leia a fábula 'A lebre e a tartaruga' e responda: a) Quais os personagens da fábula? b) Onde se passa a história? c) Qual é a moral da história?\n9) Escreva o significado das palavras homônimas: abril, abriu, mau, mal, calda, cauda. Use uma das palavras para completar as frases dadas.\n10) Resolva os problemas matemáticos dados: soma, subtração, multiplicação e interpretação de números.",
+      "createdAt": "2026-11-22T10:01:52.868Z",
+      "updatedAt": "2026-11-22T10:03:56.172Z",
+      "storageKey": "c081950f-b861-40ff-9d18-d1b4fe01c407.pdf",
+      "extractedText": "Oficina de Reforço Escolar - 3º ano\nAtividades de reforço escolar para o 3º ano do Ensino Fundamental, com exercícios de Língua Portuguesa e Matemática.\n1) Escreva o nome das figuras e numere-as de acordo com a ordem alfabética.\n2) Complete as palavras com g ou j, reescreva-as e ligue-as ao seu respectivo desenho.\n3) Organize as letras para formar as palavras e escreva-as.\n4) Pinte os triângulos da atividade anterior de acordo com a palavra escrita: palavras com lh, pinte-as de amarelo, palavras com l, pinte-as de vermelho.\n5) Encontre as palavras no caça-palavras. Pinte cada círculo de uma cor e, ao encontrar a palavra, pinte-a da mesma cor usada no círculo.",
       "analysis": {
         "readable": true,
         "unreadableReason": "",
-        "title": "Oficina de Reforço Escolar - 3º ano - Língua Portuguesa e Matemática",
+        "title": "Oficina de Reforço Escolar - 3º ano",
         "subject": "Língua Portuguesa e Matemática",
-        "estimatedGrade": "3º ano do Ensino Fundamental",
-        "generalInstructions": "Instruções gerais não especificadas, atividades de reforço escolar para o 3º ano do Ensino Fundamental.",
-        "notesForTutor": "Material básico de reforço escolar para 3º ano, com exercícios de alfabetização, ortografia, interpretação de texto, gramática e matemática básica. A criança de 26 anos pode usar este material para revisão ou reforço de conceitos básicos. Adaptar a abordagem para maior autonomia e reflexão crítica, incentivando a autoavaliação e aprofundamento dos temas.",
+        "estimatedGrade": "3º ano",
+        "generalInstructions": "Atividades de reforço escolar para o 3º ano do Ensino Fundamental, com exercícios de Língua Portuguesa e Matemática.",
+        "notesForTutor": "A criança tem 2 anos e ainda não lê sozinha. Adaptar os passos e dicas para linguagem oral simples, uso de imagens, estímulo à fala e reconhecimento visual, evitando leitura e escrita complexas.",
+        "isDidactic": true,
         "questions": [
           {
             "number": "1",
-            "statement": "Leia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate.",
-            "visualElements": "Imagens de figuras para nomear: dado, lobo, bolo, índio, janela, mamão, elefante, papagaio, abacaxi, carro.",
-            "skill": "ordem alfabética e classificação silábica",
-            "expectedAnswer": "1. abacaxi; 2. amora; 3. batata; 4. bolo; 5. carambola; 6. carro; 7. cebola; 8. damasco; 9. elefante; 10. espinafre; 11. figo; 12. goiaba; 13. hortelã; 14. inhame; 15. jaca; 16. janela; 17. kiwi; 18. limão; 19. manga; 20. mel; 21. melão; 22. nabo; 23. ovos; 24. papagaio; 25. pepino; 26. quiabo; 27. ",
+            "statement": "Escreva o nome das figuras e numere-as de acordo com a ordem alfabética.",
+            "visualElements": "10 desenhos: dado, lobo, bolo, índio, janela, mamão, elefante, papagaio, abacaxi, carro.",
+            "skill": "ordem alfabética",
+            "supportContent": "dado - lobo - bolo - índio - janela - mamão - elefante - papagaio - abacaxi - carro",
+            "answerSlots": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10"
+            ],
+            "expectedAnswer": "1. abacaxi; 2. bolo; 3. carro; 4. dado; 5. elefante; 6. índio; 7. janela; 8. lobo; 9. mamão; 10. papagaio",
             "steps": [
-              "Leia todas as palavras com atenção.",
-              "Identifique a primeira letra de cada palavra.",
-              "Organize as palavras começando pela letra A até a letra Z.",
-              "Para palavras que começam com a mesma letra, observe a segunda letra.",
-              "Continue até ordenar todas as palavras."
+              "Olhe para os desenhos e diga o nome de cada um.",
+              "Pense qual palavra começa com a letra que vem primeiro no alfabeto.",
+              "Coloque o número 1 na figura que tem a palavra que começa com a letra mais próxima do início do alfabeto.",
+              "Continue numerando as outras figuras seguindo a ordem alfabética.",
+              "Fale os nomes em voz alta para ajudar a lembrar a ordem."
             ],
             "hints": [
-              "Comece pelas palavras que iniciam com a letra A.",
-              "Compare as primeiras letras das palavras para ordenar.",
-              "Se duas palavras começam com a mesma letra, compare a segunda letra."
+              "Vamos falar o nome de cada figura.",
+              "Qual palavra começa com a letra A?",
+              "Agora, qual palavra vem depois da A no alfabeto?"
             ]
           },
           {
             "number": "2",
-            "statement": "Classifique as palavras do quadro de acordo com o número de sílabas.",
-            "visualElements": "Quadro com as palavras: pilha, batedeira, chaveiro, gula, nó, primeiro, caneleira, pombo, céu, padaria, pai, limpeza, mão, caminhoneiro, sol, rampa, cozinha, travessura, quitanda, calda.",
-            "skill": "classificação silábica",
-            "expectedAnswer": "Monossílaba: nó, céu, pai, mão, sol; Dissílaba: pilha, gula, pombo, rampa, calda; Trissílaba: chaveiro, primeiro, padaria, limpeza, cozinha, quitanda; Polissílaba: batedeira, caneleira, caminhoneiro, travessura.",
+            "statement": "Complete as palavras com g ou j, reescreva-as e ligue-as ao seu respectivo desenho.",
+            "visualElements": "Desenhos: girassol, peixe, cobra, gelatina, índio.",
+            "skill": "ortografia g ou j",
+            "supportContent": "iboia - gelatina - pajé - girino - girassol",
+            "answerSlots": [
+              "iboia",
+              "gelatina",
+              "pajé",
+              "girino",
+              "girassol"
+            ],
+            "expectedAnswer": "iboia; gelatina; pajé; girino; girassol",
             "steps": [
-              "Leia cada palavra atentamente.",
-              "Separe cada palavra em sílabas.",
-              "Conte o número de sílabas de cada palavra.",
-              "Classifique as palavras em monossílabas, dissílabas, trissílabas ou polissílabas.",
-              "Preencha o quadro com as palavras classificadas."
+              "Leia cada palavra com atenção.",
+              "Pense se a palavra tem som de g ou j.",
+              "Complete a palavra com a letra correta.",
+              "Diga a palavra em voz alta para confirmar o som.",
+              "Ligue a palavra ao desenho correspondente."
             ],
             "hints": [
-              "Lembre-se que monossílabas têm uma sílaba.",
-              "Dissílabas têm duas sílabas.",
-              "Trissílabas têm três sílabas."
+              "Escute o som da palavra.",
+              "O som é mais forte como em 'gato' ou mais suave como em 'jogo'?",
+              "Pense em outras palavras que você conhece com g ou j."
             ]
           },
           {
             "number": "3",
-            "statement": "Complete as palavras com g ou j, reescreva-as e ligue-as ao seu respectivo desenho: jiboia, gelatina, pajé, girino, girassol.",
-            "visualElements": "Desenhos de uma jiboia, gelatina, pajé, girino e girassol.",
-            "skill": "ortografia: uso de g ou j",
-            "expectedAnswer": "jiboia; gelatina; pajé; girino; girassol.",
+            "statement": "Organize as letras para formar as palavras e escreva-as.",
+            "visualElements": "",
+            "skill": "ortografia l ou lh",
+            "supportContent": "a) sandália b) pilha c) espantalho d) família e) orelha f) milho",
+            "answerSlots": [
+              "a) sandália",
+              "b) pilha",
+              "c) espantalho",
+              "d) família",
+              "e) orelha",
+              "f) milho"
+            ],
+            "expectedAnswer": "a) sandália; b) pilha; c) espantalho; d) família; e) orelha; f) milho",
             "steps": [
-              "Leia cada palavra incompleta.",
-              "Identifique se a palavra leva g ou j.",
-              "Complete a palavra corretamente.",
-              "Reescreva a palavra completa.",
-              "Ligue a palavra ao desenho correspondente."
+              "Olhe as letras embaralhadas.",
+              "Tente formar uma palavra que você conhece.",
+              "Diga a palavra em voz alta para ajudar a lembrar.",
+              "Escreva a palavra corretamente.",
+              "Repita para cada conjunto de letras."
             ],
             "hints": [
-              "Lembre-se das regras de ortografia para g e j.",
-              "Observe o som da palavra.",
-              "Pense em palavras semelhantes."
+              "Olhe as letras e tente formar uma palavra que você já ouviu.",
+              "Pense em palavras que terminam com 'lh' ou 'l'.",
+              "Peça para a criança repetir a palavra em voz alta."
             ]
           },
           {
             "number": "4",
-            "statement": "Organize as letras fora de ordem para formar palavras: sandália, pilha, espantalho, família, orelha, milho.",
-            "visualElements": "Nenhum desenho específico além das palavras para formar.",
-            "skill": "ortografia: l ou lh",
-            "expectedAnswer": "a) sandália; b) pilha; c) espantalho; d) família; e) orelha; f) milho.",
+            "statement": "Pinte os triângulos da atividade anterior de acordo com a palavra escrita: palavras com lh, pinte-as de amarelo, palavras com l, pinte-as de vermelho.",
+            "visualElements": "",
+            "skill": "ortografia l ou lh",
+            "supportContent": "",
+            "answerSlots": [
+              ""
+            ],
+            "expectedAnswer": "Palavras com lh: espantalho, orelha, milho (pinte amarelo); palavras com l: sandália, pilha, família (pinte vermelho)",
             "steps": [
-              "Leia as letras embaralhadas.",
-              "Tente formar uma palavra conhecida.",
-              "Verifique se a palavra está correta.",
-              "Escreva a palavra formada.",
-              "Repita para todas as palavras."
+              "Leia as palavras escritas.",
+              "Procure as palavras que têm 'lh'.",
+              "Pinte os triângulos dessas palavras de amarelo.",
+              "Procure as palavras que têm 'l' sem 'h'.",
+              "Pinte os triângulos dessas palavras de vermelho."
             ],
             "hints": [
-              "Procure identificar sílabas conhecidas.",
-              "Pense em palavras relacionadas ao tema.",
-              "Use o contexto para ajudar."
+              "Lembre que 'lh' tem um som diferente de 'l'.",
+              "Escute o som das palavras.",
+              "Pense em palavras que você já viu com 'lh'."
             ]
           },
           {
             "number": "5",
-            "statement": "Complete as palavras com x ou ch, pinte os círculos de acordo com a legenda e ilustre como no exemplo.",
-            "visualElements": "Palavras incompletas e círculos para pintar: chocolate, chapéu, rochedo, chave, feixe, lixeira, cachaça, xampu.",
-            "skill": "ortografia: x ou ch",
-            "expectedAnswer": "chocolate, chapéu, rochedo, chave, feixe, lixeira, cachaça, xampu.",
+            "statement": "Encontre as palavras no caça-palavras. Pinte cada círculo de uma cor e, ao encontrar a palavra, pinte-a da mesma cor usada no círculo.",
+            "visualElements": "Caça-palavras com as palavras listadas.",
+            "skill": "caça-palavras ortográfico",
+            "supportContent": "malha - colchão - palhaço - chuteira - arranha - galinha - patinho - piolho - lancheira",
+            "answerSlots": [
+              ""
+            ],
+            "expectedAnswer": "Palavras encontradas: malha, colchão, palhaço, chuteira, arranha, galinha, patinho, piolho, lancheira",
             "steps": [
-              "Leia cada palavra incompleta.",
-              "Decida se a palavra leva x ou ch.",
-              "Complete a palavra corretamente.",
-              "Pinte os círculos conforme a legenda: verde para ch, azul para x.",
-              "Ilustre as palavras conforme o exemplo."
+              "Olhe para o caça-palavras.",
+              "Procure as letras que formam as palavras da lista.",
+              "Quando encontrar uma palavra, pinte os círculos correspondentes.",
+              "Pinte os círculos da mesma cor da palavra.",
+              "Continue até encontrar todas as palavras."
             ],
             "hints": [
-              "Lembre-se das regras para o uso de ch e x.",
-              "Observe o som da palavra.",
-              "Pense em palavras semelhantes."
-            ]
-          },
-          {
-            "number": "6",
-            "statement": "Encontre as palavras no caça-palavras e complete o quadro com as palavras encontradas e acrescente mais três palavras de acordo com o grupo: lh, ch, nh.",
-            "visualElements": "Caça-palavras com palavras: malha, colchão, palhaço, chuteira, arranha, galinha, patinho, piolho, lancheira.",
-            "skill": "ortografia: lh, ch, nh",
-            "expectedAnswer": "Grupo do lh: malha, piolho, palhaço, mais três palavras pessoais; Grupo do ch: chuteira, colchão, lancheira, mais três palavras pessoais; Grupo do nh: patinho, arranha, galinha, mais três palavras pessoais.",
-            "steps": [
-              "Encontre as palavras com lh, ch e nh no caça-palavras.",
-              "Pinte os círculos correspondentes.",
-              "Escreva as palavras encontradas no quadro.",
-              "Acrescente mais três palavras para cada grupo.",
-              "Separe as palavras em sílabas e escreva novamente."
-            ],
-            "hints": [
-              "Procure por sequências lh, ch e nh.",
-              "Use cores diferentes para cada grupo.",
-              "Leia as palavras encontradas."
-            ]
-          },
-          {
-            "number": "7",
-            "statement": "Complete o quadro com o feminino das palavras masculinas: cão, boi, leão, bode, carneiro, cavalo, elefante, rei, príncipe, compadre, padrasto, padrinho, ator, autor, anão, irmão.",
-            "visualElements": "Nenhum desenho específico, quadro para completar.",
-            "skill": "masculino e feminino dos substantivos",
-            "expectedAnswer": "cão - cadela; boi - vaca; leão - leoa; bode - cabra; carneiro - ovelha; cavalo - égua; elefante - elefanta; rei - rainha; príncipe - princesa; compadre - comadre; padrasto - madrasta; padrinho - madrinha; ator - atriz; autor - autora; anão - anã; irmão - irmã.",
-            "steps": [
-              "Leia a palavra masculina.",
-              "Pense na forma feminina correspondente.",
-              "Escreva a forma feminina no quadro.",
-              "Repita para todas as palavras.",
-              "Revise para garantir que todas estão corretas."
-            ],
-            "hints": [
-              "Lembre-se das terminações femininas comuns.",
-              "Use o artigo a para ajudar a identificar o feminino.",
-              "Consulte palavras semelhantes."
-            ]
-          },
-          {
-            "number": "8",
-            "statement": "Leia a fábula 'A lebre e a tartaruga' e responda: a) Quais os personagens da fábula? b) Onde se passa a história? c) Qual é a moral da história?",
-            "visualElements": "Ilustração da lebre e da tartaruga.",
-            "skill": "interpretação de texto",
-            "expectedAnswer": "a) A lebre e a tartaruga; b) Na floresta; c) Devagar se vai ao longe.",
-            "steps": [
-              "Leia a fábula atentamente.",
-              "Identifique os personagens principais.",
-              "Localize o cenário da história.",
-              "Reflita sobre a mensagem ou moral da fábula.",
-              "Responda às perguntas com base no texto."
-            ],
-            "hints": [
-              "Procure nomes de personagens no texto.",
-              "Busque frases que indiquem o local da história.",
-              "Pense no ensinamento da fábula."
-            ]
-          },
-          {
-            "number": "9",
-            "statement": "Escreva o significado das palavras homônimas: abril, abriu, mau, mal, calda, cauda. Use uma das palavras para completar as frases dadas.",
-            "visualElements": "Nenhum desenho específico.",
-            "skill": "vocabulário e uso de homônimos",
-            "expectedAnswer": "abril - mês do ano; abriu - passado do verbo abrir; mau - que prejudica; mal - que não está bem; calda - mistura para doce; cauda - parte traseira de animal. Frases: mau - O lobo mau comeu a vovozinha; mal - Vovozinha passou mal; abril - mês do aniversário; abriu - Giovana abriu a porta; cauda - cor",
-            "steps": [
-              "Leia o significado de cada palavra.",
-              "Entenda a diferença entre as palavras homônimas.",
-              "Leia as frases incompletas.",
-              "Escolha a palavra correta para cada frase.",
-              "Complete as frases com as palavras escolhidas."
-            ],
-            "hints": [
-              "Observe o contexto das frases.",
-              "Lembre-se do significado de cada palavra.",
-              "Pense na pronúncia e escrita."
-            ]
-          },
-          {
-            "number": "10",
-            "statement": "Resolva os problemas matemáticos dados: soma, subtração, multiplicação e interpretação de números.",
-            "visualElements": "Tabela para cálculos e problemas escritos.",
-            "skill": "matemática básica: operações e problemas",
-            "expectedAnswer": "1) 298 - 137 = 161 selos; 2) 9 cachorros x 4 patas = 36 patas; 3) 2 álbuns x 24 fotos = 48 fotos; 4) 3 dúzias = 36 selos; 5) 3 ingressos x R$15,00 = R$45,00; 6) 7 estojos x 6 lápis = 42 lápis; 7) 8 bombons x R$3,00 = R$24,00; 8) Bianca tem 4 bonecas, Bianca tem o triplo = 12 bonecas.",
-            "steps": [
-              "Leia cada problema com atenção.",
-              "Identifique a operação matemática necessária.",
-              "Realize a operação passo a passo.",
-              "Escreva o resultado final.",
-              "Revise para garantir que o cálculo está correto."
-            ],
-            "hints": [
-              "Leia os números com atenção.",
-              "Identifique se é soma, subtração, multiplicação ou divisão.",
-              "Use a tabuada para multiplicações."
+              "Procure a primeira letra da palavra no caça-palavras.",
+              "Siga as letras na horizontal, vertical ou diagonal.",
+              "Pinte a palavra inteira quando encontrar."
             ]
           }
         ]
-      }
+      },
+      "isDidactic": true,
+      "completedAt": "2026-11-22T10:03:56.172Z"
     },
     {
-      "id": "b031cc2f-6897-488d-83eb-d77b9bdd716d",
-      "familyId": "390e9fac-3c1e-4fc2-a8ac-999a004f1aa3",
-      "profileId": "051c9e4e-42af-49e1-b18a-988069d00c32",
+      "id": "2f6d4041-2222-4d85-ae3d-b25cb082fd9a",
+      "familyId": "777a281e-a73f-4bb5-b103-ae2f4cb458fe",
+      "profileId": "f2744fdc-5cff-445e-9256-634e0f84ddd8",
       "originalName": "OFICINA DE REFORÇO 3º ANO - MATERIAIS PEDAGÓGICOS.pdf",
       "mimeType": "application/pdf",
       "size": 2610129,
       "sha256": "18391eb03b5b7c2036a41212e5b3c4cf8e44b908ab0324c83452dd6b19438f3d",
-      "literacyLevel": "fluent",
-      "extractionModel": "gpt-4o-mini",
-      "promptVersion": "material-tutor-v1",
-      "expiresAt": "2026-11-28T22:36:18.966Z",
-      "extractionStatus": "failed",
-      "createdAt": "2026-11-21T22:36:18.966Z",
-      "updatedAt": "2026-11-21T22:36:53.178Z",
-      "storageKey": "b031cc2f-6897-488d-83eb-d77b9bdd716d.pdf",
-      "errorCode": "UNREADABLE"
-    },
-    {
-      "id": "6cc73f32-fa77-4ae2-8c46-632d0ec72faa",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "47daa4da-2738-418e-aa1b-66d8d9f4ea92",
-      "originalName": "licao.pdf.png",
-      "mimeType": "image/png",
-      "size": 44056,
-      "sha256": "a3469930fc1c1a77b46837959922a9769b689d7eb526160c191ccbe3c1b6d76b",
       "literacyLevel": "pre_reader",
-      "extractionModel": "gpt-4o-mini",
-      "promptVersion": "material-tutor-v1",
-      "expiresAt": "2026-11-28T22:31:36.545Z",
+      "extractionModel": "gpt-4.1-mini",
+      "promptVersion": "material-tutor-v5",
+      "expiresAt": "2026-11-29T09:51:04.002Z",
       "extractionStatus": "ready",
-      "createdAt": "2026-11-21T22:31:36.545Z",
-      "updatedAt": "2026-11-21T22:31:43.274Z",
-      "storageKey": "6cc73f32-fa77-4ae2-8c46-632d0ec72faa.png",
-      "extractedText": "Continhas de Matemática\nResolva as continhas:\n1) 3 + 4 = ____\n2) 6 - 2 = ____\n3) João tem 5 balas e ganhou mais 3. Quantas balas ele tem agora? ____",
+      "createdAt": "2026-11-22T09:51:04.003Z",
+      "updatedAt": "2026-11-22T09:51:26.881Z",
+      "storageKey": "2f6d4041-2222-4d85-ae3d-b25cb082fd9a.pdf",
+      "extractedText": "Oficina de Reforço Escolar - 3º ano\nAtividades de reforço escolar para o 3º ano do Ensino Fundamental, com exercícios de Língua Portuguesa e Matemática.\n1) Escreva o nome das figuras e numere-as de acordo com a ordem alfabética.\n2) Leia as palavras e coloque-as em ordem alfabética.",
       "analysis": {
         "readable": true,
         "unreadableReason": "",
-        "title": "Continhas de Matemática",
-        "subject": "Matemática",
-        "estimatedGrade": "1º ano",
-        "generalInstructions": "Resolva as continhas:",
-        "notesForTutor": "A criança pode ter dificuldades com a leitura e a compreensão das operações. É importante usar objetos concretos para ajudar na visualização das operações.",
+        "title": "Oficina de Reforço Escolar - 3º ano",
+        "subject": "Língua Portuguesa e Matemática",
+        "estimatedGrade": "3º ano",
+        "generalInstructions": "Atividades de reforço escolar para o 3º ano do Ensino Fundamental, com exercícios de Língua Portuguesa e Matemática.",
+        "notesForTutor": "A criança tem 2 anos e ainda não lê sozinha. Adapte os passos e dicas para essa faixa etária, usando linguagem simples, apoio visual e atividades orais ou com manipulação.",
+        "isDidactic": true,
         "questions": [
           {
             "number": "1",
-            "statement": "3 + 4 = ____",
-            "visualElements": "",
-            "skill": "adição",
-            "expectedAnswer": "7",
+            "statement": "Escreva o nome das figuras e numere-as de acordo com a ordem alfabética.",
+            "visualElements": "Desenhos de dado, lobo, bolo, índio, janela, mamão, elefante, papagaio, abacaxi e carro, cada um com um círculo para numerar.",
+            "skill": "ordem alfabética",
+            "supportContent": "dado - lobo - bolo - índio - janela - mamão - elefante - papagaio - abacaxi - carro",
+            "answerSlots": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10"
+            ],
+            "expectedAnswer": "1. abacaxi; 2. bolo; 3. carro; 4. dado; 5. elefante; 6. índio; 7. janela; 8. lobo; 9. mamão; 10. papagaio",
             "steps": [
-              "Conte 3 dedos.",
-              "Depois, conte mais 4 dedos.",
-              "Quantos dedos você tem agora?"
+              "Mostre as figuras para a criança.",
+              "Diga o nome de cada figura em voz alta.",
+              "Peça para a criança repetir os nomes.",
+              "Explique que vamos colocar os nomes em ordem, do A ao Z.",
+              "Ajude a criança a identificar qual nome começa com a letra A e coloque o número 1."
             ],
             "hints": [
-              "Lembre-se de contar os dedos um a um.",
-              "Você pode usar brinquedos para ajudar a contar.",
-              "Se precisar, desenhe os números."
+              "Olhe a primeira letra de cada palavra.",
+              "Qual palavra começa com a letra A?",
+              "Vamos dizer os nomes em voz alta e colocar em ordem do A ao Z."
             ]
           },
           {
             "number": "2",
-            "statement": "6 - 2 = ____",
-            "visualElements": "",
-            "skill": "subtração",
-            "expectedAnswer": "4",
+            "statement": "Leia as palavras e coloque-as em ordem alfabética.",
+            "visualElements": "Lista de palavras para ordenar alfabeticamente.",
+            "skill": "ordem alfabética",
+            "supportContent": "pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate",
+            "answerSlots": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27"
+            ],
+            "expectedAnswer": "1. amora; 2. batata; 3. brócolis; 4. carambola; 5. cebola; 6. damasco; 7. espinafre; 8. figo; 9. goiaba; 10. hortelã; 11. inhame; 12. jaca; 13. kiwi; 14. limão; 15. manga; 16. mel; 17. melão; 18. nabo; 19. ovos; 20. pepino; 21. quiabo; 22. repolho; 23. salsinha; 24. tangerina; 25. tomate; 26. uvas; 27. vagem",
             "steps": [
-              "Conte 6 objetos.",
-              "Tire 2 objetos.",
-              "Quantos objetos sobraram?"
+              "Leia as palavras em voz alta para a criança.",
+              "Mostre a primeira letra de cada palavra.",
+              "Explique que vamos colocar as palavras em ordem do A ao Z.",
+              "Ajude a criança a identificar qual palavra começa com a letra A e coloque-a primeiro.",
+              "Continue com as outras palavras, ajudando a criança a identificar a ordem das letras."
             ],
             "hints": [
-              "Use lápis ou pedrinhas para contar.",
-              "Lembre-se de que subtrair é tirar.",
-              "Desenhe os objetos se precisar."
-            ]
-          },
-          {
-            "number": "3",
-            "statement": "João tem 5 balas e ganhou mais 3. Quantas balas ele tem agora? ____",
-            "visualElements": "",
-            "skill": "adição",
-            "expectedAnswer": "8",
-            "steps": [
-              "Conte 5 balas.",
-              "Depois, conte mais 3 balas.",
-              "Quantas balas no total?"
-            ],
-            "hints": [
-              "Você pode usar balas de verdade para contar.",
-              "Lembre-se de somar as balas que ele já tinha com as que ganhou.",
-              "Desenhe as balas se precisar."
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "445a51fd-247b-4b7c-bea3-41d2701dc14a",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "47daa4da-2738-418e-aa1b-66d8d9f4ea92",
-      "originalName": "licao.pdf",
-      "mimeType": "application/pdf",
-      "size": 916,
-      "sha256": "7682d14ad580b8bed4751bf2bf5517737a6bbafd8b0f1b7b02f3839d1f349862",
-      "literacyLevel": "emergent",
-      "extractionModel": "gpt-4o-mini",
-      "promptVersion": "material-tutor-v1",
-      "expiresAt": "2026-11-28T22:31:26.694Z",
-      "extractionStatus": "ready",
-      "createdAt": "2026-11-21T22:31:26.694Z",
-      "updatedAt": "2026-11-21T22:31:36.430Z",
-      "storageKey": "445a51fd-247b-4b7c-bea3-41d2701dc14a.pdf",
-      "extractedText": "Contas de Matemática\nResolva as continhas:\n1) 3 + 4 = ____\n2) 6 - 2 = ____\n3) João tem 5 balas e ganhou mais 3. Quantas balas ele tem agora? ____",
-      "analysis": {
-        "readable": true,
-        "unreadableReason": "",
-        "title": "Contas de Matemática",
-        "subject": "Matemática",
-        "estimatedGrade": "1º ano",
-        "generalInstructions": "Resolva as continhas:",
-        "notesForTutor": "A criança pode ter dificuldades com a subtração e a interpretação do problema. É importante incentivá-la a contar com os dedos se necessário.",
-        "questions": [
-          {
-            "number": "1",
-            "statement": "3 + 4 = ____",
-            "visualElements": "",
-            "skill": "adição simples",
-            "expectedAnswer": "7",
-            "steps": [
-              "Conte 3 com os dedos.",
-              "Depois conte mais 4.",
-              "Quantos dedos você tem agora?"
-            ],
-            "hints": [
-              "Lembre-se que a adição é juntar.",
-              "Você pode usar os dedos para contar.",
-              "Tente contar em voz alta."
-            ]
-          },
-          {
-            "number": "2",
-            "statement": "6 - 2 = ____",
-            "visualElements": "",
-            "skill": "subtração simples",
-            "expectedAnswer": "4",
-            "steps": [
-              "Comece com 6 dedos.",
-              "Tire 2 dedos.",
-              "Quantos dedos sobraram?"
-            ],
-            "hints": [
-              "Subtração é tirar.",
-              "Conte os dedos que você tem.",
-              "Tente fazer a conta em voz alta."
-            ]
-          },
-          {
-            "number": "3",
-            "statement": "João tem 5 balas e ganhou mais 3. Quantas balas ele tem agora? ____",
-            "visualElements": "",
-            "skill": "adição em contexto",
-            "expectedAnswer": "8",
-            "steps": [
-              "Conte as 5 balas que João já tem.",
-              "Depois adicione as 3 balas que ele ganhou.",
-              "Quantas balas João tem no total?"
-            ],
-            "hints": [
-              "Pense em juntar as balas.",
-              "Você pode desenhar as balas para ajudar.",
-              "Conte as balas uma a uma."
+              "Qual palavra começa com a letra A?",
+              "Qual palavra vem depois da amora?",
+              "Vamos dizer os nomes em voz alta e colocar em ordem do A ao Z."
             ]
           }
         ]
-      }
+      },
+      "isDidactic": true
+    }
+  ],
+  "recordings": [
+    {
+      "id": "c3dfccf3-229a-46ab-9ef6-89d9b4ad7249",
+      "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
+      "profileId": "568384fe-016c-4648-8dde-59258f2d471a",
+      "materialId": "c081950f-b861-40ff-9d18-d1b4fe01c407",
+      "title": "Oficina de Reforço Escolar - 3º ano",
+      "mimeType": "audio/webm",
+      "size": 1649161,
+      "durationMs": 102425,
+      "storageKey": "c3dfccf3-229a-46ab-9ef6-89d9b4ad7249.webm",
+      "transcript": [
+        {
+          "speaker": "lumi",
+          "text": "Oi, Lucas! Eu vi sua lição de Oficina de Reforço Escolar - 3º ano. Vamos fazer juntos, um pedacinho de cada vez?"
+        },
+        {
+          "speaker": "child",
+          "text": "Vamos."
+        },
+        {
+          "speaker": "lumi",
+          "text": "Ótimo! Vamos começar pela Questão 1. Na Questão 1, você precisa escrever o nome das figuras e numerá-las em ordem alfabética. Tem um desenho de um dado, lobo, bolo,índio, janela, mamão, elefante, papagaio, abacaxi e carro. Primeiro, vamos olhar para os desenhos. Você consegue me dizer o nome de um dos desenhos?"
+        },
+        {
+          "speaker": "child",
+          "text": "Sim, abacaxi."
+        },
+        {
+          "speaker": "lumi",
+          "text": "Isso mesmo! Abacaxi é um bom começo! Agora, qual letra vem primeiro no alfabeto? Qual palavra começa com a letra A?"
+        },
+        {
+          "speaker": "child",
+          "text": "Abacaxi?"
+        },
+        {
+          "speaker": "lumi",
+          "text": "Isso mesmo! A palavra \"abacaxi\" começa com a letra A. Então, você vai colocar o número 1 na figura do abacaxi. Agora, qual palavra vem depois da A no alfabeto? Você consegue pensar em outra figura?"
+        },
+        {
+          "speaker": "child",
+          "text": "B"
+        },
+        {
+          "speaker": "lumi",
+          "text": "Muito bem! A letra B vem depois da A. Agora, qual figura começa com a letra B? Qual é o nome dela?"
+        },
+        {
+          "speaker": "child",
+          "text": "Bolo"
+        },
+        {
+          "speaker": "lumi",
+          "text": "Exatamente! A figura que começa com a letra B é o \"bolo\". Agora, você vai colocar o número 2 na figura do bolo.Ótimo trabalho! Agora, vamos continuar! Qual figura vem depois do bolo? Você consegue pensar em uma figura que comece com a letra C?"
+        }
+      ],
+      "startedAt": "2026-11-22T10:02:17.658Z",
+      "createdAt": "2026-11-22T10:04:00.129Z",
+      "expiresAt": "2026-11-29T10:04:00.129Z"
     },
     {
-      "id": "aff6c1a0-f135-46a7-8c8e-c6d2263acb1f",
-      "familyId": "demo-family",
-      "profileId": "demo-lia",
-      "demoSessionId": "f9030759-06ab-4555-8ab5-880c4477e27e",
-      "originalName": "Screenshot From 2026-11-21 18-35-15.png",
-      "mimeType": "image/png",
-      "size": 122149,
-      "sha256": "45612ce0bc826b9faad533dd97f7c213060f032346aefa93615a642860c26be1",
-      "extractionModel": "anthropic/claude-opus-5.5",
-      "promptVersion": "material-text-v1",
-      "expiresAt": "2026-11-28T21:35:23.220Z",
-      "extractionStatus": "ready",
-      "createdAt": "2026-11-21T21:35:23.221Z",
-      "updatedAt": "2026-11-21T21:35:28.434Z",
-      "storageKey": "aff6c1a0-f135-46a7-8c8e-c6d2263acb1f.png",
-      "extractedText": "ORDEM ALFABÉTICA\n\nLeia as palavras e coloque-as em ordem alfabética:\n\npepino - mel - tangerina - amora - manga -\ncebola - nabo - kiwi - repolho - ovos -\nuvas - batata - limão - salsinha - damasco -\nvagem - espinafre - hortelã - figo - quiabo -\ncarambola - inhame - goiaba - melão - jaca -\nbrócolis - tomate\n\n1.________________\n2.________________\n3.________________\n4.________________\n5.________________\n6.________________\n7.________________\n8.________________\n9.________________\n10.________________\n11.________________\n12.________________\n13.________________\n14.________________\n\n15.________________\n16.________________\n17.________________\n18.________________\n19.________________\n20.________________\n21.________________\n22.________________\n23.________________\n24.________________\n25.________________\n26.________________\n27.________________"
+      "id": "1cf89e47-4362-4235-93f7-2c6b80ac05ed",
+      "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
+      "profileId": "568384fe-016c-4648-8dde-59258f2d471a",
+      "title": "Conversa livre",
+      "mimeType": "audio/webm",
+      "size": 581939,
+      "durationMs": 36160,
+      "storageKey": "1cf89e47-4362-4235-93f7-2c6b80ac05ed.webm",
+      "transcript": [
+        {
+          "speaker": "lumi",
+          "text": "Oi, Lucas! Eu sou o Lumi. O que vamos descobrir juntos hoje?"
+        }
+      ],
+      "startedAt": "2026-11-22T10:01:39.253Z",
+      "createdAt": "2026-11-22T10:02:15.539Z",
+      "expiresAt": "2026-11-29T10:02:15.539Z"
+    },
+    {
+      "id": "0adee757-3f3e-4fb1-acb3-694f66f876aa",
+      "familyId": "777a281e-a73f-4bb5-b103-ae2f4cb458fe",
+      "profileId": "f2744fdc-5cff-445e-9256-634e0f84ddd8",
+      "title": "Conversa livre",
+      "mimeType": "audio/webm",
+      "size": 117493,
+      "durationMs": 7363,
+      "storageKey": "0adee757-3f3e-4fb1-acb3-694f66f876aa.webm",
+      "transcript": [],
+      "startedAt": "2026-11-22T09:53:40.015Z",
+      "createdAt": "2026-11-22T09:53:47.395Z",
+      "expiresAt": "2026-11-29T09:53:47.395Z"
+    },
+    {
+      "id": "214cc800-19db-4088-a951-fb11beaa7599",
+      "familyId": "777a281e-a73f-4bb5-b103-ae2f4cb458fe",
+      "profileId": "f2744fdc-5cff-445e-9256-634e0f84ddd8",
+      "title": "Conversa livre",
+      "mimeType": "audio/webm",
+      "size": 400155,
+      "durationMs": 24877,
+      "storageKey": "214cc800-19db-4088-a951-fb11beaa7599.webm",
+      "transcript": [],
+      "startedAt": "2026-11-22T09:53:14.933Z",
+      "createdAt": "2026-11-22T09:53:39.877Z",
+      "expiresAt": "2026-11-29T09:53:39.877Z"
+    },
+    {
+      "id": "6223f410-17e2-4588-a5a7-7413060ab39b",
+      "familyId": "777a281e-a73f-4bb5-b103-ae2f4cb458fe",
+      "profileId": "f2744fdc-5cff-445e-9256-634e0f84ddd8",
+      "materialId": "2f6d4041-2222-4d85-ae3d-b25cb082fd9a",
+      "title": "Oficina de Reforço Escolar - 3º ano",
+      "mimeType": "audio/webm",
+      "size": 111368,
+      "durationMs": 51672,
+      "storageKey": "6223f410-17e2-4588-a5a7-7413060ab39b.webm",
+      "transcript": [
+        {
+          "speaker": "lumi",
+          "text": "Oi, Lucas! Eu vi sua lição de Oficina de Reforço Escolar - 3º ano. Vamos fazer juntos, um pedacinho de cada vez?"
+        }
+      ],
+      "startedAt": "2026-11-22T09:51:34.287Z",
+      "createdAt": "2026-11-22T09:52:25.999Z",
+      "expiresAt": "2026-11-29T09:52:25.999Z"
+    },
+    {
+      "id": "9fe4ac3c-06c1-4f29-8dfe-c6b08216b704",
+      "familyId": "777a281e-a73f-4bb5-b103-ae2f4cb458fe",
+      "profileId": "f2744fdc-5cff-445e-9256-634e0f84ddd8",
+      "title": "Conversa livre",
+      "mimeType": "audio/webm",
+      "size": 593007,
+      "durationMs": 37328,
+      "storageKey": "9fe4ac3c-06c1-4f29-8dfe-c6b08216b704.webm",
+      "transcript": [
+        {
+          "speaker": "lumi",
+          "text": "Oi, Lucas! Eu sou o Lumi. O que vamos descobrir juntos hoje?"
+        },
+        {
+          "speaker": "child",
+          "text": "Oi!"
+        },
+        {
+          "speaker": "lumi",
+          "text": "Como você está hoje? Pronto para aprender algo novo?"
+        },
+        {
+          "speaker": "child",
+          "text": "Como você está hoje?"
+        },
+        {
+          "speaker": "lumi",
+          "text": "Eu estou muito bem,"
+        },
+        {
+          "speaker": "child",
+          "text": "Muito bem."
+        },
+        {
+          "speaker": "lumi",
+          "text": "Que bom saber disso! Vamos aprender algo novo hoje? O que você gostaria de estudar?"
+        }
+      ],
+      "startedAt": "2026-11-22T09:50:49.583Z",
+      "createdAt": "2026-11-22T09:51:27.232Z",
+      "expiresAt": "2026-11-29T09:51:27.232Z"
     }
   ],
   "sessions": [
     {
-      "id": "06d5a44f-09db-4c3d-a23a-192d5ea0fe11",
-      "tokenHash": "a284af22a26a2593e3b489a14c603a56933ade3833b526b90003aed1491375a1",
+      "id": "0cb0d9b0-e244-49f5-a8e3-c2a11ecec4c5",
+      "tokenHash": "a20f28cd108da668f83206dda72353db009911b0917716da5fbb3cdc07f249ab",
       "familyId": "demo-family",
       "isDemo": true,
-      "createdAt": "2026-11-21T18:02:08.332Z",
-      "expiresAt": "2026-12-21T18:02:08.332Z"
+      "createdAt": "2026-11-22T09:57:07.219Z",
+      "expiresAt": "2026-12-22T09:57:07.219Z"
     },
     {
-      "id": "e7e67590-44af-4534-9903-b5d234047cc2",
-      "tokenHash": "6a8528da4f72acc8d3a142fe7b0174a5f57ba0c75a6bab9a956811ff1def27c8",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T18:02:18.016Z",
-      "expiresAt": "2026-12-21T18:02:18.016Z"
-    },
-    {
-      "id": "5555738d-0fdc-4382-9fac-557e8742437d",
-      "tokenHash": "dd5c9eb7c126b0e497d6ef008928cb423447aee28a9a528d432ffc807a5a7b9b",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T18:06:01.998Z",
-      "expiresAt": "2026-12-21T18:06:01.998Z"
-    },
-    {
-      "id": "15b4fab6-5ad1-4505-9f63-ab73eb0a1617",
-      "tokenHash": "0af2c7621db0e676d6a3886d761e93fb9d4e9448909dcdf96d5abec11976cc8d",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T18:07:08.417Z",
-      "expiresAt": "2026-12-21T18:07:08.417Z"
-    },
-    {
-      "id": "b95280c4-bad2-405a-8a4a-8d89549452b0",
-      "tokenHash": "c7d4f809c0a7b43227b9b5930b32bb15b1d7834e4459530497c68f3f004c9052",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T18:20:23.269Z",
-      "expiresAt": "2026-12-21T18:20:23.269Z"
-    },
-    {
-      "id": "2f6d2279-86c5-489b-9f7d-ed03bfaf215c",
-      "tokenHash": "c5878fd9d55cc77551e2ce11c22fb132c5ef4c9280d06684a6bfac4dfdd7e1c5",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T19:03:23.028Z",
-      "expiresAt": "2026-12-21T19:03:23.028Z"
-    },
-    {
-      "id": "781f692e-9703-4373-9c19-cc8910dca460",
-      "tokenHash": "c9fb1b3ab09f5448a2691fb567f61a58ff6ac18565a4a360513a183c1f306284",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T19:03:52.185Z",
-      "expiresAt": "2026-12-21T19:03:52.185Z"
-    },
-    {
-      "id": "7796dd40-74aa-4e0a-8f45-2e26a3fde904",
-      "tokenHash": "20436aba3d763273caa7438ed0cc86bcbf389b27cdfb20fe0149cee556203901",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T19:07:06.069Z",
-      "expiresAt": "2026-12-21T19:07:06.069Z"
-    },
-    {
-      "id": "79690947-d80f-4ec3-ab6e-acc94d0e5259",
-      "tokenHash": "ac105877f06cb943850b025ad26d8d9cdb280f6b648055eddb26af135f76d5dc",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T19:07:39.113Z",
-      "expiresAt": "2026-12-21T19:07:39.113Z"
-    },
-    {
-      "id": "a344ea25-5cf5-4336-8bc9-6ee3f1b315c7",
-      "tokenHash": "ec8ef2d65b9015d3dbcf5c15b47e0b9e606aea1db16fbf202ee2dac608272a56",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T19:12:29.083Z",
-      "expiresAt": "2026-12-21T19:12:29.083Z"
-    },
-    {
-      "id": "3c364022-284e-4a87-9c4b-2b10f9174ddf",
-      "tokenHash": "62a6a4ee6367d989273be798c080304570d171773a86fccb95e6e5bd0de1a1ae",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T19:15:31.746Z",
-      "expiresAt": "2026-12-21T19:15:31.746Z"
-    },
-    {
-      "id": "974b479c-af17-465d-aa0a-3d56e8163b83",
-      "tokenHash": "d81418d24883e9d8a6ab2abb7a6c4ab25515500891ade60ddaa9c163ebc00acc",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T21:29:48.950Z",
-      "expiresAt": "2026-12-21T21:29:48.950Z"
-    },
-    {
-      "id": "f9030759-06ab-4555-8ab5-880c4477e27e",
-      "tokenHash": "2a4cf7f26369f334a50fdeba717294ea6e97fc8e445aa4455f2dfbeabca09542",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T21:34:53.329Z",
-      "expiresAt": "2026-12-21T21:34:53.329Z"
-    },
-    {
-      "id": "47daa4da-2738-418e-aa1b-66d8d9f4ea92",
-      "tokenHash": "586cc33b37c80580f731203baa9bbc986a071333cb173324c7a498ab6c8d0e53",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T22:31:26.624Z",
-      "expiresAt": "2026-12-21T22:31:26.624Z",
-      "adultVerifiedUntil": "2026-11-21T22:46:26.673Z"
-    },
-    {
-      "id": "24315277-708b-407e-ab4e-9da6dbfe03e4",
-      "tokenHash": "0ab1bb4bce656ee2afa21c0a28f2afab9c7f73f74d8e048dce74c405012179ff",
-      "familyId": "390e9fac-3c1e-4fc2-a8ac-999a004f1aa3",
+      "id": "345b0a39-c592-48ec-a229-203d0d938295",
+      "tokenHash": "7c98268a12c11cfe371626d4f0ccfe6b06f82f6439a692c269fbf74bc7dd33fc",
+      "familyId": "ef34214a-afc5-43ed-894a-6591d74c0af6",
       "isDemo": false,
-      "createdAt": "2026-11-21T22:35:45.119Z",
-      "expiresAt": "2026-12-21T22:35:45.119Z",
-      "adultVerifiedUntil": "2026-11-21T22:51:18.837Z"
-    },
-    {
-      "id": "6923757a-7dad-46f7-94d3-b9ee23221aab",
-      "tokenHash": "3e98f07ff8fa94ee40fb798e88961db64032288d9b74c6048ab6e552538e7988",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T23:23:17.320Z",
-      "expiresAt": "2026-12-21T23:23:17.320Z",
-      "adultVerifiedUntil": "2026-11-21T23:44:54.857Z"
-    },
-    {
-      "id": "a036546a-5c5c-4e0c-81ee-4d71d104f26a",
-      "tokenHash": "e0cb8a3b5eabbab3f74772566dfdda753891106b8182872b8f6693a180e7437f",
-      "familyId": "demo-family",
-      "isDemo": true,
-      "createdAt": "2026-11-21T23:45:41.112Z",
-      "expiresAt": "2026-12-21T23:45:41.112Z"
+      "createdAt": "2026-11-22T09:58:54.069Z",
+      "expiresAt": "2026-12-22T09:58:54.069Z"
     }
   ],
   "version": 3

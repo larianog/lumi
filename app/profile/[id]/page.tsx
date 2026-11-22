@@ -21,6 +21,7 @@ import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
 import MaterialStudyPageClient from '@/components/MaterialStudyPageClient';
 import { calculateAge } from '@/lib/age';
+import { clearStoredAnswers } from '@/lib/answer-storage';
 import { prepareUploadFile } from '@/lib/prepare-upload';
 import { messages } from '@/packages/i18n';
 import type { ActivityCompletion, LiteracyLevel, Profile } from '@/types/database';
@@ -172,6 +173,9 @@ export default function ProfilePage() {
       } else {
         setSelectedMaterial(null);
         setMaterialUploadState('idle');
+        // Re-uploading the same file returns the cached material (same id);
+        // a new upload is a fresh attempt, so start with empty blanks.
+        clearStoredAnswers(payload.material.id);
         setActiveMaterial({ id: payload.material.id, profileId: targetProfileId });
       }
     } catch (error) {
@@ -265,6 +269,7 @@ export default function ProfilePage() {
             profileName={profile.firstName}
             age={age}
             activityTitle={messages.activities[selectedActivity].title}
+            recording={profile.type === 'child' ? { profileId: profile.id, title: 'Conversa livre' } : undefined}
             autoStart
             variant="inline"
           />
