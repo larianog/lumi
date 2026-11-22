@@ -31,6 +31,8 @@ If the first agent turn is interrupted and omitted, `messageList` can remain emp
 
 ## Agent Visualizer Mapping
 
+In material sessions, completed tutor confirmations after a child answer trigger one Plush success cycle; whole-material confirmation separately starts the authenticated completion flow. The selected provider avatar remains selected and receives the whole-material completion callback without the local Plush animation.
+
 Plush local avatars use a separate RTC audio activity path (`useLumiSpeechState` / `LumiSpeechDetector`). A session's generic `listening` event is not proof the user is speaking. Existing mic/remote agent levels drive idle/listening/speaking with short attack/release windows; audible agent speech wins visual overlap, and continuing user speech resumes listening once agent audio ends. Disabled mic, lost connection, or inaudible remote playback clears the corresponding activity. Transcript rendering, voice interruption behavior, and the visualizer mapping below are unchanged.
 
 `mapAgentVisualizerState` prioritizes RTC transport state before agent semantic state:
