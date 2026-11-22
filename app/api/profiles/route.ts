@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addProfilesToFamily, createFamily, createSession, getFamilyForSession } from '@/lib/db';
+import { addProfilesToFamily, createFamily, createSession, getFamilyForSession, setProfileLumiAvatar } from '@/lib/db';
+import { isLumiAvatarId } from '@/lib/lumi-avatars';
 import { getSessionToken, setSessionCookie } from '@/lib/lumi-session';
 import type { Profile, ProfileType } from '@/types/database';
 
@@ -105,5 +106,26 @@ export async function POST(request: NextRequest) {
     }
     console.error('Error creating profile:', error);
     return NextResponse.json({ error: 'Não foi possível criar o perfil.' }, { status: 500 });
+  }
+}
+
+/** Child profile: save the Lumi avatar picked on /profile/[id]/avatars. */
+export async function PATCH(request: NextRequest) {
+  try {
+    const result = await getFamilyForSession(getSessionToken(request));
+    if (!result) return NextResponse.json({ error: 'Sessão não encontrada.' }, { status: 401 });
+    const body = await request.json().catch(() => null) as { profileId?: unknown; lumiAvatar?: unknown } | null;
+    if (typeof body?.profileId !== 'string' || !isLumiAvatarId(body.lumiAvatar)) {
+      return NextResponse.json({ error: 'Escolha um avatar válido.' }, { status: 400 });
+    }
+    if (result.session.isDemo) {
+      return NextResponse.json({ error: 'No modo demonstração não dá para trocar o avatar.' }, { status: 403 });
+    }
+    const profile = await setProfileLumiAvatar(result.family.id, body.profileId, body.lumiAvatar);
+    if (!profile) return NextResponse.json({ error: 'Perfil infantil não encontrado.' }, { status: 404 });
+    return NextResponse.json({ profile });
+  } catch (error) {
+    console.error('Error saving Lumi avatar:', error);
+    return NextResponse.json({ error: 'Não foi possível salvar o avatar.' }, { status: 500 });
   }
 }

@@ -7,6 +7,8 @@ export type Profile = {
   lastName: string;
   birthDate: string;
   avatar: number;
+  /** Lumi avatar chosen by the child (`LumiAvatarId`); default when missing. */
+  lumiAvatar?: string;
   createdAt: string;
 };
 

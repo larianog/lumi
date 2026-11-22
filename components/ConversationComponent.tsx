@@ -34,6 +34,8 @@ import {
   type LumiSendTextDetail,
 } from '@/lib/lumi-events';
 import { useSessionRecorder } from '@/lib/use-session-recorder';
+import ChromaKeyAvatar from '@/components/ChromaKeyAvatar';
+import { getLumiAvatar } from '@/lib/lumi-avatars';
 import { PhoneOff } from 'lucide-react';
 import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
 import { messages } from '@/packages/i18n';
@@ -103,6 +105,7 @@ export default function ConversationComponent({
   variant = 'full',
   onRetryMicrophone,
   recording,
+  lumiAvatar,
 }: ConversationComponentProps) {
   const client = useRTCClient();
   const remoteUsers = useRemoteUsers();
@@ -465,7 +468,7 @@ export default function ConversationComponent({
       })),
     [messageList, currentInProgressMessage, agentUID],
   );
-  const { isRecording } = useSessionRecorder({
+  useSessionRecorder({
     context: recording,
     micTrack: localMicrophoneTrack,
     remoteAudioTracks,
@@ -566,6 +569,7 @@ export default function ConversationComponent({
   }, [onEndConversation]);
 
   const avatarUser = remoteUsers.find((user) => user.uid.toString() === avatarUID);
+  const avatar = getLumiAvatar(lumiAvatar);
   const displayMessages = currentInProgressMessage
     ? [...messageList, currentInProgressMessage]
     : messageList;
@@ -610,9 +614,9 @@ export default function ConversationComponent({
       <div className="lumi-inline" role="region" aria-label={messages.voice.title}>
         {voiceWarnings}
         {avatarUser ? (
-          <div className="lumi-inline-avatar"><RemoteUser user={avatarUser} /></div>
+          <div className="lumi-inline-avatar is-keyed"><ChromaKeyAvatar user={avatarUser} keying={avatar.keying} /></div>
         ) : (
-          <Image className="lumi-inline-fallback" src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={480} height={520} priority />
+          <Image className="lumi-inline-fallback" src={avatar.image} alt={messages.accessibility.lumiMascot} width={480} height={520} priority />
         )}
         {hiddenRemoteAudio}
         <div className="lumi-inline-controls">
@@ -626,11 +630,6 @@ export default function ConversationComponent({
             disabledColor="hsl(var(--destructive))"
           />
           <span className="lumi-inline-status" aria-live="polite">{statusLabel}</span>
-          {isRecording && (
-            <span className="lumi-inline-recording" title={messages.voice.recordingHint}>
-              <span aria-hidden="true" />{messages.voice.recording}
-            </span>
-          )}
         </div>
         <button className="lumi-inline-end" type="button" onClick={() => void handleEndConversation()}>
           <PhoneOff size={16} />{messages.voice.endSession}
@@ -656,9 +655,9 @@ export default function ConversationComponent({
           aria-label={messages.accessibility.lumiMascot}
         >
           {avatarUser ? (
-            <div className="lumi-live-avatar"><RemoteUser user={avatarUser} /></div>
+            <div className="lumi-live-avatar is-keyed"><ChromaKeyAvatar user={avatarUser} keying={avatar.keying} fit="contain" /></div>
           ) : (
-            <img className="lumi-avatar-fallback" src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} />
+            <img className="lumi-avatar-fallback" src={avatar.image} alt={messages.accessibility.lumiMascot} />
           )}
           {hiddenRemoteAudio}
           <div className="agent-visualizer-shell"><AgentVisualizer state={visualizerState} size="lg" /></div>

@@ -15,6 +15,7 @@ import type {
   ClientStartRequest,
 } from '@/types/conversation';
 import { ErrorBoundary } from './ErrorBoundary';
+import { getLumiAvatar } from '@/lib/lumi-avatars';
 import { LoadingSkeleton } from './LoadingSkeleton';
 
 const ConversationComponent = dynamic(() => import('./ConversationComponent'), {
@@ -46,6 +47,8 @@ type LumiVoiceAgentProps = {
   materialId?: string;
   /** Record the session audio for the parent area. */
   recording?: SessionRecordingContext;
+  /** Lumi avatar chosen on the child's profile (`LumiAvatarId`). */
+  lumiAvatar?: string;
   /** Start the session on mount instead of waiting for the "start" button. */
   autoStart?: boolean;
   /** `modal` = full-screen dialog; `inline` = avatar embedded in the page. */
@@ -60,10 +63,12 @@ export default function LumiVoiceAgent({
   profileId,
   materialId,
   recording,
+  lumiAvatar,
   autoStart = false,
   variant = 'modal',
   onClose = () => {},
 }: LumiVoiceAgentProps) {
+  const avatarImage = getLumiAvatar(lumiAvatar).image;
   const [showConversation, setShowConversation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +114,7 @@ export default function LumiVoiceAgent({
             age,
             activity_title: activityTitle,
             material_id: materialId,
+            avatar_id: lumiAvatar,
           } satisfies ClientStartRequest & {
             profile_name: string;
             age: number;
@@ -233,7 +239,7 @@ export default function LumiVoiceAgent({
     return (
       <div className="lumi-inline-host">
         {showConversation && agoraData && rtmClient ? (
-          <Suspense fallback={<LumiInlinePlaceholder status={messages.voice.starting} />}>
+          <Suspense fallback={<LumiInlinePlaceholder image={avatarImage} status={messages.voice.starting} />}>
             <ErrorBoundary>
               {agentJoinError && <div className="voice-warning">{messages.voice.connectionError}</div>}
               <AgoraProvider>
@@ -245,13 +251,14 @@ export default function LumiVoiceAgent({
                   onTokenWillExpire={handleTokenWillExpire}
                   onEndConversation={handleEndConversation}
                   recording={recording}
+                  lumiAvatar={lumiAvatar}
                   variant="inline"
                 />
               </AgoraProvider>
             </ErrorBoundary>
           </Suspense>
         ) : sessionEnded ? (
-          <LumiInlinePlaceholder status={messages.voice.sessionEnded}>
+          <LumiInlinePlaceholder image={avatarImage} status={messages.voice.sessionEnded}>
             <button
               className="lumi-inline-restart"
               type="button"
@@ -265,7 +272,7 @@ export default function LumiVoiceAgent({
             </button>
           </LumiInlinePlaceholder>
         ) : (
-          <LumiInlinePlaceholder status={error ?? messages.voice.starting} />
+          <LumiInlinePlaceholder image={avatarImage} status={error ?? messages.voice.starting} />
         )}
       </div>
     );
@@ -276,7 +283,7 @@ export default function LumiVoiceAgent({
       {!showConversation ? (
         <div className="voice-precall">
           <button className="voice-close" onClick={onClose} aria-label={messages.common.close}><X size={21} /></button>
-          <div className="voice-precall-orbit"><Image src="/assets/lumi-avatar.png" alt={messages.accessibility.lumiMascot} width={160} height={165} /></div>
+          <div className="voice-precall-orbit"><Image src={avatarImage} alt={messages.accessibility.lumiMascot} width={160} height={165} /></div>
           <span className="eyebrow">{messages.voice.title}</span>
           <h2>{messages.voice.preCall}</h2>
           <p>{messages.voice.configurationHint}</p>
@@ -299,6 +306,7 @@ export default function LumiVoiceAgent({
                 onTokenWillExpire={handleTokenWillExpire}
                 onEndConversation={handleEndConversation}
                 recording={recording}
+                lumiAvatar={lumiAvatar}
               />
             </AgoraProvider>
           </ErrorBoundary>
@@ -324,12 +332,12 @@ function stopSession(agentId: string | undefined, channel: string | undefined) {
   void releaseRtm(channel);
 }
 
-function LumiInlinePlaceholder({ status, children }: { status: string; children?: React.ReactNode }) {
+function LumiInlinePlaceholder({ status, image, children }: { status: string; image: string; children?: React.ReactNode }) {
   return (
     <div className="lumi-inline">
       <Image
         className="lumi-inline-fallback"
-        src="/assets/lumi-avatar.png"
+        src={image}
         alt={messages.accessibility.lumiMascot}
         width={480}
         height={520}

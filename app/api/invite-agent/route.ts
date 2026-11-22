@@ -1,5 +1,3 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   AgoraClient,
@@ -12,7 +10,9 @@ import {
   OpenAI,
 } from 'agora-agents';
 import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
-import { buildAgentToken } from '@/lib/agora-agent-token';
+import { buildAgentToken, buildAvatarToken } from '@/lib/agora-agent-token';
+import { resolveLemonSliceSource } from '@/lib/lumi-avatar-source';
+import { getLumiAvatar } from '@/lib/lumi-avatars';
 import { getFamilyForSession, getStudyMaterial } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
 import { defaultLiteracyLevel, formatHomeworkBrief } from '@/lib/material-extraction';
@@ -139,25 +139,13 @@ export async function POST(request: NextRequest) {
 
     const lemonSliceApiKey = process.env.NEXT_LEMONSLICE_API_KEY;
     if (lemonSliceApiKey) {
-      // With NEXT_LEMONSLICE_AGENT_ID, use the avatar configured in the LemonSlice
-      // dashboard (its look, avatar prompt and idle prompt live there). Without it,
-      // fall back to the bundled Lumi image and the prompts below.
-      const lemonSliceAgentId = process.env.NEXT_LEMONSLICE_AGENT_ID?.trim();
-      const avatarSource = lemonSliceAgentId
-        ? { agentId: lemonSliceAgentId }
-        : {
-            agentImageBase64: (await readFile(join(process.cwd(), 'public/assets/lumi-avatar.png'))).toString('base64'),
-            aspectRatio: '2x3' as const,
-            additionalParams: {
-              agent_prompt: 'Friendly plush mascot, warm smile, bright curious eyes. Nods gently while speaking, small happy bounces when praising, calm and patient.',
-              agent_idle_prompt: 'Listens attentively, blinks softly, breathes calmly, small friendly nods, slight curious head tilt.',
-            },
-          };
+      // The child's chosen Lumi (lib/lumi-avatars.ts); unknown values fall back to the default.
+      const avatarSource = await resolveLemonSliceSource(getLumiAvatar(body.avatar_id).id);
       agent = agent.withAvatar(
         new LemonSlice({
           apiKey: lemonSliceApiKey,
           agoraUid: String(DEFAULT_AVATAR_UID),
-          agoraToken: buildAgentToken(channelName, DEFAULT_AVATAR_UID),
+          agoraToken: buildAvatarToken(channelName, DEFAULT_AVATAR_UID),
           ...avatarSource,
         }),
       );

@@ -16,6 +16,8 @@ export interface ClientStartRequest {
   age?: number;
   activity_title?: string;
   material_id?: string;
+  /** Chosen Lumi avatar (`LumiAvatarId`); validated against the server catalog. */
+  avatar_id?: string;
 }
 
 export interface StopConversationRequest {
@@ -44,4 +46,6 @@ export interface ConversationComponentProps {
   onRetryMicrophone?: () => void;
   /** When set, the session audio is recorded and saved for the parent area. */
   recording?: SessionRecordingContext;
+  /** Lumi avatar shown in the call (`LumiAvatarId`); default when missing. */
+  lumiAvatar?: string;
 }
