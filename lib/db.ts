@@ -10,20 +10,20 @@ import type {
   Profile,
   SessionRecord,
   HomeworkAnalysis,
-  SessionRecording,
   StudyMaterial,
 } from '@/types/database';
 
 const DB_PATH = path.join(process.cwd(), 'data', 'lumi-db.json');
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
+const ADULT_ACCESS_TTL_MS = 1000 * 60 * 15;
 const DEMO_FAMILY_ID = 'demo-family';
+const DEMO_PASSWORD = 'lumi123';
 const scrypt = promisify(scryptCallback);
 
 const initialDb: Database = {
   families: [],
   completions: [],
   materials: [],
-  recordings: [],
   sessions: [],
   version: 3,
 };
@@ -111,7 +111,6 @@ async function readDb(): Promise<Database> {
       families: parsed.families as FamilyRecord[] ?? [],
       completions: parsed.completions ?? [],
       materials: parsed.materials ?? [],
-      recordings: parsed.recordings ?? [],
       sessions: parsed.sessions ?? [],
       version: 3,
     };
@@ -141,7 +140,6 @@ async function readDb(): Promise<Database> {
         family.profiles.some((profile) => profile.id === completion.profileId))?.id ?? '',
     })),
     materials: parsed.materials ?? [],
-    recordings: parsed.recordings ?? [],
     sessions: parsed.sessions ?? [],
     version: 3,
   };
@@ -200,12 +198,11 @@ export async function authenticateFamily(phone: string, password: string) {
   return toPublicFamily(family);
 }
 
-/** Adds several profiles in one write (signup step 2: one or more children). */
-export async function addProfilesToFamily(familyId: string, profiles: Profile[]) {
+export async function addProfileToFamily(familyId: string, profile: Profile) {
   return updateDb((db) => {
     const family = db.families.find((candidate) => candidate.id === familyId);
     if (!family) throw new Error('FAMILY_NOT_FOUND');
-    family.profiles.push(...profiles);
+    family.profiles.push(profile);
     return toPublicFamily(family);
   });
 }
@@ -229,15 +226,6 @@ export async function createSession(familyId: string, isDemo = false) {
   return token;
 }
 
-/** Logout: forget this browser's session (the cookie is cleared by the route). */
-export async function deleteSession(token: string | undefined) {
-  if (!token) return;
-  const tokenHash = hashToken(token);
-  await updateDb((db) => {
-    db.sessions = db.sessions.filter((session) => session.tokenHash !== tokenHash);
-  });
-}
-
 export async function getSession(token: string | undefined): Promise<SessionRecord | null> {
   if (!token) return null;
   const db = await readDb();
@@ -254,6 +242,34 @@ export async function getFamilyForSession(token: string | undefined) {
   const db = await readDb();
   const family = db.families.find((candidate) => candidate.id === session.familyId);
   return family ? { family: toPublicFamily(family), session } : null;
+}
+
+export async function verifyAdultAccess(token: string | undefined, password: string) {
+  const session = await getSession(token);
+  if (!session) return false;
+
+  let matches = false;
+  if (session.isDemo) {
+    const supplied = Buffer.from(password);
+    const expected = Buffer.from(DEMO_PASSWORD);
+    matches = supplied.length === expected.length && timingSafeEqual(supplied, expected);
+  } else {
+    const db = await readDb();
+    const family = db.families.find((candidate) => candidate.id === session.familyId);
+    matches = Boolean(family && await passwordMatches(password, family));
+  }
+
+  if (!matches) return false;
+  await updateDb((db) => {
+    const current = db.sessions.find((candidate) => candidate.id === session.id);
+    if (current) current.adultVerifiedUntil = new Date(Date.now() + ADULT_ACCESS_TTL_MS).toISOString();
+  });
+  return true;
+}
+
+export async function hasAdultAccess(token: string | undefined) {
+  const session = await getSession(token);
+  return Boolean(session?.adultVerifiedUntil && Date.parse(session.adultVerifiedUntil) > Date.now());
 }
 
 export async function recordCompletion(
@@ -417,50 +433,5 @@ export async function purgeExpiredStudyMaterials() {
     }
 
     return storageKeys;
-  });
-}
-
-function belongsToRecordingScope(recording: SessionRecording, familyId: string, demoSessionId?: string) {
-  return recording.familyId === familyId
-    && (demoSessionId ? recording.demoSessionId === demoSessionId : !recording.demoSessionId);
-}
-
-export async function saveRecording(recording: SessionRecording) {
-  return updateDb((db) => {
-    db.recordings.unshift(recording);
-    return recording;
-  });
-}
-
-export async function getRecording(id: string, familyId: string, demoSessionId?: string) {
-  const db = await readDb();
-  return db.recordings.find((recording) =>
-    recording.id === id && belongsToRecordingScope(recording, familyId, demoSessionId)) ?? null;
-}
-
-export async function getRecordingsByFamily(familyId: string, demoSessionId?: string) {
-  const db = await readDb();
-  return db.recordings.filter((recording) => belongsToRecordingScope(recording, familyId, demoSessionId));
-}
-
-/** Removes the record and returns its file key so the caller can delete the audio. */
-export async function deleteRecording(id: string, familyId: string, demoSessionId?: string) {
-  return updateDb((db) => {
-    const recording = db.recordings.find((candidate) =>
-      candidate.id === id && belongsToRecordingScope(candidate, familyId, demoSessionId));
-    if (!recording) return null;
-    db.recordings = db.recordings.filter((candidate) => candidate.id !== id);
-    return recording.storageKey;
-  });
-}
-
-/** Drops expired recordings and returns their file keys for deletion. */
-export async function purgeExpiredRecordings() {
-  return updateDb((db) => {
-    const now = Date.now();
-    const expired = db.recordings.filter((recording) => Date.parse(recording.expiresAt) <= now);
-    if (expired.length === 0) return [];
-    db.recordings = db.recordings.filter((recording) => Date.parse(recording.expiresAt) > now);
-    return expired.map((recording) => recording.storageKey);
   });
 }

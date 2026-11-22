@@ -41,10 +41,6 @@ export type HomeworkQuestion = {
   number: string;
   /** Faithful transcription of the question. */
   statement: string;
-  /** Word box, list or text the child reads to answer (child-safe, no answers). */
-  supportContent?: string;
-  /** Labels of the answer blanks, in sheet order (e.g. "1".."27"); empty for drawing tasks. */
-  answerSlots?: string[];
   /** Pictures, diagrams or layout the child needs (e.g. "5 maçãs desenhadas"). */
   visualElements: string;
   skill: string;
@@ -104,35 +100,13 @@ export type SessionRecord = {
   isDemo: boolean;
   createdAt: string;
   expiresAt: string;
-};
-
-/** One line of a recorded conversation. */
-export type RecordingTurn = { speaker: 'child' | 'lumi'; text: string };
-
-/** Audio of a Lumi session, recorded in the browser and visible only to adults. */
-export type SessionRecording = {
-  id: string;
-  familyId: string;
-  profileId: string;
-  /** Shared demo families are isolated by the browser session that recorded. */
-  demoSessionId?: string;
-  materialId?: string;
-  title: string;
-  mimeType: string;
-  size: number;
-  durationMs: number;
-  storageKey: string;
-  transcript: RecordingTurn[];
-  startedAt: string;
-  createdAt: string;
-  expiresAt: string;
+  adultVerifiedUntil?: string;
 };
 
 export type Database = {
   families: FamilyRecord[];
   completions: ActivityCompletion[];
   materials: StudyMaterial[];
-  recordings: SessionRecording[];
   sessions: SessionRecord[];
   version: 3;
 };

@@ -31,7 +31,6 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - UI components: `agora-agent-uikit` for visualizer, transcript, and mic controls
 - Server SDK: `agora-agents` for managed agent session startup
 - API routes: token generation, agent invite, chat, and stop routes live in `app/api`
-- Parent area (`/report`): open to the signed-in family session; there is no separate adult password.
 - Study materials: authenticated image upload, private temporary storage, OpenAI homework analysis, cached results, and child/parent history
 - Default voice-agent config: Agora-managed STT, LLM, and TTS; OpenAI credentials are used only for material extraction
 
@@ -82,9 +81,8 @@ The sections below (Start Here, Patterns, Anti-Patterns, etc.) remain the canoni
 - `lib/agora.ts`: shared agent UID defaults.
 - `lib/conversation.ts`: transcript normalization and visualizer state mapping.
 - `lib/material-extraction.ts`: server-only multimodal extraction request and response validation.
-- Homework tutoring: `analyzeMaterial` returns a child-safe `extractedText` and a server-only `analysis` (expected answers, steps, hints). Never add `analysis` to DTOs. `invite-agent` switches to `messages.voice.homeworkPrompt` when a material has an analysis.
+- Homework tutoring: `analyzeMaterial` returns a child-safe `extractedText` and a server-only `analysis` (expected answers, steps, hints). Never add `analysis` to DTOs. `invite-agent` switches to `messages.voice.homeworkPrompt` when a material has an analysis. Uploads require adult access.
 - `lib/material-storage.ts`: private temporary local file cache.
-- Session recordings: `lib/use-session-recorder.ts` records child mic + Lumi audio in the browser (Web Audio mix + `MediaRecorder`, tracks are only read, never stopped) and uploads on session end to `app/api/recordings`; listing, playback (`[id]/file`, Range) and delete require the family session (the parent area has no extra password). Files live in `data/recordings/` (never `public/`), retention `LUMI_RECORDING_RETENTION_HOURS` (default 168). Parent UI: `/report` lists each child's recorded sessions with the audio player, the transcript, delete, and the material linked to that session (`materialId`). The inline Lumi shows a visible "Gravando" indicator and a "Finalizar sessão" button.
 - `lib/study-materials.ts`: ownership, shared-demo isolation, DTO, and expiry helpers.
 - `config/env/env.local.example`: local environment template.
 - `deploy/docker/`: container build definition and Docker-specific ignore rules.
@@ -207,7 +205,7 @@ pnpm run build
 - Do not use the deprecated `turnDetection.type: 'agora_vad'` flat API; use `turnDetection.config.start_of_speech` and `turnDetection.config.end_of_speech`.
 - Do not replace `RtcTokenBuilder.buildTokenWithRtm` with an RTC-only token builder.
 - Do not hide SDK requirements only in `CLAUDE.md`; all agent-facing guidance belongs in `AGENTS.md`.
-- Do not place uploads under `public/` or commit `data/lumi-db.json` / `data/material-cache/` / `data/recordings/` runtime content.
+- Do not place uploads under `public/` or commit `data/lumi-db.json` / `data/material-cache/` runtime content.
 
 ## Done Criteria
 

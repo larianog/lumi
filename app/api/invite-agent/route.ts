@@ -12,7 +12,6 @@ import {
   OpenAI,
 } from 'agora-agents';
 import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID } from '@/lib/agora';
-import { buildAgentToken } from '@/lib/agora-agent-token';
 import { getFamilyForSession, getStudyMaterial } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
 import { defaultLiteracyLevel, formatHomeworkBrief } from '@/lib/material-extraction';
@@ -86,9 +85,6 @@ export async function POST(request: NextRequest) {
       area: Area.US,
       appId: requireEnv('NEXT_PUBLIC_AGORA_APP_ID'),
       appCertificate: requireEnv('NEXT_AGORA_APP_CERTIFICATE'),
-      // REST auth: the SDK's per-request token also expires after one second, which
-      // fails large start requests with 401 "Token is expired" (lib/agora-agent-token.ts).
-      authToken: buildAgentToken(channelName, DEFAULT_AGENT_UID),
     });
 
     let agent = new Agent({
@@ -132,33 +128,22 @@ export async function POST(request: NextRequest) {
         new MiniMaxTTS({
           model: 'speech_2_6_turbo',
           voiceId: 'English_captivating_female1',
-          // 4 = skip text inside [ ]: Lumi's [preencher …] commands for the answer grid.
-          skipPatterns: [4],
         }),
       );
 
     const lemonSliceApiKey = process.env.NEXT_LEMONSLICE_API_KEY;
     if (lemonSliceApiKey) {
-      // With NEXT_LEMONSLICE_AGENT_ID, use the avatar configured in the LemonSlice
-      // dashboard (its look, avatar prompt and idle prompt live there). Without it,
-      // fall back to the bundled Lumi image and the prompts below.
-      const lemonSliceAgentId = process.env.NEXT_LEMONSLICE_AGENT_ID?.trim();
-      const avatarSource = lemonSliceAgentId
-        ? { agentId: lemonSliceAgentId }
-        : {
-            agentImageBase64: (await readFile(join(process.cwd(), 'public/assets/lumi-avatar.png'))).toString('base64'),
-            aspectRatio: '2x3' as const,
-            additionalParams: {
-              agent_prompt: 'Friendly plush mascot, warm smile, bright curious eyes. Nods gently while speaking, small happy bounces when praising, calm and patient.',
-              agent_idle_prompt: 'Listens attentively, blinks softly, breathes calmly, small friendly nods, slight curious head tilt.',
-            },
-          };
+      const lumiImage = await readFile(join(process.cwd(), 'public/assets/lumi-avatar.png'));
       agent = agent.withAvatar(
         new LemonSlice({
           apiKey: lemonSliceApiKey,
           agoraUid: String(DEFAULT_AVATAR_UID),
-          agoraToken: buildAgentToken(channelName, DEFAULT_AVATAR_UID),
-          ...avatarSource,
+          additionalParams: {
+            agent_image_base64: lumiImage.toString('base64'),
+            aspect_ratio: '2x3',
+            agent_prompt: 'Mascote de pelúcia gentil, expressivo e curioso.',
+            agent_idle_prompt: 'Respira suavemente, pisca e faz pequenos acenos amigáveis.',
+          },
         }),
       );
     }
@@ -166,8 +151,6 @@ export async function POST(request: NextRequest) {
     const session = agent.createSession({
       channel: channelName,
       agentUid: String(DEFAULT_AGENT_UID),
-      // Pre-built: the SDK's own token expires after one second (see lib/agora-agent-token.ts).
-      token: buildAgentToken(channelName, DEFAULT_AGENT_UID),
       remoteUids: [requesterId],
       idleTimeout: 60,
       expiresIn: ExpiresIn.hours(1),

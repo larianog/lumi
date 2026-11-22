@@ -1,4 +1,3 @@
-import { stripFillCommands } from '@/lib/lumi-events';
 import {
   type AgentState,
   type AgentTranscription,
@@ -95,10 +94,9 @@ export function normalizeTranscript(
 ) {
   return transcript.map((item) => {
     const remappedUID = item.uid === '0' ? localUID : item.uid;
-    // Lumi's [preencher …] commands drive the answer grid; never show them.
     const normalizedText =
       typeof item.text === 'string'
-        ? normalizeTranscriptSpacing(stripFillCommands(item.text))
+        ? normalizeTranscriptSpacing(item.text)
         : item.text;
     return { ...item, uid: remappedUID, text: normalizedText };
   });

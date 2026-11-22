@@ -473,6 +473,20 @@ async function verifyLoginValidation() {
   );
 }
 
+async function verifyAdultAccessValidation() {
+  const { POST: verifyAdult } = await import('../app/api/adult-access/route');
+  const request = new NextRequest('http://localhost:3000/api/adult-access', {
+    body: JSON.stringify({}),
+    method: 'POST',
+  });
+  const response = await verifyAdult(request);
+
+  assert(
+    response.status === 400,
+    'POST /api/adult-access should require a password',
+  );
+}
+
 async function verifyActivitiesRequireSession() {
   const { POST: createCompletion } = await import('../app/api/activities/route');
   const request = new NextRequest('http://localhost:3000/api/activities', {
@@ -523,8 +537,6 @@ async function verifyMaterialAnalysis() {
     questions: [{
       number: '1',
       statement: '3 + 4 = ___',
-      supportContent: '',
-      answerSlots: [''],
       visualElements: '',
       skill: 'adição',
       expectedAnswer: 'SECRET-ANSWER-7',
@@ -611,6 +623,7 @@ async function main() {
   await verifyStopConversationSuccess();
   await verifyProfileCreationValidation();
   await verifyLoginValidation();
+  await verifyAdultAccessValidation();
   await verifyActivitiesRequireSession();
   await verifyMaterialsRequireSession();
   await verifyMaterialAnalysis();

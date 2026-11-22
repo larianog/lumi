@@ -61,7 +61,7 @@ Authenticated multipart body: `profileId` string plus `file` (`image/jpeg`, `ima
 ### `GET /api/materials`
 
 - `?profileId=<id>` returns browser-safe history metadata for a family-owned child.
-- `?scope=family` returns all current-session family material metadata (family session only).
+- `?scope=family` requires recent adult verification and returns all current-session family material metadata.
 
 List results exclude hashes, private storage keys, and extracted text.
 
@@ -123,21 +123,3 @@ From `types/conversation.ts` (high-use):
 
 - [conversation_lifecycle.md](L2/conversation_lifecycle.md) — How route contracts are used in sequence.
 - [transcript_pipeline.md](L2/transcript_pipeline.md) — Event-level contract mapping.
-
-### Session recordings
-
-- `POST /api/recordings` (child's session, multipart): `profileId` (child), `file` (`audio/webm` | `audio/ogg` | `audio/mp4`, ≤ 30 MB), optional `materialId` (kept only if it belongs to the same child), `title`, `startedAt`, `durationMs`, `transcript` (JSON `[{ speaker: 'child' | 'lumi', text }]`). `201 { id }`; `401`, `404` non-child, `413`, `415`.
-- `GET /api/recordings` → `SessionRecordingDto[]` for the family (demo sessions isolated).
-- `GET /api/recordings/[id]/file` → audio, supports `Range` (`206`).
-- `DELETE /api/recordings/[id]` → removes record and file.
-
-### `POST /api/logout`
-
-Deletes the caller's session record and clears the `lumi_session` cookie. Always `200 { success: true }` (idempotent). UI: `components/LogoutButton.tsx` on `/profiles` and in the parent area header.
-
-### `POST /api/profiles` (two-step signup)
-
-- No session (step 1): `{ firstName, lastName, phone, password }` creates the family with the **adult** profile (no birth date) and sets the session cookie. `400` missing name / phone / password < 6, `409` phone already registered.
-- With a family session (step 2 or "add child"): `{ children: [{ firstName, lastName, birthDate }] }` (1–8) adds child profiles in one write; a single child object is also accepted. Birth dates must be valid, not in the future, under 18 years. Demo family: `403`.
-- UI: `components/NewProfileForm.tsx` (`/new-profile?mode=signup` → step 1, `&type=child` → step 2). `/profiles` sends a family without children to step 2.
-

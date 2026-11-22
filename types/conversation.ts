@@ -1,4 +1,3 @@
-import type { SessionRecordingContext } from '@/lib/use-session-recorder';
 import type { RTMClient } from 'agora-rtm';
 
 export interface AgoraTokenData {
@@ -42,6 +41,4 @@ export interface ConversationComponentProps {
   variant?: 'full' | 'inline';
   /** Called from a user tap after microphone access was denied. */
   onRetryMicrophone?: () => void;
-  /** When set, the session audio is recorded and saved for the parent area. */
-  recording?: SessionRecordingContext;
 }
