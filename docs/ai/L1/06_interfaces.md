@@ -37,6 +37,8 @@ Success (`AgentResponse`):
 
 Validation failures return `400`; server failures return `500`.
 
+The main route uses `LumiTTS` from `lib/lumi-tts.ts` for both greeting and replies: managed MiniMax `speech_2_6_turbo`, voice `English_captivating_female1`, and explicit `params.language_boost: 'Portuguese'`. The adapter preserves SDK-managed model metadata while adding the documented MiniMax language option. No new environment variable or browser parameter is required. Contract tests inspect serialization without starting live sessions; pronunciation must be checked in a new conversation. The isolated playground provider experiment retains its own configuration.
+
 `requester_id` must be a decimal string in `1..2147483647` distinct from the reserved agent/avatar IDs. This is the current Conversational AI numeric participant limit, narrower than RTC's uint32 range. Invalid IDs are rejected before an agent session is created.
 
 ### `PATCH /api/profiles`
@@ -90,7 +92,7 @@ List results exclude hashes, private storage keys, and extracted text.
 
 ### `GET/PATCH /api/materials/[id]`
 
-`GET` returns authorized detail including extracted text while retained. `PATCH { "completed": true }` records idempotent explicit completion. Expired content keeps metadata but omits text.
+`GET` returns authorized detail including extracted text while retained. `PATCH { "completed": true }` records idempotent completion, invoked by the manual action or a whole-material tutor confirmation. Expired content keeps metadata but omits text.
 
 ## Event/Data Interfaces
 
@@ -114,7 +116,9 @@ Optional material settings are `HOMEWORK_VISION_MODEL` (default `gpt-4.1-mini`) 
 
 ## Shared Client-Side Interfaces
 
-`LumiConversationAvatar` and `LumiMaterialLoading` follow `prefers-reduced-motion` directly. They expose no play/pause/reload control and ignore older saved manual motion choices. A failed asset leaves the still fallback and an error status until the page is reloaded. The avatar catalog is browser-safe; `lib/lumi-avatar-source.ts` resolves provider IDs and the private Plush reference image only on the server. Welcome/profile selection and default lessons keep the animated Plush; saved non-Plush choices use the existing picker and provider display path.
+`ConversationComponent.celebrateAnswers` defaults to false and is enabled by `LumiVoiceAgent` only for material sessions, in inline and full layouts. It derives a `celebrationId` from `LumiAnswerCelebrationDetector` using completed normalized agent confirmations, deduplicated by turn ID. `LumiConversationAvatar` accepts `celebrationId?: string | null` (undefined skips the study clip preload) and `celebrationReady` (response preparation/audio finished). The avatar consumes one loaded celebration cycle; its cancellation gates consume the cue without replay. `LumiAnimationState` includes `celebrating`, while RTC speech detection remains idle/listening/speaking. Per-question cues do not persist completion. Whole-material completion uses the separate callback below; HTTP payloads and private analysis remain unchanged.
+
+Product avatars and material reading have automatic playback, with no start/pause button. They autoplay regardless of `prefers-reduced-motion` by explicit product choice and do not read or write manual playback choices in `sessionStorage`; old saved pauses cannot disable new mounts. Only failed loading/playback exposes **Recarregar**, which retries automatic playback. Hidden/offscreen gates remain. Playground controls and its reduced-motion autoplay gate remain independent.
 
 `LumiConversationAvatar` optionally accepts `idleOnly`, `className`, `entranceReady`, `onVisualReady` and `onAnimationEnd` for standalone illustrations. `idleOnly` loads only idle and uses a responsive frame; callers may size it through `--lumi-idle-width`. A disconnected call still renders idle, but never keeps its previous listening/speaking loop. Intersection and document visibility pause animation without changing voice lifecycle.
 
@@ -128,7 +132,7 @@ Optional material settings are `HOMEWORK_VISION_MODEL` (default `gpt-4.1-mini`) 
 
 `LumiConversationAvatar` receives the requested `state` plus `active`, `listeningEnabled` and `speakingEnabled` cancellation flags from the existing RTC lifecycle. Its `data-lumi-state` is the displayed cycle; `data-lumi-requested-state` tracks current speech. `LumiWebPClip.onReady` optionally reports cycle duration in milliseconds and `onCycleEnd` reports loaded playback boundaries. Conversation callers finish cycles except for incoming speech priority or explicit cancellation. Playground callers retain their independent timed simulation.
 
-`LumiVideoClip.fit` optionally selects `contain` (default) or centered `cover` for both players and the exported production manifest. The bundled landscape speaking WebP uses `cover` to crop transparent side margins in portrait containers without modifying its bytes. Local replacements default to `contain`.
+`LumiVideoClip.fit` optionally selects `contain` (default) or centered `cover` for both players and the exported production manifest. The bundled square speaking WebP uses `contain` to show the whole image and wings in portrait containers without modifying its bytes. Local replacements default to `contain`.
 
 The playground file selector accepts WebP/WebM/MP4/MOV up to 40 MB. `LumiVideoClip` represents both images and videos; file extension selects the renderer, and the browser validates decoding. `videoProductionManifest` exports `suggestedWebp` alongside existing video paths; it contains no local file bytes or blob URLs.
 
@@ -165,4 +169,6 @@ From `types/conversation.ts` (high-use):
 - [conversation_lifecycle.md](L2/conversation_lifecycle.md) — How route contracts are used in sequence.
 - [transcript_pipeline.md](L2/transcript_pipeline.md) — Event-level contract mapping.
 
-Non-didactic material classification from main is retained in persistence and DTOs (`isDidactic`, with an analysis fallback for older records). Prompt version `material-tutor-v5` invalidates pre-classification cache entries. Upload success still finishes the reading cycle before showing the adult-profile warning or the embedded study result. Processing responses that later become non-didactic must not start a child tutoring session. The shared workspace retains the original-file viewer, answer blanks, and the history route.
+Non-didactic material classification from main is retained in persistence and DTOs (`isDidactic`, with an analysis fallback for older records). Prompt version `material-tutor-v3` invalidates pre-classification cache entries. Upload success still finishes the reading cycle before showing the adult-profile warning or the embedded study result. Processing responses that later become non-didactic must not start a child tutoring session. The shared workspace retains keyboard/close-button image preview and the history route.
+
+`ConversationComponent.onMaterialCompleted?: () => void` reports the distinct final tutor verdict only after speech/preparation ends; `LumiVoiceAgent` forwards it only with `materialId`. The study workspace disables this callback for already-completed materials. Its automatic mode owns a locked, abortable 15-second `PATCH { completed: true }` and waits for the successful response plus success animation before invoking `onBack`/`onClose`, or returning standalone detail to `/profile/:id`. `LumiConversationAvatar.onCelebrationComplete?(id, outcome)` reports exactly once per cue with `played` after a full cycle or `skipped` on visibility/error/30-second timeout; it does not itself persist anything. Retry never creates a second completion timestamp.

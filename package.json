@@ -14,7 +14,7 @@
     "build": "npm run typecheck && next build --webpack",
     "start": "next start",
     "lint": "eslint .",
-    "verify:api": "node --import tsx scripts/verify-api-contracts.ts",
+    "verify:api": "node --import tsx scripts/verify-api-contracts.ts && node --import tsx scripts/verify-family-flow.ts",
     "typecheck": "tsc --noEmit",
     "verify": "pnpm run doctor && pnpm run lint && pnpm run typecheck && pnpm run verify:api && pnpm run build"
   },

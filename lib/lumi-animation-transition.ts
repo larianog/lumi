@@ -1,7 +1,7 @@
 import type { AgentState } from 'agora-agent-client-toolkit';
 import type { LumiSpeechState } from './lumi-speech';
 
-export type LumiAnimationState = LumiSpeechState | 'sleeping';
+export type LumiAnimationState = LumiSpeechState | 'sleeping' | 'celebrating';
 
 /** SDK silence is also rest; actual RTC speech still resets the inactivity timer. */
 export function isLumiRestingAgentState(state: `${AgentState}` | null): boolean {
@@ -16,6 +16,7 @@ export function nextLumiAnimationState(
 ): LumiAnimationState {
   // Audible speech retains priority over listening, including microphone echo.
   // Wake immediately on interaction; sleeping must never delay listening.
-  if (!finishingCycle || current === 'idle' || current === 'sleeping' || requested === 'speaking') return requested;
+  // Celebration completion is consumed by the avatar at its first cycle boundary.
+  if (!finishingCycle || current === 'idle' || current === 'sleeping' || current === 'celebrating' || requested === 'speaking') return requested;
   return current;
 }

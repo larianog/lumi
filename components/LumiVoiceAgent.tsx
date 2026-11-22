@@ -48,6 +48,7 @@ type LumiVoiceAgentProps = {
   profileId?: string;
   materialId?: string;
   recording?: SessionRecordingContext;
+  onMaterialCompleted?: () => void;
   /** Start the session on mount instead of waiting for the "start" button. */
   autoStart?: boolean;
   /** `modal` = full-screen dialog; `inline` = avatar embedded in the page. */
@@ -64,6 +65,7 @@ export default function LumiVoiceAgent({
   profileId,
   materialId,
   recording,
+  onMaterialCompleted,
   autoStart = false,
   variant = 'modal',
   avatarMode = 'provider',
@@ -224,6 +226,8 @@ export default function LumiVoiceAgent({
                   avatarMode={avatarMode}
                   lumiAvatar={lumiAvatar}
                   recording={recording}
+                  celebrateAnswers={Boolean(materialId)}
+                  onMaterialCompleted={materialId ? onMaterialCompleted : undefined}
                 />
               </AgoraProvider>
             </ErrorBoundary>
@@ -269,6 +273,8 @@ export default function LumiVoiceAgent({
                 avatarMode={avatarMode}
                 lumiAvatar={lumiAvatar}
                 recording={recording}
+                celebrateAnswers={Boolean(materialId)}
+                onMaterialCompleted={materialId ? onMaterialCompleted : undefined}
               />
             </AgoraProvider>
           </ErrorBoundary>

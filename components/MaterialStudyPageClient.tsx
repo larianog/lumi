@@ -6,6 +6,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
 import LumiMaterialLoading from '@/components/LumiMaterialLoading';
+import LumiConversationAvatar from '@/components/LumiConversationAvatar';
+import avatarStyles from '@/components/lumi-conversation-avatar.module.css';
 import { getLumiAvatarMode } from '@/lib/lumi-avatars';
 import MaterialQuestion from '@/components/MaterialQuestion';
 import { matchBankWords, mentionedQuestion, parseWordBank } from '@/lib/answer-matching';
@@ -48,6 +50,15 @@ export default function MaterialStudyPageClient({
   const [loadError, setLoadError] = useState('');
   const [completionError, setCompletionError] = useState('');
   const [completing, setCompleting] = useState(false);
+  const [automaticCompletion, setAutomaticCompletion] = useState(false);
+  const [successAnimationFinished, setSuccessAnimationFinished] = useState(false);
+  const completionRequest = useRef<AbortController | null>(null);
+  const returnedToUpload = useRef(false);
+  const finishSuccessAnimation = useCallback(() => setSuccessAnimationFinished(true), []);
+  const goBack = useCallback(() => {
+    if (onClose) onClose();
+    else router.push(`/profile/${profileId}`);
+  }, [onClose, router, profileId]);
   const [readingPending, setReadingPending] = useState(initialMaterial?.extractionStatus === 'processing');
   const finishReading = useCallback(() => setReadingPending(false), []);
   const [activeQuestion, setActiveQuestion] = useState<number | null>(null);
@@ -55,7 +66,19 @@ export default function MaterialStudyPageClient({
   useEffect(() => {
     activeQuestionRef.current = activeQuestion;
   }, [activeQuestion]);
-  const close = onClose ?? (() => router.push(`/profile/${profileId}`));
+  const close = goBack;
+
+  useEffect(() => () => {
+    const request = completionRequest.current;
+    completionRequest.current = null;
+    request?.abort();
+  }, [materialId]);
+
+  useEffect(() => {
+    if (!automaticCompletion || !material?.completedAt || !successAnimationFinished || returnedToUpload.current) return;
+    returnedToUpload.current = true;
+    goBack();
+  }, [automaticCompletion, material?.completedAt, successAnimationFinished, goBack]);
 
   const loadMaterial = useCallback(async (signal: AbortSignal) => {
     const response = await fetch(`/api/materials/${encodeURIComponent(materialId)}`, { cache: 'no-store', signal });
@@ -114,8 +137,13 @@ export default function MaterialStudyPageClient({
   }, [loadMaterial, material?.extractionStatus, loadError]);
 
 
-  const completeMaterial = async () => {
-    if (!material || material.completedAt || completing) return;
+  const completeMaterial = async (automatic = false) => {
+    if (!material || material.extractionStatus !== 'ready' || material.isDidactic === false || material.purgedAt) return;
+    if (automatic) setAutomaticCompletion(true);
+    if (material.completedAt || completionRequest.current) return;
+    const controller = new AbortController();
+    completionRequest.current = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 15_000);
     setCompleting(true);
     setCompletionError('');
     try {
@@ -123,14 +151,20 @@ export default function MaterialStudyPageClient({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ completed: true }),
+        signal: controller.signal,
       });
       const data = await response.json() as StudyMaterialDto & { error?: string };
-      if (!response.ok) throw new Error(data.error || 'Não foi possível concluir a atividade.');
+      if (!response.ok || data.id !== material.id || !data.completedAt) throw new Error('Não foi possível concluir a atividade. Tente novamente.');
+      if (completionRequest.current !== controller) return;
       setMaterial(data);
-    } catch (error) {
-      setCompletionError(error instanceof Error ? error.message : 'Não foi possível concluir a atividade.');
+    } catch {
+      if (completionRequest.current === controller) setCompletionError('Não foi possível salvar a conclusão. Tente novamente.');
     } finally {
-      setCompleting(false);
+      window.clearTimeout(timeout);
+      if (completionRequest.current === controller) {
+        completionRequest.current = null;
+        setCompleting(false);
+      }
     }
   };
 
@@ -194,7 +228,17 @@ export default function MaterialStudyPageClient({
       <div className="material-stage">
         <aside className="material-lumi">
           <div className="lumi-halo" />
-          {ready ? (
+          {automaticCompletion && getLumiAvatarMode(profile.lumiAvatar) === 'local' ? (
+            <div className={`lumi-inline-host ${avatarStyles.host}`}>
+              <div className="lumi-inline">
+                <LumiConversationAvatar state="idle" celebrationId={`material:${material.id}`}
+                  onCelebrationComplete={finishSuccessAnimation} />
+                <div className="lumi-inline-controls" role="status">
+                  <span className="lumi-inline-status">{completing ? messages.materials.completing : material.completedAt ? messages.materials.completed : messages.materials.retryCompletion}</span>
+                </div>
+              </div>
+            </div>
+          ) : ready ? (
             <LumiVoiceAgent
               profileName={profile.firstName}
               age={calculateAge(profile.birthDate)}
@@ -204,6 +248,10 @@ export default function MaterialStudyPageClient({
               avatarMode={getLumiAvatarMode(profile.lumiAvatar)}
               materialId={material.id}
               recording={{ profileId, materialId: material.id, title: material.title ?? material.originalName }}
+              onMaterialCompleted={material.completedAt ? undefined : () => {
+                if (getLumiAvatarMode(profile.lumiAvatar) !== 'local') setSuccessAnimationFinished(true);
+                void completeMaterial(true);
+              }}
               autoStart
               variant="inline"
             />

@@ -233,6 +233,8 @@ Voice-session startup works as follows:
 
 The voice configuration uses server-side voice activity detection, bounded conversation history, interruption support, and a material-specific greeting. Agora-managed STT, LLM, and TTS do not require separate provider credentials in the default configuration. The `OPENAI_API_KEY` described below is used for material analysis.
 
+`lib/lumi-tts.ts` keeps the existing MiniMax voice (`English_captivating_female1`) and explicitly sends `language_boost: 'Portuguese'` for both the initial greeting and subsequent replies. This avoids relying on automatic language detection for a short greeting. The adapter preserves the SDK's managed-model metadata; no MiniMax key is needed. Voice configuration changes take effect when a new conversation starts.
+
 ### Data and security boundaries
 
 - `NEXT_AGORA_APP_CERTIFICATE` and `OPENAI_API_KEY` are server-only secrets.
@@ -260,7 +262,7 @@ Lumi voice screens read the RTC connection snapshot as well as later events. Age
 Open [http://localhost:3000/playground/lumi-animation](http://localhost:3000/playground/lumi-animation) after `pnpm run dev`.
 This standalone lab adds no navigation or styling changes to the main Lumi experience.
 
-- **Vídeos por estado (default):** opens on **Falando** with `public/assets/lumi/states/lummi-falando-otimizada.webp` (143 frames, about 6 seconds, 600 × 650); **Escutando** uses `lummi-transparente-02.webp` (192 frames, about 8 seconds, 768 × 768) in the same directory. Both animated WebPs have alpha. Speaking uses an optimized portrait derivative (3,949,272 bytes, down from 9,202,324), retaining all 143 frames, delays and the previous centered cover framing. The Full HD source `lummi-animacao-transparente-1.webp` remains unchanged. Regenerate offline with `node scripts/optimize-lumi-speaking.mjs` (Sharp supplied by Next). Load local WebP/WebM/MP4/MOV overrides for any state, preview animations, pause/replay, inspect backgrounds, and simulate a conversation without API calls. Local overrides stay in page memory across playground tabs; reload or **Restaurar vídeo padrão** restores bundled defaults. Reading also has a bundled `lummi-lendo-transparente.webp` available for manual preview. Idle and sleeping also have bundled loops; the remaining three states await clips. See the [Lumi video production guide](docs/lumi-video-states.md) for the eight-state brief and alpha formats.
+- **Vídeos por estado (default):** opens on **Falando** with `public/assets/lumi/states/lummi-falando-asas-web-v1.webp` (181 frames, 6033 ms, 800 × 800); **Escutando** uses `lummi-transparente-02.webp` (192 frames, about 8 seconds, 768 × 768) in the same directory. Both animated WebPs have alpha. Speaking uses a 4,808,826-byte playback copy (89% smaller), keeping all frames, delays, dimensions and transparency. `scripts/optimize-lumi-speaking-wings.mjs` compresses color for web playback while preserving the 44,527,006-byte supplied master `lummi-falando-asas-preservadas.webp` unchanged. It uses `contain` to show the entire image and wings in portrait containers. The earlier optimized speaking clip and Full HD source `lummi-animacao-transparente-1.webp` remain unchanged; the new filename avoids stale cached blobs. Load local WebP/WebM/MP4/MOV overrides for any state, preview animations, pause/replay, inspect backgrounds, and simulate a conversation without API calls. Local overrides stay in page memory across playground tabs; reload or **Restaurar vídeo padrão** restores bundled defaults. Reading also has a bundled `lummi-lendo-transparente.webp` available for manual preview. Idle and sleeping also have bundled loops; the remaining two states await clips. See the [Lumi video production guide](docs/lumi-video-states.md) for the eight-state brief and alpha formats.
 - **Local 2D:** preview breathing, listening, thinking, speaking and celebration body motions; adjust intensity/speed, pause, play a sequence and compare with the original image. This is a silent motion study, not lip sync or a prediction of Lemon Slice output. Device reduced-motion preferences are respected.
 - **Lemon Slice:** compare the current prompt with `Mais presente` and `Expressiva`, edit speaking/idle prompts, choose an aspect ratio, then explicitly start a real test conversation. Each test uses its own `lumi-animation-*` channel and ends when its dialog closes. Tests consume Agora/Lemon Slice account usage.
 - **Exportar ajustes:** download the local motion values and Lemon Slice parameters as JSON. Exporting does not apply anything to the main app.
@@ -271,7 +273,7 @@ Video states are currently simulated, not wired to real Agora state events. Ordi
 
 In video mode, reduced-motion preferences pause automatic playback but keep **Simular conversa** and manual playback available. Clicking either explicitly enables playback for the current page; reload or a change in the system preference resets that choice. **Parar simulação** stops both the sequence and the current video.
 
-The simulation includes only states with loaded, playable clips. With both bundled assets ready, it runs **Escutando → Falando → Escutando**, skipping **Saudação** and the other missing states. On completion it pauses on **Repouso** if available, otherwise on the last displayed state.
+The simulation includes only states with loaded, playable clips. With the bundled conversation assets ready, it runs **Escutando → Falando → Escutando → Comemorando**, skipping **Saudação** and the other missing states. On completion it pauses on **Repouso** if available, otherwise on the last displayed state.
 
 The same tab also accepts static or animated **WebP**, including alpha transparency, up to 40 MB. WebP participates in the state simulation. Pausing or hiding it displays a still first-frame preview; resuming/restarting plays from the beginning. WebP speed and repeat count come from the file, so the video speed control is disabled for it. Manual WebP playback does not automatically return to idle on completion; use state selection or the timed simulation. These files stay browser-local too. See [Google's WebP documentation](https://developers.google.com/speed/webp/faq).
 
@@ -330,7 +332,7 @@ Run `pnpm run verify` before shipping changes. The `doctor` step requires a conf
 | `GET/POST /api/profiles` | Profile lookup and family/child creation |
 | `/api/recordings` | Save, list, play and delete session recordings for the signed-in family |
 | `GET/POST /api/materials` | Material history and authenticated upload/analysis |
-| `GET/PATCH /api/materials/[id]` | Authorized material detail and explicit completion |
+| `GET/PATCH /api/materials/[id]` | Authorized material detail and idempotent completion, manual or tutor-confirmed |
 | `GET /api/materials/[id]/file` | Authorized private material bytes |
 | `GET /api/generate-agora-token` | Combined RTC + RTM browser token |
 | `POST /api/invite-agent` | Material-aware managed voice-agent startup |
@@ -391,3 +393,6 @@ The bundled JSON database and private filesystem cache are intended for local de
 ## License
 
 Released under the [MIT License](LICENSE).
+
+
+WebP previews decode only the first frame with `createImageBitmap` (native image-load fallback), then encode a static PNG asynchronously. Poster/replay blob URLs are revoked and bitmap resources closed on cleanup. Playback uses native image load events, avoiding `next/image` decode waits that can delay cycle completion. Hidden tabs still pause playback. Product character animations autoplay regardless of OS reduced motion; only the playground keeps its reduced-motion autoplay gate.

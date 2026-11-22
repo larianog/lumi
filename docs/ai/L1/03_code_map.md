@@ -27,14 +27,12 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `stop-conversation/route.ts`: stops agent and handles idempotent already-stopping cases.
 - `chat/completions/route.ts`: optional OpenAI-compatible SSE proxy for custom LLM path.
 - `materials/route.ts`: upload validation, cache reservation, OpenAI analysis, and child/family lists.
-- `materials/[id]/route.ts`: authorized detail and explicit completion.
-- `recordings/` + `logout/`: session audio upload/list/play/delete and sign-out for the restored parent report.
+- `materials/[id]/route.ts`: authorized detail and idempotent completion (manual or tutor-confirmed).
 
 ## Client Ownership (`components`)
 
 - `LumiApp.tsx`: welcome headline and sign-up/sign-in actions, without the former family-description paragraph. Demo entry, its hint and errors are rendered only in development (`NODE_ENV === 'development'`); the login API contract is unchanged.
-- `LumiConversationAvatar.tsx` + `lumi-conversation-avatar.module.css`: shared conversation idle/listening/speaking playback for profiles, materials and activities; completes outgoing cycles with immediate speaking priority, independent readiness and system reduced-motion handling.
-- `LumiAvatarPickerClient.tsx` + `/profile/[id]/avatars`: child avatar catalog and save action. `lib/lumi-avatars.ts` defaults missing choices to Plush and selects local/provider playback; `ChromaKeyAvatar.tsx` displays selected provider video. `lib/lumi-avatar-source.ts` maps catalog IDs to server-only Lemon Slice sources.
+- `LumiConversationAvatar.tsx` + `lumi-conversation-avatar.module.css`: shared conversation idle/listening/speaking playback for profiles, materials and activities; completes outgoing cycles with immediate speaking priority, independent readiness and automatic character playback independent of system reduced motion, with hidden/offscreen pausing.
 - `lib/lumi-animation-transition.ts` + `lib/lumi-webp-timing.ts`: latest-state transition policy and RIFF/ANMF timing; `scripts/verify-lumi-transitions.ts` checks both via `verify:api`.
 - `useLumiSpeechState.ts` + `lib/lumi-speech.ts`: samples existing RTC tracks and smooths speech activity; `scripts/verify-lumi-speech.ts` exercises silence, noise, overlap, mute, blocked audio, and reconnect behavior through `verify:api`.
 - `useLumiIdleSleep.ts`: 30-second silent/visible inactivity timer for local voice avatars, page-interaction wake listeners and immediate speech wake-up. Its `sleeping` state is visual only; RTC and microphone ownership remain in the conversation hooks. `lummi-dormindo-transparente.webp` is shared with the playground.
@@ -49,7 +47,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `QuickstartTranscriptPanel.tsx`: live transcript panel.
 - `QuickstartPipelineMetrics.tsx`: latency chips from metrics stream.
 - `ConnectionStatusPanel.tsx` + `ConversationErrorCard.tsx`: issue rendering/severity.
-- `MaterialStudyPageClient.tsx` + `MaterialQuestion.tsx` + `MaterialViewer.tsx`: shared embedded/standalone worksheet, answer blanks, spoken answer routing, original-file viewer, bounded polling/retry, grounded voice and explicit completion.
+- `MaterialStudyPageClient.tsx`: shared embedded profile result and standalone history detail, with image/PDF preview, bounded processing polling/retry, grounded voice, manual completion and tutor-confirmed completion with success animation and return to upload.
 - `LumiMaterialLoading.tsx`: reading avatar and **Carregando…** caption during upload/analysis, without opening a voice session. Reports completion after a full loaded cycle once the API responds; motion cancellation/failure bypasses the wait.
 - `MaterialHistoryPageClient.tsx`: child material history/status list.
 - `NewProfileForm.tsx`: two-step family sign-up with a batch child form.
@@ -69,7 +67,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `app/playground/lumi-animation/page.tsx` + `components/playground/`: separate animation lab, CSS Module, local motion states, and live-test dialog.
 - `lib/lumi-animation.ts`: bounded prompt validation and presets; no main-app defaults are imported from it.
 - `components/playground/LumiVideoStates.tsx` + `lib/lumi-video-states.ts`: local clips, playback lifecycle, state sequence, and exported production manifest. `docs/lumi-video-states.md` documents the asset brief and future Agora event mapping.
-- `public/assets/lumi/states/lummi-falando-otimizada.webp` (speaking) and `lummi-transparente-02.webp` (listening): optimized speaking and supplied listening animations selected by `BUNDLED_LUMI_VIDEO_CLIPS` in both profile and playground. Local overrides can restore these defaults without changing the assets. The earlier MP4 is retained but not selected.
+- `public/assets/lumi/states/lummi-falando-asas-web-v1.webp` (speaking) and `lummi-transparente-02.webp` (listening): supplied speaking and listening animations selected by `BUNDLED_LUMI_VIDEO_CLIPS` in both profile and playground. Local overrides can restore these defaults without changing the assets. The earlier MP4 is retained but not selected.
 - `public/assets/lumi/states/lummi-lendo-transparente.webp`: reading animation for material generation and manual playground preview (118 frames, 3933 ms, 800 x 800, alpha).
 - `components/LumiWebPClip.tsx`: shared browser-local static/animated WebP playback, first-frame pause preview and replay URL lifecycle. Profile and playground supply visibility/playback state and scoped CSS.
 - `lib/lumi-webp.ts` + `scripts/verify-lumi-webp.ts`: shared bundled Blob downloads survive subscriber unmounts, failed requests can retry, and local uploads retain abort ownership. Lifecycle checks run through `verify:api`.
@@ -82,7 +80,8 @@ Auto-discovered project files remain at the repository root. This includes packa
 
 ## Fast File Lookup
 
-- Change agent prompt/model/VAD -> `app/api/invite-agent/route.ts`.
+- Change Agora session wiring/model/VAD -> `app/api/invite-agent/route.ts`.
+- Change Portuguese tutor instructions -> `packages/i18n/pt-BR.ts` (`messages.voice.homeworkPrompt` and `messages.voice.agentPrompt`); behavior reference: `docs/specs/07-lummi-prompt-tutoria-v2.md`.
 - Change token policy/channel naming -> `app/api/generate-agora-token/route.ts`.
 - Change transcript mapping behavior -> `lib/conversation.ts` + `components/ConversationComponent.tsx`.
 - Change session bootstrap UX -> `components/LandingPage.tsx`.

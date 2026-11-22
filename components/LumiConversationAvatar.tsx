@@ -7,9 +7,10 @@ import { nextLumiAnimationState, type LumiAnimationState } from '@/lib/lumi-anim
 import LumiWebPClip from './LumiWebPClip';
 import styles from './lumi-conversation-avatar.module.css';
 
-const labels = { idle: 'Lumi em repouso', listening: 'Lumi escutando você', speaking: 'Lumi falando', sleeping: 'Lumi dormindo' };
+const labels = { idle: 'Lumi em repouso', listening: 'Lumi escutando você', speaking: 'Lumi falando', sleeping: 'Lumi dormindo', celebrating: 'Lumi comemorando seu acerto' };
 const idleStates = [{ id: 'idle', label: 'Repouso' }] as const;
 const conversationStates = [...idleStates, { id: 'listening', label: 'Escutando' }, { id: 'speaking', label: 'Falando' }, { id: 'sleeping', label: 'Dormindo' }] as const;
+const studyStates = [...conversationStates, { id: 'celebrating', label: 'Comemorando' }] as const;
 
 type Props = {
   state: LumiAnimationState;
@@ -18,6 +19,12 @@ type Props = {
   speakingEnabled?: boolean;
   /** Illustrations outside a call load only the idle clip, not every voice state. */
   idleOnly?: boolean;
+  /** Undefined outside tutoring; a new confirmed tutor turn requests one cycle. */
+  celebrationId?: string | null;
+  /** Wait for both agent audio and its response preparation to finish. */
+  celebrationReady?: boolean;
+  /** Reports a full success cycle, or a visibility/error/timeout bypass, once. */
+  onCelebrationComplete?: (id: string, outcome: 'played' | 'skipped') => void;
   className?: string;
   entranceReady?: boolean;
   onVisualReady?: () => void;
@@ -25,8 +32,8 @@ type Props = {
 };
 type ClipStatus = { status: 'ready' | 'failed'; durationMs?: number };
 
-export default function LumiConversationAvatar({ state, active = true, listeningEnabled = true, speakingEnabled = true, idleOnly = false, className = '', entranceReady, onVisualReady, onAnimationEnd }: Props) {
-  const animatedStates = idleOnly ? idleStates : conversationStates;
+export default function LumiConversationAvatar({ state, active = true, listeningEnabled = true, speakingEnabled = true, idleOnly = false, celebrationId, celebrationReady = true, onCelebrationComplete, className = '', entranceReady, onVisualReady, onAnimationEnd }: Props) {
+  const animatedStates = idleOnly ? idleStates : celebrationId === undefined ? conversationStates : studyStates;
   const root = useRef<HTMLDivElement>(null);
   const visualReady = useRef(onVisualReady);
   useEffect(() => { visualReady.current = onVisualReady; }, [onVisualReady]);
@@ -34,17 +41,35 @@ export default function LumiConversationAvatar({ state, active = true, listening
   const videos = useRef<Partial<Record<LumiVideoState, HTMLVideoElement>>>({});
   const [statuses, setStatuses] = useState<Partial<Record<LumiVideoState, ClipStatus>>>({});
   const [animationState, setAnimationState] = useState<LumiAnimationState>(state);
-  const [motionEnabled, setMotionEnabled] = useState(false);
   const [visible, setVisible] = useState(true);
   const [playBlocked, setPlayBlocked] = useState(false);
+  const [consumedCelebration, setConsumedCelebration] = useState<string | null>(null);
+  const playingCelebration = useRef<string | null>(null);
+  const celebrationComplete = useRef(onCelebrationComplete);
+  const reportedCelebrations = useRef(new Set<string>());
+  useEffect(() => { celebrationComplete.current = onCelebrationComplete; }, [onCelebrationComplete]);
+  const finishCelebration = useCallback((id: string, outcome: 'played' | 'skipped') => {
+    setConsumedCelebration(id);
+    if (reportedCelebrations.current.has(id)) return;
+    reportedCelebrations.current.add(id);
+    celebrationComplete.current?.(id, outcome);
+  }, []);
   const failed = animatedStates.some(({ id }) => statuses[id]?.status === 'failed');
-  const requested = idleOnly || !active || (state === 'listening' && !listeningEnabled) || (state === 'speaking' && !speakingEnabled) ? 'idle' : state;
+  const baseRequested = idleOnly || !active || (state === 'listening' && !listeningEnabled) || (state === 'speaking' && !speakingEnabled) ? 'idle' : state;
+  const celebrationAllowed = !idleOnly && active && visible && inView && !playBlocked && speakingEnabled && statuses.celebrating?.status !== 'failed';
+  const pendingCelebration = Boolean(celebrationId && celebrationId !== consumedCelebration);
+  const requested = pendingCelebration && celebrationAllowed && statuses.celebrating?.status === 'ready'
+    && baseRequested !== 'speaking' && (celebrationReady || animationState === 'celebrating') ? 'celebrating' : baseRequested;
   // Disconnection cancels speech immediately; the waiting mascot can still idle.
-  const playbackAllowed = (active || animationState === 'idle') && motionEnabled && !playBlocked && visible && inView;
+  const playbackAllowed = (active || animationState === 'idle') && !playBlocked && visible && inView;
   const stateEnabled = animationState === 'listening' ? listeningEnabled : animationState === 'speaking' ? speakingEnabled : true;
   const showClip = statuses[animationState]?.status === 'ready' && playbackAllowed && stateEnabled;
   const finishingCycle = showClip && (statuses[animationState]?.durationMs ?? 0) > 0;
   const playingState = showClip ? animationState : null;
+  useEffect(() => {
+    if (playingState === 'celebrating') playingCelebration.current ??= celebrationId ?? null;
+    else playingCelebration.current = null;
+  }, [playingState, celebrationId]);
   const onReady = useCallback((id: LumiVideoState, _url?: string, durationMs?: number) => {
     setStatuses((current) => ({ ...current, [id]: { status: 'ready', durationMs } }));
     visualReady.current?.();
@@ -62,25 +87,41 @@ export default function LumiConversationAvatar({ state, active = true, listening
     setAnimationState((current) => nextLumiAnimationState(current, requested, finishingCycle));
   }, [requested, finishingCycle]);
 
-  const onCycleEnd = useCallback((id: LumiVideoState, url: string) => {
-    if (!playbackAllowed || BUNDLED_LUMI_VIDEO_CLIPS[id]?.url !== url) return;
-    setAnimationState((current) => current === id ? requested : current);
-  }, [requested, playbackAllowed]);
+  useEffect(() => {
+    if (celebrationId && (!celebrationAllowed || (statuses.celebrating?.status === 'ready' && !statuses.celebrating.durationMs))) {
+      finishCelebration(celebrationId, 'skipped');
+    }
+  }, [celebrationId, celebrationAllowed, statuses.celebrating, finishCelebration]);
 
   useEffect(() => {
-    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const syncMotion = () => setMotionEnabled(!preference.matches);
+    if (!celebrationId) return;
+    // Never replay an old success after a stalled download or a long interruption.
+    const timer = window.setTimeout(() => finishCelebration(celebrationId, 'skipped'), 30_000);
+    return () => window.clearTimeout(timer);
+  }, [celebrationId, finishCelebration]);
+
+  const onCycleEnd = useCallback((id: LumiVideoState, url: string) => {
+    if (!playbackAllowed || BUNDLED_LUMI_VIDEO_CLIPS[id]?.url !== url) return;
+    if (id === 'celebrating') {
+      const completed = playingCelebration.current ?? celebrationId;
+      if (completed) finishCelebration(completed, 'played');
+      playingCelebration.current = null;
+      setAnimationState((current) => current === id ? baseRequested : current);
+      return;
+    }
+    setAnimationState((current) => current === id ? requested : current);
+  }, [requested, baseRequested, celebrationId, playbackAllowed, finishCelebration]);
+
+  useEffect(() => {
+    // Character media autoplays by product choice, independently of OS UI motion.
     const syncVisibility = () => setVisible(document.visibilityState === 'visible');
-    syncMotion();
     syncVisibility();
     for (const { id } of animatedStates) {
       const video = videos.current[id];
       if (video && video.readyState >= 2) onReady(id, video.src, video.duration * 1000);
     }
-    preference.addEventListener('change', syncMotion);
     document.addEventListener('visibilitychange', syncVisibility);
     return () => {
-      preference.removeEventListener('change', syncMotion);
       document.removeEventListener('visibilitychange', syncVisibility);
     };
   }, [onReady, animatedStates]);
@@ -116,11 +157,13 @@ export default function LumiConversationAvatar({ state, active = true, listening
           : <video key={clip.url} ref={(element) => { if (element) videos.current[id] = element; else delete videos.current[id]; }}
             className={styles.video} data-state={id} data-visible={active} src={clip.url}
             style={{ objectFit: clip.fit ?? 'contain' }}
-            muted playsInline loop={requested === id} preload="auto" aria-hidden="true"
+            muted playsInline loop={id !== 'celebrating' && requested === id} preload="auto" aria-hidden="true"
             onLoadedData={(event) => onReady(id, clip.url, event.currentTarget.duration * 1000)} onError={() => onError(id)}
             onEnded={() => onCycleEnd(id, clip.url)} />;
       })}
-      {failed && <p className={styles.loadError} role="status">Não foi possível carregar a animação.</p>}
+      {(failed || playBlocked) && <div className={styles.loadError} role="status">
+        <p>Não foi possível reproduzir a animação.</p>
+      </div>}
     </div>
   );
 }

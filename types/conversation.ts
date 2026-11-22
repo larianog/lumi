@@ -46,6 +46,10 @@ export interface ConversationComponentProps {
   avatarMode?: 'provider' | 'local';
   lumiAvatar?: string;
   recording?: SessionRecordingContext;
+  /** Celebrate confirmed answers during material tutoring. */
+  celebrateAnswers?: boolean;
+  /** The tutor confirmed the whole material and finished speaking. */
+  onMaterialCompleted?: () => void;
   /** Called from a user tap after microphone access was denied. */
   onRetryMicrophone?: () => void;
   /** End the failed session and start a fresh one without leaving the page. */

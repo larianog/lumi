@@ -11,4 +11,5 @@
 .avatar [data-visible=true] { opacity: 1; }
 .avatar[data-lumi-state=listening] .still { transform: rotate(-7deg) translateY(-3px) scale(.97); }
 .loadError { position: absolute; z-index: 2; bottom: 32px; left: 8px; right: 8px; margin: 0; padding: 8px 12px; border-radius: 12px; background: rgba(5,47,41,.9); color: white; text-align: center; font-size: 12px; }
+.loadError p { margin: 0; }
 @media (max-width: 720px) { .avatar { height: 26dvh; max-width: 70vw; } }

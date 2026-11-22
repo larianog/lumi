@@ -20,11 +20,10 @@ type Props = {
 export default function LumiMaterialLoading({ loading = true, active = true, onComplete }: Props) {
   const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>('loading');
   const [durationMs, setDurationMs] = useState(0);
-  const [motionEnabled, setMotionEnabled] = useState<boolean | null>(null);
   const [visible, setVisible] = useState(true);
   const failed = status === 'failed';
   const showClip = active && status === 'ready';
-  const playing = showClip && motionEnabled === true && visible;
+  const playing = showClip && visible;
   const onReady = useCallback((_id: string, _url: string, duration = 0) => {
     setDurationMs(duration); setStatus('ready');
   }, []);
@@ -34,15 +33,11 @@ export default function LumiMaterialLoading({ loading = true, active = true, onC
   }, [loading, playing, onComplete]);
 
   useEffect(() => {
-    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const syncMotion = () => setMotionEnabled(!preference.matches);
-    syncMotion();
+    // Keep the reading state animated even when OS interface animations are off.
     const syncVisibility = () => setVisible(document.visibilityState === 'visible');
     syncVisibility();
-    preference.addEventListener('change', syncMotion);
     document.addEventListener('visibilitychange', syncVisibility);
     return () => {
-      preference.removeEventListener('change', syncMotion);
       document.removeEventListener('visibilitychange', syncVisibility);
     };
   }, []);
@@ -59,9 +54,9 @@ export default function LumiMaterialLoading({ loading = true, active = true, onC
   }, [active, status]);
 
   useEffect(() => {
-    if (loading || motionEnabled === null) return;
-    if (!active || !motionEnabled || !visible || failed || (status === 'ready' && !durationMs)) onComplete?.();
-  }, [loading, active, motionEnabled, visible, failed, status, durationMs, onComplete]);
+    if (loading) return;
+    if (!active || !visible || failed || (status === 'ready' && !durationMs)) onComplete?.();
+  }, [loading, active, visible, failed, status, durationMs, onComplete]);
 
   if (!active) return <LumiConversationAvatar state="idle" />;
   return (
@@ -72,7 +67,7 @@ export default function LumiMaterialLoading({ loading = true, active = true, onC
           {active && <LumiWebPClip id="reading" label="Lendo o material" url={clip.url}
             className={styles.video} fit={clip.fit} visible={showClip} playing={playing} replay={0}
             onReady={onReady} onError={onError} onCycleEnd={onCycleEnd} />}
-          {active && failed && <p className={styles.loadError} role="status">Não foi possível carregar a animação.</p>}
+          {failed && <p className={styles.loadError} role="status">Não foi possível carregar a animação.</p>}
         </div>
         {active && (
           <div className="lumi-inline-controls lumi-upload-status" role="status" aria-live="polite">

@@ -61,3 +61,5 @@ Fallback parser:
 - `components/QuickstartTranscriptPanel.tsx`: transcript render sink.
 - `components/QuickstartPipelineMetrics.tsx`: metrics render sink.
 - `components/ConnectionStatusPanel.tsx`: surfaced connection diagnostics.
+
+The separate **Atividade concluída com sucesso!** first sentence is reserved for the entire checked worksheet. `LumiMaterialCompletionDetector` accepts only completed agent turns after a user answer, with the same interrupted/disabled/duplicate protection. `ConversationComponent` waits for agent rest and no audible speech for 600 ms before calling the material-specific callback. The study workspace then owns persistence, voice unmount, one success animation and return to upload. Per-question confirmation, ending a call and text spoken by the user never substitute for the final tutor verdict. This is the existing tutor's judgment, not an independent server grader.
