@@ -18,6 +18,8 @@
 
 ## L1 — Summaries
 
+Merge review on 2026-11-22 combines main's didactic classification, product README/demo image, feedback specifications and CI/Docker updates with local animations, reading-cycle gating, voice recovery and sleep. Cached/async non-didactic results do not start tutoring; runtime database contents are preserved locally.
+
 Motion recovery review on 2026-11-22 centralizes avatar/reading preferences and clears the old tab-wide saved pause once. The v2 preference preserves new manual choices across remounts and respects reduced motion. Browser checks cover recovery, explicit pause/resume and preference changes.
 
 Sleep regression review on 2026-11-22 includes the SDK `silent` state in the inactivity gate. Previously a silent agent could stay awake indefinitely after replying. The countdown remains stable across resting-state events, with browser coverage of sleep and speech wake-up.

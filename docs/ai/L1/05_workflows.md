@@ -72,6 +72,8 @@ Bootstrap behavior:
 
 The bundled JSON database and `data/material-cache/` adapter are suitable for local or persistent-container development. Select durable database/private object storage adapters before serverless production deployment.
 
+After a didactic upload, the profile page embeds `MaterialStudyPageClient` in place of the submission controls. Its **Voltar ao perfil** action restores the submission view. Saved materials from history still use `/profile/[id]/materials/[materialId]`.
+
 ## Ship-Readiness Workflow
 
 1. Run `pnpm run verify`.
@@ -88,6 +90,7 @@ The bundled JSON database and `data/material-cache/` adapter are suitable for lo
 ## Build the Container Image
 
 The Dockerfile and its Dockerfile-specific ignore rules are colocated under `deploy/docker/`. Keep the repository root as the build context:
+When changing the `packageManager` version, update both Dockerfile install stages to match.
 
 ```bash
 docker build -f deploy/docker/Dockerfile -t lumi-by-agora .

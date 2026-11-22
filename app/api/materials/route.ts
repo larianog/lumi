@@ -8,6 +8,7 @@ import {
   markStudyMaterialFailed,
   markStudyMaterialReady,
   reserveStudyMaterial,
+  updateDb,
 } from '@/lib/db';
 import { calculateAge } from '@/lib/age';
 import {
@@ -140,6 +141,7 @@ export async function POST(request: NextRequest) {
     const model = getExtractionModel();
     const sha256 = createHash('sha256').update(bytes).digest('hex');
     const now = Date.now();
+
     const reservation = await reserveStudyMaterial({
       id: randomUUID(),
       familyId: result.family.id,
@@ -165,14 +167,31 @@ export async function POST(request: NextRequest) {
 
     storageKey = await storeMaterialFile(reservation.material.id, file.type, bytes);
     const extraction = await analyzeMaterial(bytes, file.type, { age, literacyLevel });
+
+    // For non-didactic materials, assign to parent's profile
+    const targetProfileId = extraction.analysis?.isDidactic === false
+      ? result.family.profiles.find((p) => p.type === 'adult')?.id || profileId
+      : profileId;
+
+    // If we need to change the profile, update the reservation
+    if (targetProfileId !== profileId) {
+      await updateDb((db) => {
+        const material = db.materials.find((candidate) => candidate.id === reservedMaterialId);
+        if (material) material.profileId = targetProfileId;
+      });
+    }
+
     const material = await markStudyMaterialReady(
       reservation.material.id,
       storageKey,
       extraction.text,
       extraction.analysis,
+      extraction.analysis?.isDidactic,
     );
     return NextResponse.json({
       material: toStudyMaterialDto(material, true),
+      profileId: targetProfileId,
+      isDidactic: extraction.analysis?.isDidactic,
       cached: false,
     }, { status: 201 });
   } catch (error) {

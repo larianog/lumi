@@ -57,6 +57,7 @@ export default function ProfilePage() {
   const [selectedMaterial, setSelectedMaterial] = useState<File | null>(null);
   const [materialUploadState, setMaterialUploadState] = useState<'idle' | 'uploading'>('idle');
   const [materialError, setMaterialError] = useState('');
+  const [materialWarning, setMaterialWarning] = useState('');
   const [studyMaterial, setStudyMaterial] = useState<StudyMaterialDto | null>(null);
   const [pendingMaterial, setPendingMaterial] = useState<StudyMaterialDto | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -82,7 +83,7 @@ export default function ProfilePage() {
     setPendingMaterial(null);
     setSelectedMaterial(null);
     setMaterialUploadState('idle');
-    setMaterialError('');
+    setMaterialError(''); setMaterialWarning('');
     setLiteracyLevel(null);
     setCameraOpen(false);
     const loadData = async () => {
@@ -161,7 +162,7 @@ export default function ProfilePage() {
     if (!file) return;
     setSelectedMaterial(file);
     setMaterialUploadState('idle');
-    setMaterialError('');
+    setMaterialError(''); setMaterialWarning('');
     event.currentTarget.value = '';
   };
 
@@ -171,7 +172,7 @@ export default function ProfilePage() {
     uploadController.current = controller;
     setMaterialUploadState('uploading');
     setPendingMaterial(null);
-    setMaterialError('');
+    setMaterialError(''); setMaterialWarning('');
 
     let accepted = false;
     try {
@@ -185,10 +186,11 @@ export default function ProfilePage() {
       if (!response.ok || !payload.material?.id) {
         throw new Error(payload.error || messages.home.materialError);
       }
-      if (payload.material.profileId !== profileId) throw new Error(messages.home.materialError);
+      const isDidactic = payload.isDidactic ?? payload.material.isDidactic;
+      if (isDidactic !== false && payload.material.profileId !== profileId) throw new Error(messages.home.materialError);
       if (!controller.signal.aborted) {
         accepted = true;
-        setPendingMaterial(payload.material);
+        setPendingMaterial({ ...payload.material, isDidactic });
       }
     } catch (error) {
       if (!controller.signal.aborted) setMaterialError(error instanceof Error ? error.message : messages.home.materialError);
@@ -237,7 +239,7 @@ export default function ProfilePage() {
       const photo = new File([blob], `material-${Date.now()}.jpg`, { type: 'image/jpeg' });
       setSelectedMaterial(photo);
       setMaterialUploadState('idle');
-      setMaterialError('');
+      setMaterialError(''); setMaterialWarning('');
       setCameraOpen(false);
     }, 'image/jpeg', 0.9);
   };
@@ -251,7 +253,7 @@ export default function ProfilePage() {
   const selectedLiteracy = literacyLevel ?? defaultLiteracy(age);
 
   return (
-    <section className="forest-screen home-screen">
+    <section className={`forest-screen home-screen${studyMaterial ? ' home-screen-study' : ''}`}>
       <div className="forest-overlay forest-overlay-home" />
       <header className="home-header">
         <Brand size="medium" />
@@ -273,7 +275,7 @@ export default function ProfilePage() {
           key={studyMaterial.id}
           profileId={profileId} materialId={studyMaterial.id}
           initialProfile={profile} initialMaterial={studyMaterial} embedded
-          onBack={() => { setStudyMaterial(null); setSelectedMaterial(null); setMaterialError(''); }}
+          onBack={() => { setStudyMaterial(null); setSelectedMaterial(null); setMaterialError(''); setMaterialWarning(''); }}
         />
       ) : <div className="home-layout">
         <aside className="home-lumi">
@@ -281,7 +283,13 @@ export default function ProfilePage() {
           {/* Lumi greets the child as soon as the profile screen opens. */}
           {materialUploadState === 'uploading' ? <LumiMaterialLoading loading={!pendingMaterial} onComplete={() => {
             if (!pendingMaterial) return;
-            setStudyMaterial(pendingMaterial); setPendingMaterial(null); setMaterialUploadState('idle');
+            if (pendingMaterial.isDidactic === false) {
+              setMaterialWarning('Esse material não é didático. Ele foi salvo no perfil do responsável.');
+              setSelectedMaterial(null);
+            } else {
+              setStudyMaterial(pendingMaterial);
+            }
+            setPendingMaterial(null); setMaterialUploadState('idle');
           }} /> : <LumiVoiceAgent
             profileName={profile.firstName}
             age={age}
@@ -373,6 +381,7 @@ export default function ProfilePage() {
                   </button>
                 </div>
               )}
+              {materialWarning && <div className="study-source-warning" role="status"><p>{materialWarning}</p><button type="button" onClick={() => setMaterialWarning('')}>Entendi</button></div>}
               {materialError && <p className="study-source-error" role="alert">{materialError}</p>}
             </div>
           )}

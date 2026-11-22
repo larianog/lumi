@@ -46,3 +46,5 @@ The JSON database and `data/material-cache/` adapter support local or persistent
 - DTOs expose only `title`, `subject`, and `questionCount` from the analysis; `analysis` and expected answers never reach the browser.
 - `invite-agent` uses `messages.voice.homeworkPrompt` (step-by-step tutoring that never gives the final answer, adapted to literacy level) and `homeworkGreeting` when the material has an `analysis`; older text-only materials keep `agentPrompt`.
 - The browser downsizes photos to 1600 px JPEG on a white background before upload (`lib/prepare-upload.ts`); transparent PNGs otherwise become unreadable black images.
+
+Non-didactic material classification from main is retained in persistence and DTOs (`isDidactic`, with an analysis fallback for older records). Prompt version `material-tutor-v3` invalidates pre-classification cache entries. Upload success still finishes the reading cycle before showing the adult-profile warning or the embedded study result. Processing responses that later become non-didactic must not start a child tutoring session. The shared workspace retains keyboard/close-button image preview and the history route.

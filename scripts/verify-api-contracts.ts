@@ -588,6 +588,7 @@ async function verifyMaterialAnalysis() {
 
   const analysis = {
     readable: true,
+    isDidactic: true,
     unreadableReason: '',
     title: 'Somas até 10',
     subject: 'Matemática',
@@ -650,6 +651,15 @@ async function verifyMaterialAnalysis() {
     assert(result.analysis.questions[0]?.expectedAnswer === 'SECRET-ANSWER-7', 'Material analysis should keep the answer key server-side');
     assert(result.text.includes('3 + 4 = ___'), 'Child transcript should include the question');
     assert(!result.text.includes('SECRET-ANSWER-7'), 'Child transcript must never include expected answers');
+    assert(result.analysis.isDidactic === true, 'Schoolwork must retain its didactic classification');
+
+    const unrelated = await analyzeMaterial(
+      Buffer.from([0x89, 0x50, 0x4e, 0x47]), 'image/png',
+      { age: 7, literacyLevel: 'emergent' },
+      fakeResponse({ ...analysis, isDidactic: false, questions: [] }),
+    );
+    assert(unrelated.analysis.isDidactic === false, 'Readable unrelated files must be classified for adult review');
+    assert(unrelated.analysis.questions.length === 0, 'Non-didactic content need not invent worksheet questions');
 
     let unreadableCode = '';
     try {
@@ -662,7 +672,7 @@ async function verifyMaterialAnalysis() {
     } catch (error) {
       unreadableCode = error instanceof MaterialExtractionError ? error.code : 'OTHER';
     }
-    assert(unreadableCode === 'UNREADABLE', 'Non-homework uploads should be rejected as UNREADABLE');
+    assert(unreadableCode === 'UNREADABLE', 'Unreadable uploads should be rejected as UNREADABLE');
   } finally {
     if (originalApiKey === undefined) delete process.env.OPENAI_API_KEY;
     else process.env.OPENAI_API_KEY = originalApiKey;

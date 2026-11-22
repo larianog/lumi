@@ -71,6 +71,9 @@ Requires env/project binding:
 
 ## CI Expectations
 
+- `pnpm/action-setup` reads the pnpm version from `package.json`; do not also set its `version` input.
+- CI runs lint, typecheck, API contracts, and build without `doctor` or application credentials. Run `doctor` locally with a configured `.env.local`.
+- Both Dockerfile install stages pin the same pnpm version as `package.json`.
 - Build workflow badge exists in root `README.md`.
 - Pre-ship expectation: `pnpm run verify` passes.
 - Route contract tests are executed by `scripts/verify-api-contracts.ts`.

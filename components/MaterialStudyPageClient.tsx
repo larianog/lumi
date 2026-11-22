@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, History, LoaderCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, History, LoaderCircle, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
@@ -17,6 +17,7 @@ type MaterialStudyPageClientProps = {
   initialMaterial?: StudyMaterialDto;
   embedded?: boolean;
   onBack?: () => void;
+  onClose?: () => void;
 };
 
 function calculateAge(birthDate: string) {
@@ -35,6 +36,7 @@ export default function MaterialStudyPageClient({
   initialMaterial,
   embedded = false,
   onBack,
+  onClose,
 }: MaterialStudyPageClientProps) {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(initialProfile ?? null);
@@ -51,7 +53,7 @@ export default function MaterialStudyPageClient({
     const response = await fetch(`/api/materials/${encodeURIComponent(materialId)}`, { cache: 'no-store', signal });
     if (!response.ok) throw new Error('Material não encontrado.');
     const data = await response.json() as StudyMaterialDto;
-    if (data.profileId !== profileId) throw new Error('Material não encontrado.');
+    if (data.profileId !== profileId && data.isDidactic !== false) throw new Error('Material não encontrado.');
     return data;
   }, [materialId, profileId]);
 
@@ -61,13 +63,13 @@ export default function MaterialStudyPageClient({
     const load = async () => {
       try {
         const [profileResponse, materialData] = await Promise.all([
-          fetch(`/api/profiles?profileId=${encodeURIComponent(profileId)}`, { cache: 'no-store', signal: controller.signal }),
+          initialProfile ? Promise.resolve(null) : fetch(`/api/profiles?profileId=${encodeURIComponent(profileId)}`, { cache: 'no-store', signal: controller.signal }),
           loadMaterial(controller.signal),
         ]);
-        if (!profileResponse.ok) throw new Error('Perfil não encontrado.');
-        const profileData = await profileResponse.json() as { profile: Profile };
+        if (profileResponse && !profileResponse.ok) throw new Error('Perfil não encontrado.');
+        const profileData = profileResponse ? await profileResponse.json() as { profile: Profile } : null;
         if (!controller.signal.aborted) {
-          setProfile(profileData.profile);
+          setProfile(profileData?.profile ?? initialProfile ?? null);
           setMaterial(materialData);
           setReadingPending(materialData.extractionStatus === 'processing');
         }
@@ -105,6 +107,15 @@ export default function MaterialStudyPageClient({
     return () => { controller.abort(); window.clearTimeout(timer); window.clearTimeout(timeout); };
   }, [loadMaterial, material?.extractionStatus, loadError]);
 
+  useEffect(() => {
+    if (!showImageModal) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowImageModal(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [showImageModal]);
+
   const completeMaterial = async () => {
     if (!material || material.completedAt || completing) return;
     setCompleting(true);
@@ -126,14 +137,14 @@ export default function MaterialStudyPageClient({
   };
 
   if (loading) return <MaterialPageState message={messages.common.loading} />;
-  const goBack = onBack ?? (() => router.push(`/profile/${profileId}`));
+  const goBack = onBack ?? onClose ?? (() => router.push(`/profile/${profileId}`));
   if (!profile || !material) {
     return <MaterialPageState message={loadError || 'Material não encontrado.'} action={goBack} />;
   }
 
   const reading = readingPending && !loadError && material.extractionStatus !== 'failed' && !material.purgedAt;
   const processing = material.extractionStatus === 'processing' && !loadError;
-  const ready = material.extractionStatus === 'ready' && Boolean(material.extractedText) && !material.purgedAt && !reading;
+  const ready = material.extractionStatus === 'ready' && Boolean(material.extractedText) && !material.purgedAt && !reading && material.isDidactic !== false;
 
   const workspace = (
       <div className={embedded ? 'home-layout home-material-layout' : 'material-stage'}>
@@ -174,6 +185,8 @@ export default function MaterialStudyPageClient({
                 {messages.common.back}
               </button>}
             </div>
+          ) : material.isDidactic === false ? (
+            <div className="material-state-card" role="status"><strong>Não Didático</strong><span>Esse material não é didático. Envie uma atividade de estudo para conversar com a Lumi.</span></div>
           ) : material.purgedAt || !material.extractedText ? (
             <div className="material-state-card material-state-error"><strong>{messages.materials.expired}</strong></div>
           ) : (
@@ -183,16 +196,17 @@ export default function MaterialStudyPageClient({
                   <iframe className="material-pdf" title={material.originalName} src={`/api/materials/${encodeURIComponent(material.id)}/file`} />
                   <a className="button button-secondary" href={`/api/materials/${encodeURIComponent(material.id)}/file`} target="_blank" rel="noopener noreferrer">{messages.materials.openPdf}</a>
                 </div>
-              ) : <div className="material-original-file" onClick={() => setShowImageModal(true)}>
+              ) : <button className="material-original-file" type="button" aria-label="Ampliar material" onClick={() => setShowImageModal(true)}>
                 <img
                   src={`/api/materials/${encodeURIComponent(material.id)}/file`}
                   alt={material.originalName}
                   loading="lazy"
                 />
-              </div>}
-              {showImageModal && (
-                <div className="image-modal-overlay" onClick={() => setShowImageModal(false)}>
+              </button>}
+              {material.mimeType !== 'application/pdf' && showImageModal && (
+                <div className="image-modal-overlay" role="dialog" aria-modal="true" aria-label="Material ampliado" onClick={() => setShowImageModal(false)}>
                   <div className="image-modal" onClick={(e) => e.stopPropagation()}>
+                    <button className="image-modal-close" type="button" aria-label="Fechar material ampliado" autoFocus onClick={() => setShowImageModal(false)}><X size={22} /></button>
                     <img
                       src={`/api/materials/${encodeURIComponent(material.id)}/file`}
                       alt={material.originalName}

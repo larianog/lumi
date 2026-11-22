@@ -1,6 +1,6 @@
 # Sofia — Casos de uso e requisitos funcionais
 
-**Versão:** 1.0 | **Status:** especificação proposta para implementação, não descrição de testes executados.
+**Versão:** 1.1 | **Status:** especificação proposta para implementação, não descrição de testes executados.
 
 ## 1. Atores e contexto
 
@@ -118,3 +118,17 @@ Timeout de extração, queda de conexão, erro de ferramenta ou TTS: mostrar est
 0–30 min: preparar folha fictícia de três questões, gabarito e critérios revisados. 30–90 min: ensaiar erro conceitual, erro aritmético, acerto direto e transferência. 90–130 min: silêncio, interrupção, autocorreção, fala incompleta, documento ilegível e queda. 130–160 min: pedidos fora do domínio, segredo, dados pessoais e prova. 160–180 min: registrar observações e corrigir problemas críticos. Adultos interpretam perfis fictícios; não é validação de aprendizagem infantil.
 
 Tabela de registro sugerida: cenário | resposta esperada | observado | passou/falhou | latência | nível de ajuda | correção necessária. Preencher apenas após execução.
+
+## 5. Considerações derivadas do feedback
+
+O feedback de mentoria (21/11/2026) levanta perguntas de produto; não equivale a validação com famílias, estudantes ou professores.
+
+- Em UC05, comparar pergunta orientadora e explicação direta conforme a evidência da tentativa. Registrar se a criança explicou o próprio raciocínio e como a ajuda mudou a resposta; não insistir em etapas quando a compreensão já estiver demonstrada.
+- Em UC07–UC08, distinguir resposta correta, estratégia explicada, quantidade/nível de ajuda e resultado em transferência. Acerto e duração de sessão isolados não são prova de compreensão.
+- Em UC11, caso o resumo P1 seja implementado, comunicar fatos da sessão e limites: resolvido independentemente, resolvido com ajuda, pulado ou não avaliado. Não afirmar aprendizagem duradoura.
+- Ensaios rápidos usam adultos com perfis fictícios e documentos fictícios/autorizados. Seus resultados avaliam o comportamento do sistema, não eficácia infantil.
+- Necessidades da criança, responsável e professor são perguntas distintas. Entrevistas com adultos podem explorar as duas primeiras perspectivas sem simular participação de menores; pesquisa com menores exige processo próprio de proteção e autorização antes de acontecer.
+
+### Campos adicionais para registro de ensaio
+
+Adicionar à tabela do ensaio: estratégia verbal observada; pergunta orientadora ou explicação usada; nível de ajuda; resultado da nova questão; distinção entre evidência observada e interpretação; perspectiva representada (criança fictícia/responsável/professor). Não registrar nomes ou dados identificáveis.

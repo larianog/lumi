@@ -31,6 +31,7 @@
 ## Agent Startup Pitfalls
 
 - Missing `NEXT_PUBLIC_AGORA_APP_ID`/`NEXT_AGORA_APP_CERTIFICATE` yields hard 500s on token/invite/stop routes.
+- `agora-agents` 2.15.0 calls `ConvoAITokenBuilder.buildToken` with a role where the token lifetime belongs, producing a one-second token. Keep server start/stop/avatar tokens on `lib/agora-agent-token.ts` until that SDK call is fixed. `RtcTokenBuilder.buildTokenWithRtm` also expects relative lifetime seconds, not a Unix timestamp.
 - Changing the agent UID outside `lib/agora.ts` can desynchronize the browser and invite route.
 - RTM subscription failures may only surface through SAL status or raw signaling fallback events.
 
