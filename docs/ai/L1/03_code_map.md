@@ -37,7 +37,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `QuickstartTranscriptPanel.tsx`: live transcript panel.
 - `QuickstartPipelineMetrics.tsx`: latency chips from metrics stream.
 - `ConnectionStatusPanel.tsx` + `ConversationErrorCard.tsx`: issue rendering/severity.
-- `MaterialStudyPageClient.tsx`: inline grounded Lumi plus extracted-text workspace.
+- `MaterialStudyPageClient.tsx`: shared inline grounded Lumi and material workspace, embedded on the profile page after upload and reused by the saved-material route.
 - `MaterialHistoryPageClient.tsx`: child material history/status list.
 
 ## Shared Logic (`lib`)

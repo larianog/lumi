@@ -85,7 +85,7 @@ Agora Cloud
 1. The profile page sends an authenticated multipart image upload.
 2. The server validates the signature/size, hashes the bytes, and reserves a material record.
 3. An unexpired match for owner/profile/hash/model/prompt is reused; otherwise the private file is stored and OpenAI extracts text.
-4. The study page displays the text and starts Lumi with server-loaded material context.
+4. The profile page embeds the study workspace after upload, displaying the material and starting Lumi with server-loaded material context. The saved-material route reuses that workspace for history links.
 5. The child explicitly marks completion; child history and adult report read the same record.
 6. File and text content expire lazily while metadata and completion state remain.
 
