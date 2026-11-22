@@ -102,7 +102,7 @@ Optional material settings are `HOMEWORK_VISION_MODEL` (default `gpt-4.1-mini`) 
 
 ## Shared Client-Side Interfaces
 
-`lib/lumi-motion-preference.ts` owns manual playback preferences for avatars and material reading. The v2 key clears the old saved pause once, preserving explicit opt-in and system reduced motion. New pauses/resumes survive remounts/reload, storage failures use memory, and system preference changes clear the override. **Animar Lumi** indicates disabled motion, not an asset error.
+`LumiConversationAvatar` and `LumiMaterialLoading` follow `prefers-reduced-motion` directly. They expose no play/pause/reload control and ignore older saved manual motion choices. A failed asset leaves the still fallback and an error status until the page is reloaded.
 
 `LumiConversationAvatar` optionally accepts `idleOnly`, `className`, `entranceReady`, `onVisualReady` and `onAnimationEnd` for standalone illustrations. `idleOnly` loads only idle and uses a responsive frame; callers may size it through `--lumi-idle-width`. A disconnected call still renders idle, but never keeps its previous listening/speaking loop. Intersection and document visibility pause animation without changing voice lifecycle.
 

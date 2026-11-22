@@ -18,15 +18,15 @@
 
 ## L1 — Summaries
 
+Motion control removal on 2026-11-22 removes the main-app avatar and reading play/pause/reload buttons. Playback now follows the system reduced-motion preference directly; failed assets retain the still fallback and error status, and a page reload retries them. The animation playground keeps its separate controls.
+
 Welcome review on 2026-11-22 removes the family-description paragraph and limits the demo button/hint/error to development builds. Production retains registration and sign-in; the login API contract is unchanged.
 
 Merge review on 2026-11-22 combines main's didactic classification, product README/demo image, feedback specifications and CI/Docker updates with local animations, reading-cycle gating, voice recovery and sleep. Cached/async non-didactic results do not start tutoring; runtime database contents are preserved locally.
 
-Motion recovery review on 2026-11-22 centralizes avatar/reading preferences and clears the old tab-wide saved pause once. The v2 preference preserves new manual choices across remounts and respects reduced motion. Browser checks cover recovery, explicit pause/resume and preference changes.
-
 Sleep regression review on 2026-11-22 includes the SDK `silent` state in the inactivity gate. Previously a silent agent could stay awake indefinitely after replying. The countdown remains stable across resting-state events, with browser coverage of sleep and speech wake-up.
 
-Idle review on 2026-11-22 configures the supplied 121-frame, 4033 ms alpha WebP across all app mascot illustrations and voice waiting states. Shared `idleOnly` rendering avoids downloading other clips on non-voice screens; intersection/visibility handling pauses hidden illustrations. Idle immediately yields to conversation actions or sleep, and material analysis keeps reading. The welcome entrance and motion controls remain accessible.
+Idle review on 2026-11-22 configures the supplied 121-frame, 4033 ms alpha WebP across all app mascot illustrations and voice waiting states. Shared `idleOnly` rendering avoids downloading other clips on non-voice screens; intersection/visibility handling pauses hidden illustrations. Idle immediately yields to conversation actions or sleep, and material analysis keeps reading. The welcome entrance remains accessible.
 
 Inactivity review on 2026-11-22 adds sleeping after 30 seconds without speech or page interaction in local conversations. The supplied sleeping loop retains its original bytes (121 frames, 4033 ms, alpha). Interaction or speech wakes immediately; pending responses, failed connections and hidden tabs suspend the countdown. Voice stays connected and material loading keeps reading.
 
@@ -46,7 +46,7 @@ Review scope on 2026-11-21 includes the animation playground, local video/WebP w
 
 The bundled assets are `lummi-falando-otimizada.webp` for speaking (143 frames, approximately 6 seconds, 600 × 650) and `lummi-transparente-02.webp` for listening (192 frames, approximately 8 seconds, 768 × 768), both with alpha, rendered by a shared WebP component in profiles and the playground. Speaking uses a 3.95 MB portrait derivative with 81% fewer pixels per frame and the same centered cover framing; the original Full HD `lummi-animacao-transparente-1.webp` is retained unchanged. Profiles preload conversation clips and animate only the displayed state; silence plays the idle loop until the inactivity timer requests sleep. The earlier speaking WebP and MP4 are not the defaults.
 
-The reviewed avatar loading flow shares bundled downloads across placeholder/live remounts, exposes failed-load recovery, and retains explicit motion choices per tab. LAN previews require a network binding; microphone use on another device requires HTTPS.
+The reviewed avatar loading flow shares bundled downloads across placeholder/live remounts and retains a still fallback on failure. LAN previews require a network binding; microphone use on another device requires HTTPS.
 
 Conversation animations give incoming audible agent speech immediate priority over microphone activity. After speech ends, the displayed cycle finishes before resuming listening if the user is still talking, or returning to still. RTC voice interruption behavior is unchanged.
 

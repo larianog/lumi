@@ -10,7 +10,5 @@
 .avatar [data-visible=false] { opacity: 0; }
 .avatar [data-visible=true] { opacity: 1; }
 .avatar[data-lumi-state=listening] .still { transform: rotate(-7deg) translateY(-3px) scale(.97); }
-.motionToggle { position: absolute; z-index: 2; top: 8px; right: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 34px; height: 34px; padding: 0 9px; border: 1px solid rgba(255,255,255,.4); border-radius: 18px; color: white; background: rgba(5,47,41,.9); cursor: pointer; font-size: 12px; }
-.motionToggle:focus-visible { outline: 3px solid #dff48b; outline-offset: 3px; }
 .loadError { position: absolute; z-index: 2; bottom: 32px; left: 8px; right: 8px; margin: 0; padding: 8px 12px; border-radius: 12px; background: rgba(5,47,41,.9); color: white; text-align: center; font-size: 12px; }
 @media (max-width: 720px) { .avatar { height: 26dvh; max-width: 70vw; } }

@@ -1,12 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { Pause, Play, RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type AnimationEventHandler } from 'react';
 import { BUNDLED_LUMI_VIDEO_CLIPS, isWebPClip, type LumiVideoState } from '@/lib/lumi-video-states';
-import { forgetLumiWebP } from '@/lib/lumi-webp';
 import { nextLumiAnimationState, type LumiAnimationState } from '@/lib/lumi-animation-transition';
-import { readLumiMotionPreference, writeLumiMotionPreference } from '@/lib/lumi-motion-preference';
 import LumiWebPClip from './LumiWebPClip';
 import styles from './lumi-conversation-avatar.module.css';
 
@@ -40,10 +37,7 @@ export default function LumiConversationAvatar({ state, active = true, listening
   const [motionEnabled, setMotionEnabled] = useState(false);
   const [visible, setVisible] = useState(true);
   const [playBlocked, setPlayBlocked] = useState(false);
-  const [retry, setRetry] = useState(0);
-  const [loadAttempt, setLoadAttempt] = useState(0);
   const failed = animatedStates.some(({ id }) => statuses[id]?.status === 'failed');
-  const motionLabel = failed ? 'Recarregar animações' : motionEnabled && !playBlocked ? 'Pausar animação da Lumi' : 'Animar Lumi';
   const requested = idleOnly || !active || (state === 'listening' && !listeningEnabled) || (state === 'speaking' && !speakingEnabled) ? 'idle' : state;
   // Disconnection cancels speech immediately; the waiting mascot can still idle.
   const playbackAllowed = (active || animationState === 'idle') && motionEnabled && !playBlocked && visible && inView;
@@ -75,13 +69,9 @@ export default function LumiConversationAvatar({ state, active = true, listening
 
   useEffect(() => {
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const syncMotion = () => {
-      writeLumiMotionPreference(null);
-      setMotionEnabled(!preference.matches);
-    };
+    const syncMotion = () => setMotionEnabled(!preference.matches);
     const syncVisibility = () => setVisible(document.visibilityState === 'visible');
-    const savedMotion = readLumiMotionPreference();
-    setMotionEnabled(savedMotion === null ? !preference.matches : savedMotion === 'on');
+    syncMotion();
     syncVisibility();
     for (const { id } of animatedStates) {
       const video = videos.current[id];
@@ -108,7 +98,7 @@ export default function LumiConversationAvatar({ state, active = true, listening
       }
     }
     return () => { cancelled = true; elements.forEach(([, element]) => element.pause()); };
-  }, [playingState, retry]);
+  }, [playingState]);
 
   return (
     <div ref={root} className={`${styles.avatar} ${idleOnly ? 'lumi-idle-avatar' : ''} ${className}`} data-ready={entranceReady}
@@ -120,34 +110,17 @@ export default function LumiConversationAvatar({ state, active = true, listening
         if (!clip) return null;
         const active = showClip && animationState === id;
         return isWebPClip(clip)
-          ? <LumiWebPClip key={`${clip.url}:${loadAttempt}`} id={id} label={label} url={clip.url}
+          ? <LumiWebPClip key={clip.url} id={id} label={label} url={clip.url}
             fit={clip.fit}
-            className={styles.video} visible={active} playing={active} replay={retry} onReady={onReady} onError={onError} onCycleEnd={onCycleEnd} />
-          : <video key={`${clip.url}:${loadAttempt}`} ref={(element) => { if (element) videos.current[id] = element; else delete videos.current[id]; }}
+            className={styles.video} visible={active} playing={active} replay={0} onReady={onReady} onError={onError} onCycleEnd={onCycleEnd} />
+          : <video key={clip.url} ref={(element) => { if (element) videos.current[id] = element; else delete videos.current[id]; }}
             className={styles.video} data-state={id} data-visible={active} src={clip.url}
             style={{ objectFit: clip.fit ?? 'contain' }}
             muted playsInline loop={requested === id} preload="auto" aria-hidden="true"
             onLoadedData={(event) => onReady(id, clip.url, event.currentTarget.duration * 1000)} onError={() => onError(id)}
             onEnded={() => onCycleEnd(id, clip.url)} />;
       })}
-      {failed && <p className={styles.loadError} role="status">Não foi possível carregar a animação. Toque em recarregar.</p>}
-      <button className={styles.motionToggle} type="button" aria-label={motionLabel} title={motionLabel}
-        onClick={() => {
-          const enabled = failed || !motionEnabled || playBlocked;
-          writeLumiMotionPreference(enabled ? 'on' : 'off');
-          if (failed) {
-            for (const { id } of animatedStates) {
-              const clip = BUNDLED_LUMI_VIDEO_CLIPS[id];
-              if (clip) forgetLumiWebP(clip.url);
-            }
-            setStatuses({});
-            setLoadAttempt((value) => value + 1);
-          }
-          setMotionEnabled(enabled); setPlayBlocked(false); setRetry((value) => value + 1);
-        }}>
-        {failed ? <RotateCcw size={15} /> : motionEnabled && !playBlocked ? <Pause size={15} /> : <Play size={15} />}
-        {(failed || !motionEnabled || playBlocked) && <span>{failed ? 'Recarregar' : 'Animar Lumi'}</span>}
-      </button>
+      {failed && <p className={styles.loadError} role="status">Não foi possível carregar a animação.</p>}
     </div>
   );
 }

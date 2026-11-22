@@ -697,8 +697,6 @@ async function main() {
   verifyLumiSpeech();
   const { verifyLumiTransitions } = await import('./verify-lumi-transitions');
   await verifyLumiTransitions();
-  const { verifyLumiMotion } = await import('./verify-lumi-motion');
-  verifyLumiMotion();
   const { verifyLumiWebP } = await import('./verify-lumi-webp');
   await verifyLumiWebP();
   await verifyStopConversationValidation();
