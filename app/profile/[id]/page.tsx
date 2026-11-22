@@ -55,6 +55,7 @@ export default function ProfilePage() {
   const [selectedMaterial, setSelectedMaterial] = useState<File | null>(null);
   const [materialUploadState, setMaterialUploadState] = useState<'idle' | 'uploading'>('idle');
   const [materialError, setMaterialError] = useState('');
+  const [materialWarning, setMaterialWarning] = useState('');
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState('');
@@ -162,7 +163,13 @@ export default function ProfilePage() {
       if (!response.ok || !payload.material?.id) {
         throw new Error(payload.error || messages.home.materialError);
       }
-      router.push(`/profile/${profileId}/materials/${payload.material.id}`);
+      const targetProfileId = payload.profileId ?? profileId;
+      if (payload.isDidactic === false) {
+        setMaterialWarning('Esse material não é didático. Ele foi salvo no perfil do responsável.');
+        setMaterialUploadState('idle');
+      } else {
+        router.push(`/profile/${targetProfileId}/materials/${payload.material.id}`);
+      }
     } catch (error) {
       setMaterialError(error instanceof Error ? error.message : messages.home.materialError);
       setMaterialUploadState('idle');
@@ -310,7 +317,7 @@ export default function ProfilePage() {
                   ))}
                 </fieldset>
               )}
-              {selectedMaterial && (
+              {selectedMaterial && !materialWarning ? (
                 <div className="study-source-selection" role="status" aria-live="polite">
                   <div className="study-source-file">
                     <FileCheck2 size={20} />
@@ -328,7 +335,21 @@ export default function ProfilePage() {
                     {materialUploadState === 'uploading' ? messages.home.extractingFile : messages.home.sendFile}
                   </button>
                 </div>
-              )}
+              ) : materialWarning ? (
+                <div className="study-source-warning" role="status" aria-live="polite">
+                  <span>{materialWarning}</span>
+                  <button
+                    className="button button-secondary"
+                    type="button"
+                    onClick={() => {
+                      setMaterialWarning('');
+                      setSelectedMaterial(null);
+                    }}
+                  >
+                    OK
+                  </button>
+                </div>
+              ) : null}
               {materialError && <p className="study-source-error" role="alert">{materialError}</p>}
             </div>
           )}

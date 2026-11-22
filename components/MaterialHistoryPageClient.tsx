@@ -85,7 +85,12 @@ export default function MaterialHistoryPageClient({ profileId }: { profileId: st
                   <strong>{material.originalName}</strong>
                   <small>{new Date(material.createdAt).toLocaleDateString('pt-BR')}</small>
                 </span>
-                <span className={`material-status-pill${material.completedAt ? ' is-complete' : ''}`}>{status}</span>
+                <span className="material-history-badges">
+                  {material.isDidactic === false && (
+                    <span className="material-status-pill status-failed">Não Didático</span>
+                  )}
+                  <span className={`material-status-pill${material.completedAt ? ' is-complete' : ''}`}>{status}</span>
+                </span>
               </button>
             );
           })}

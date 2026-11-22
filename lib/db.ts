@@ -154,7 +154,7 @@ async function writeDb(db: Database) {
   await fs.rename(temporaryPath, DB_PATH);
 }
 
-async function updateDb<T>(mutate: (db: Database) => Promise<T> | T): Promise<T> {
+export async function updateDb<T>(mutate: (db: Database) => Promise<T> | T): Promise<T> {
   const operation = writeQueue.then(async () => {
     const db = await readDb();
     const result = await mutate(db);
@@ -350,6 +350,7 @@ export async function markStudyMaterialReady(
   storageKey: string,
   extractedText: string,
   analysis?: HomeworkAnalysis,
+  isDidactic?: boolean,
 ) {
   return updateDb((db) => {
     const material = db.materials.find((candidate) => candidate.id === id);
@@ -357,6 +358,7 @@ export async function markStudyMaterialReady(
     material.storageKey = storageKey;
     material.extractedText = extractedText;
     material.analysis = analysis;
+    material.isDidactic = isDidactic;
     material.extractionStatus = 'ready';
     material.errorCode = undefined;
     material.updatedAt = new Date().toISOString();

@@ -60,6 +60,8 @@ export type HomeworkAnalysis = {
   generalInstructions: string;
   questions: HomeworkQuestion[];
   notesForTutor: string;
+  /** Whether the material is related to didactic/educational purposes. */
+  isDidactic?: boolean;
 };
 
 export type StudyMaterial = {
@@ -78,6 +80,8 @@ export type StudyMaterial = {
   /** Server-only tutoring brief with expected answers. Never exposed in DTOs. */
   analysis?: HomeworkAnalysis;
   literacyLevel?: LiteracyLevel;
+  /** Whether the material is related to didactic/educational purposes. */
+  isDidactic?: boolean;
   extractionStatus: StudyMaterialExtractionStatus;
   extractionModel: string;
   promptVersion: string;
