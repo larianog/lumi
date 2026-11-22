@@ -51,6 +51,17 @@ export const ptBR = {
     passwordError: 'Essa senha não confere. Tente novamente.',
     demoPassword: 'Na demo, use a senha lumi123.',
   },
+  avatars: {
+    tab: 'Avatares',
+    title: 'Escolha seu Lumi',
+    subtitle: 'Quem vai conversar e estudar com você? Toque no Lumi que você mais gostar.',
+    choose: 'Escolher',
+    selected: 'Escolhido',
+    saved: 'Pronto! Na próxima conversa, esse Lumi vai falar com você.',
+    talkNow: 'Conversar agora',
+    loadError: 'Não foi possível carregar os avatares.',
+    saveError: 'Não foi possível salvar o avatar. Tente de novo.',
+  },
   home: {
     greeting: (name: string) => `Olá, ${name}!`,
     prompt: 'O que vamos estudar hoje?',

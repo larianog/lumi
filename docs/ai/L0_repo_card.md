@@ -18,6 +18,8 @@
 
 ## L1 — Summaries
 
+Avatar integration on 2026-11-22 restores the child avatar picker from `larianog/change-avatar` after its ancestor merge became a no-op. The animated Plush remains on welcome and profile selection and is the default for new lessons. Saved non-Plush choices keep their provider avatar path; all bundled Plush WebP states remain in place.
+
 Motion control removal on 2026-11-22 removes the main-app avatar and reading play/pause/reload buttons. Playback now follows the system reduced-motion preference directly; failed assets retain the still fallback and error status, and a page reload retries them. The animation playground keeps its separate controls.
 
 Welcome review on 2026-11-22 removes the family-description paragraph and limits the demo button/hint/error to development builds. Production retains registration and sign-in; the login API contract is unchanged.
@@ -42,7 +44,7 @@ Animation transition review on 2026-11-21 covers normal/demo profiles, material 
 
 Integration review on 2026-11-21 combines the material upload/history/tutoring flow from main with local profile and material-study animations. Invites preserve both material grounding identifiers and `avatar_mode`; upload password removal does not remove the adult check on family-wide history. Local database sessions are preserved separately from the merge commit.
 
-Review scope on 2026-11-21 includes the animation playground, local video/WebP workflow, and profile avatars driven by RTC speech activity. Profiles explicitly request local avatars without Lemon Slice; omitted invite avatar mode preserves provider defaults.
+Review scope on 2026-11-21 includes the animation playground, local video/WebP workflow, and profile avatars driven by RTC speech activity. Plush profiles explicitly request local avatars without Lemon Slice; selected non-Plush profiles use the provider path, while omitted invite settings preserve provider defaults.
 
 The bundled assets are `lummi-falando-otimizada.webp` for speaking (143 frames, approximately 6 seconds, 600 × 650) and `lummi-transparente-02.webp` for listening (192 frames, approximately 8 seconds, 768 × 768), both with alpha, rendered by a shared WebP component in profiles and the playground. Speaking uses a 3.95 MB portrait derivative with 81% fewer pixels per frame and the same centered cover framing; the original Full HD `lummi-animacao-transparente-1.webp` is retained unchanged. Profiles preload conversation clips and animate only the displayed state; silence plays the idle loop until the inactivity timer requests sleep. The earlier speaking WebP and MP4 are not the defaults.
 

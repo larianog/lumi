@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Brand from '@/components/Brand';
 import LumiVoiceAgent from '@/components/LumiVoiceAgent';
 import LumiMaterialLoading from '@/components/LumiMaterialLoading';
+import { getLumiAvatarMode } from '@/lib/lumi-avatars';
 import { messages } from '@/packages/i18n';
 import type { Profile } from '@/types/database';
 import type { StudyMaterialDto } from '@/types/materials';
@@ -159,7 +160,8 @@ export default function MaterialStudyPageClient({
               materialId={material.id}
               autoStart
               variant="inline"
-              avatarMode="local"
+              lumiAvatar={profile.lumiAvatar}
+              avatarMode={getLumiAvatarMode(profile.lumiAvatar)}
             />
           ) : (
             <LumiMaterialLoading loading={processing} active={Boolean(reading)} onComplete={finishReading} />

@@ -21,7 +21,7 @@ Failure response: `{ "error": string, "details"?: string }` with `400` for overs
 
 ### `POST /api/invite-agent`
 
-Optional `avatar_mode` accepts only `"local"` or `"provider"` (invalid values return `400`). `"local"` starts the usual voice agent without Lemon Slice; omitted/`"provider"` retains optional avatar generation when its server key exists. Profile pages explicitly send local mode; the response shape is unchanged. Client components pass this selection as `avatarMode`.
+Optional `avatar_mode` accepts only `"local"` or `"provider"`; optional `avatar_id` must be a catalog ID (`alien`, `princess`, `hero`, `cowboy`, or `plush`). Invalid values return `400`. `"local"` starts the usual voice agent without Lemon Slice. Profile, material-study, and activity pages send local mode for the default Plush and provider mode plus the saved ID for other choices. Omitted provider settings retain the existing generic avatar path. The response shape is unchanged. Client components pass this selection as `avatarMode` and `lumiAvatar`.
 
 Body (`ClientStartRequest`):
 
@@ -38,6 +38,10 @@ Success (`AgentResponse`):
 Validation failures return `400`; server failures return `500`.
 
 `requester_id` must be a decimal string in `1..2147483647` distinct from the reserved agent/avatar IDs. This is the current Conversational AI numeric participant limit, narrower than RTC's uint32 range. Invalid IDs are rejected before an agent session is created.
+
+### `PATCH /api/profiles`
+
+An authenticated family session may save `{ "profileId": "...", "lumiAvatar": "plush" }` for one of its child profiles. The avatar ID must be in the catalog. The shared demo family cannot change its avatar (`403`); an unknown or adult profile returns `404`. Existing profiles without `lumiAvatar` resolve to Plush. The picker at `/profile/[id]/avatars` uses this contract.
 
 ### `POST /api/stop-conversation`
 
@@ -102,7 +106,7 @@ Optional material settings are `HOMEWORK_VISION_MODEL` (default `gpt-4.1-mini`) 
 
 ## Shared Client-Side Interfaces
 
-`LumiConversationAvatar` and `LumiMaterialLoading` follow `prefers-reduced-motion` directly. They expose no play/pause/reload control and ignore older saved manual motion choices. A failed asset leaves the still fallback and an error status until the page is reloaded.
+`LumiConversationAvatar` and `LumiMaterialLoading` follow `prefers-reduced-motion` directly. They expose no play/pause/reload control and ignore older saved manual motion choices. A failed asset leaves the still fallback and an error status until the page is reloaded. The avatar catalog is browser-safe; `lib/lumi-avatar-source.ts` resolves provider IDs and the private Plush reference image only on the server. Welcome/profile selection and default lessons keep the animated Plush; saved non-Plush choices use the existing picker and provider display path.
 
 `LumiConversationAvatar` optionally accepts `idleOnly`, `className`, `entranceReady`, `onVisualReady` and `onAnimationEnd` for standalone illustrations. `idleOnly` loads only idle and uses a responsive frame; callers may size it through `--lumi-idle-width`. A disconnected call still renders idle, but never keeps its previous listening/speaking loop. Intersection and document visibility pause animation without changing voice lifecycle.
 

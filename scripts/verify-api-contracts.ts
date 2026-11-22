@@ -390,6 +390,7 @@ async function verifyInviteAgentSuccess() {
     const sessionConfig = capturedSessionConfig as {
       channel?: string;
       agentUid?: string;
+      token?: string;
       remoteUids?: string[];
     };
 
@@ -401,6 +402,8 @@ async function verifyInviteAgentSuccess() {
       sessionConfig.agentUid === '123456',
       'POST /api/invite-agent should use the shared default agent UID',
     );
+    assert(typeof sessionConfig.token === 'string' && sessionConfig.token.length > 0,
+      'POST /api/invite-agent should pass the explicit agent token');
     assert(
       JSON.stringify(sessionConfig.remoteUids) ===
         JSON.stringify(['4321']),
@@ -413,12 +416,15 @@ async function verifyInviteAgentSuccess() {
 
 async function verifyLocalAvatarInvite() {
   const { POST: inviteAgent } = await import('../app/api/invite-agent/route');
+  const { getLumiAvatar, getLumiAvatarMode } = await import('../lib/lumi-avatars');
+  assert(getLumiAvatar().id === 'plush' && getLumiAvatarMode() === 'local', 'Profiles without a saved avatar must start with animated Plush');
+  assert(getLumiAvatarMode('alien') === 'provider', 'Changing to a catalog avatar must retain provider playback');
   const originalCreateSession = Agent.prototype.createSession;
   const originalKey = process.env.NEXT_LEMONSLICE_API_KEY;
   const configurations: ReturnType<Agent['toProperties']>[] = [];
-  const request = (avatarMode: unknown) => new NextRequest('http://localhost:3000/api/invite-agent', {
+  const request = (avatarMode: unknown, avatarId?: unknown) => new NextRequest('http://localhost:3000/api/invite-agent', {
     method: 'POST',
-    body: JSON.stringify({ requester_id: '4321', channel_name: 'local-avatar-contract', avatar_mode: avatarMode }),
+    body: JSON.stringify({ requester_id: '4321', channel_name: 'local-avatar-contract', avatar_mode: avatarMode, avatar_id: avatarId }),
   });
   Agent.prototype.createSession = function (this: Agent) {
     configurations.push(this.toProperties({ channel: 'local-avatar-contract', agentUid: '123456', remoteUids: ['4321'], token: 'mock-token' }));
@@ -430,10 +436,17 @@ async function verifyLocalAvatarInvite() {
       assert((await inviteAgent(request(mode))).status === 200, 'Supported avatar modes must start a voice session');
       assert(Boolean(configurations.at(-1)?.avatar) === (mode !== 'local'), 'Local mode must omit Lemon Slice even when its key exists; other modes preserve the provider');
     }
+    assert((await inviteAgent(request('local', 'plush'))).status === 200, 'Selected Plush must start a voice session');
+    assert(!configurations.at(-1)?.avatar, 'Selected Plush must keep the bundled local animation');
+    assert((await inviteAgent(request('provider', 'alien'))).status === 200, 'Selected catalog avatar must start a voice session');
+    const selectedAvatar = configurations.at(-1)?.avatar as { params?: Record<string, unknown> } | undefined;
+    assert(selectedAvatar?.params?.agent_id === 'agent_65ce272168dc785d', 'Selected avatar must retain its LemonSlice dashboard source');
+    assert(typeof selectedAvatar?.params?.agora_token === 'string', 'Selected avatar must receive its RTC publisher token');
     for (const mode of ['unknown', null, 123]) {
       assert((await inviteAgent(request(mode))).status === 400, 'Invalid avatar modes must be rejected');
     }
-    assert(configurations.length === 3, 'Invalid modes must never start sessions');
+    assert((await inviteAgent(request('provider', 'unknown'))).status === 400, 'Unknown avatar IDs must be rejected');
+    assert(configurations.length === 5, 'Invalid modes and avatar IDs must never start sessions');
   } finally {
     Agent.prototype.createSession = originalCreateSession;
     if (originalKey === undefined) delete process.env.NEXT_LEMONSLICE_API_KEY;

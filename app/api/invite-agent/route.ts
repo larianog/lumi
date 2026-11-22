@@ -12,6 +12,9 @@ import {
   OpenAI,
 } from 'agora-agents';
 import { DEFAULT_AGENT_UID, DEFAULT_AVATAR_UID, isAgoraParticipantUid } from '@/lib/agora';
+import { buildAgentToken, buildAvatarToken } from '@/lib/agora-agent-token';
+import { resolveLemonSliceSource } from '@/lib/lumi-avatar-source';
+import { isLumiAvatarId } from '@/lib/lumi-avatars';
 import { getFamilyForSession, getStudyMaterial } from '@/lib/db';
 import { getSessionToken } from '@/lib/lumi-session';
 import { defaultLiteracyLevel, formatHomeworkBrief } from '@/lib/material-extraction';
@@ -38,6 +41,9 @@ export async function POST(request: NextRequest) {
     }
     if (body.avatar_mode !== undefined && body.avatar_mode !== 'provider' && body.avatar_mode !== 'local') {
       return NextResponse.json({ error: 'avatar_mode must be provider or local' }, { status: 400 });
+    }
+    if (body.avatar_id !== undefined && !isLumiAvatarId(body.avatar_id)) {
+      return NextResponse.json({ error: 'avatar_id must be a valid Lumi avatar' }, { status: 400 });
     }
 
     let profileName = body.profile_name?.trim().slice(0, 40) || 'explorador';
@@ -139,17 +145,20 @@ export async function POST(request: NextRequest) {
 
     const lemonSliceApiKey = process.env.NEXT_LEMONSLICE_API_KEY;
     if (lemonSliceApiKey && body.avatar_mode !== 'local') {
-      const lumiImage = await readFile(join(process.cwd(), 'public/assets/lumi-avatar.png'));
+      const source = body.avatar_id
+        ? await resolveLemonSliceSource(body.avatar_id)
+        : { additionalParams: {
+            agent_image_base64: (await readFile(join(process.cwd(), 'public/assets/lumi-avatar.png'))).toString('base64'),
+            aspect_ratio: '2x3',
+            agent_prompt: 'Mascote de pelúcia gentil, expressivo e curioso.',
+            agent_idle_prompt: 'Respira suavemente, pisca e faz pequenos acenos amigáveis.',
+          } };
       agent = agent.withAvatar(
         new LemonSlice({
           apiKey: lemonSliceApiKey,
           agoraUid: String(DEFAULT_AVATAR_UID),
-          additionalParams: {
-            agent_image_base64: lumiImage.toString('base64'),
-            aspect_ratio: '2x3',
-            agent_prompt: 'Mascote de pelúcia gentil, expressivo e curioso.',
-            agent_idle_prompt: 'Respira suavemente, pisca e faz pequenos acenos amigáveis.',
-          },
+          agoraToken: buildAvatarToken(channelName, DEFAULT_AVATAR_UID),
+          ...source,
         }),
       );
     }
@@ -157,6 +166,7 @@ export async function POST(request: NextRequest) {
     const session = agent.createSession({
       channel: channelName,
       agentUid: String(DEFAULT_AGENT_UID),
+      token: buildAgentToken(channelName, DEFAULT_AGENT_UID),
       remoteUids: [requesterId],
       idleTimeout: 60,
       expiresIn: ExpiresIn.hours(1),

@@ -73,7 +73,8 @@ The optional `/playground/lumi-animation` is an additive experiment using `api.r
 
 - `GET /api/generate-agora-token` returns `{ token, uid, channel }`.
 - `POST /api/invite-agent` accepts `{ requester_id, channel_name }` and returns the agent id/state payload.
-- Optional invite `avatar_mode: "local"` disables provider avatar generation for profile animation while preserving voice. Omitted/`"provider"` keeps the prior behavior and all response fields.
+- Optional invite `avatar_mode: "local"` disables provider avatar generation for the default animated Plush while preserving voice. Saved non-Plush choices use `"provider"` plus validated catalog `avatar_id`; omitted provider settings keep the prior behavior and response fields.
+- `PATCH /api/profiles` saves a catalog `lumiAvatar` for an authenticated child profile; missing values resolve to Plush and demo avatar changes are rejected.
 - `POST /api/stop-conversation` accepts `{ agent_id }` and treats already-stopping sessions as success.
 - Required env vars are `NEXT_PUBLIC_AGORA_APP_ID` and `NEXT_AGORA_APP_CERTIFICATE`.
 - Material extraction additionally requires server-only `OPENAI_API_KEY`.

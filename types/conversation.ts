@@ -15,6 +15,8 @@ export interface ClientStartRequest {
   age?: number;
   activity_title?: string;
   avatar_mode?: 'provider' | 'local';
+  /** Chosen Lumi avatar; Plush uses the local animation path. */
+  avatar_id?: string;
   material_id?: string;
 }
 
@@ -41,6 +43,7 @@ export interface ConversationComponentProps {
   /** `full` = in-call layout with header and transcript; `inline` = avatar + mic only. */
   variant?: 'full' | 'inline';
   avatarMode?: 'provider' | 'local';
+  lumiAvatar?: string;
   /** Called from a user tap after microphone access was denied. */
   onRetryMicrophone?: () => void;
   /** End the failed session and start a fresh one without leaving the page. */

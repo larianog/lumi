@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import AgoraRTC, {
   useRTCClient,
@@ -39,6 +40,8 @@ import {
 } from './ConversationErrorCard';
 import type { ConversationComponentProps } from '@/types/conversation';
 import LumiConversationAvatar from './LumiConversationAvatar';
+import ChromaKeyAvatar from './ChromaKeyAvatar';
+import { getLumiAvatar } from '@/lib/lumi-avatars';
 import { useLumiSpeechState } from './useLumiSpeechState';
 import { useLumiIdleSleep } from './useLumiIdleSleep';
 import { isLumiRestingAgentState } from '@/lib/lumi-animation-transition';
@@ -95,6 +98,7 @@ export default function ConversationComponent({
   onEndConversation,
   variant = 'full',
   avatarMode = 'provider',
+  lumiAvatar,
   onRetryMicrophone,
   onRetryConversation,
 }: ConversationComponentProps) {
@@ -493,6 +497,8 @@ export default function ConversationComponent({
   }, [onEndConversation]);
 
   const avatarUser = remoteUsers.find((user) => user.uid.toString() === avatarUID);
+  const selectedProviderAvatar = avatarMode === 'provider' && Boolean(lumiAvatar);
+  const avatar = getLumiAvatar(lumiAvatar);
   const displayMessages = currentInProgressMessage
     ? [...messageList, currentInProgressMessage]
     : messageList;
@@ -554,7 +560,11 @@ export default function ConversationComponent({
       <div className="lumi-inline" role="region" aria-label={messages.voice.title}>
         {voiceWarnings}
         {avatarMode === 'local' ? <LumiConversationAvatar state={lumiAnimationState} active={lumiConnected} listeningEnabled={isEnabled && !microphoneError} speakingEnabled={!autoplayBlocked} /> : avatarUser ? (
-          <div className="lumi-inline-avatar"><RemoteUser user={avatarUser} /></div>
+          <div className={`lumi-inline-avatar${selectedProviderAvatar ? ' is-keyed' : ''}`}>
+            {selectedProviderAvatar ? <ChromaKeyAvatar user={avatarUser} keying={avatar.keying} /> : <RemoteUser user={avatarUser} />}
+          </div>
+        ) : selectedProviderAvatar ? (
+          <Image className="lumi-inline-fallback" src={avatar.image} alt={messages.accessibility.lumiMascot} width={480} height={520} priority />
         ) : (
           <LumiConversationAvatar state="idle" />
         )}
@@ -594,7 +604,11 @@ export default function ConversationComponent({
           aria-label={messages.accessibility.lumiMascot}
         >
           {avatarMode === 'local' ? <LumiConversationAvatar state={lumiAnimationState} active={lumiConnected} listeningEnabled={isEnabled && !microphoneError} speakingEnabled={!autoplayBlocked} /> : avatarUser ? (
-            <div className="lumi-live-avatar"><RemoteUser user={avatarUser} /></div>
+            <div className={`lumi-live-avatar${selectedProviderAvatar ? ' is-keyed' : ''}`}>
+              {selectedProviderAvatar ? <ChromaKeyAvatar user={avatarUser} keying={avatar.keying} fit="contain" /> : <RemoteUser user={avatarUser} />}
+            </div>
+          ) : selectedProviderAvatar ? (
+            <Image className="lumi-avatar-fallback" src={avatar.image} alt={messages.accessibility.lumiMascot} width={480} height={520} priority />
           ) : (
             <LumiConversationAvatar state="idle" idleOnly className="lumi-avatar-fallback" />
           )}

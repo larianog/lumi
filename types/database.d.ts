@@ -7,6 +7,8 @@ export type Profile = {
   lastName: string;
   birthDate: string;
   avatar: number;
+  /** Lumi avatar chosen by the child; missing values use the animated Plush. */
+  lumiAvatar?: string;
   createdAt: string;
 };
 

@@ -32,6 +32,57 @@
   "completions": [],
   "materials": [
     {
+      "id": "8b5992fe-7268-4e83-9cc5-dd601d5118d4",
+      "familyId": "demo-family",
+      "profileId": "demo-lia",
+      "demoSessionId": "bf29d7b2-3fbd-4e04-9261-cddb34d7ba9b",
+      "originalName": "Screenshot From 2026-11-21 18-35-15.jpg",
+      "mimeType": "image/jpeg",
+      "size": 89494,
+      "sha256": "6221be192eba6cf6076292b8bc714f676a9d414efc28a3d4439469a8c4f5d5ff",
+      "literacyLevel": "fluent",
+      "extractionModel": "gpt-4.1-mini",
+      "promptVersion": "material-tutor-v3",
+      "expiresAt": "2026-11-29T13:38:34.310Z",
+      "extractionStatus": "ready",
+      "createdAt": "2026-11-22T13:38:34.312Z",
+      "updatedAt": "2026-11-22T13:38:41.496Z",
+      "storageKey": "8b5992fe-7268-4e83-9cc5-dd601d5118d4.jpg",
+      "extractedText": "Ordem alfabética\nLeia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate\n1 a 27) Coloque as palavras abaixo em ordem alfabética: pepino, mel, tangerina, amora, manga, cebola, nabo, kiwi, repolho, ovos, uvas, batata, limão, salsinha, damasco, vagem, espinafre, hortelã, figo, quiabo, carambola, inhame, goiaba, melão, jaca, brócolis, tomate.",
+      "analysis": {
+        "readable": true,
+        "unreadableReason": "",
+        "title": "Ordem alfabética",
+        "subject": "Português",
+        "estimatedGrade": "3º ano",
+        "generalInstructions": "Leia as palavras e coloque-as em ordem alfabética: pepino - mel - tangerina - amora - manga - cebola - nabo - kiwi - repolho - ovos - uvas - batata - limão - salsinha - damasco - vagem - espinafre - hortelã - figo - quiabo - carambola - inhame - goiaba - melão - jaca - brócolis - tomate",
+        "notesForTutor": "A criança deve saber ler as palavras sozinha e entender o conceito de ordem alfabética. Pode ter dificuldade em comparar palavras com letras próximas no alfabeto e em organizar uma lista longa. É importante que ela saiba identificar a primeira letra de cada palavra e, se necessário, a segunda e terceira para desempatar.",
+        "isDidactic": true,
+        "questions": [
+          {
+            "number": "1 a 27",
+            "statement": "Coloque as palavras abaixo em ordem alfabética: pepino, mel, tangerina, amora, manga, cebola, nabo, kiwi, repolho, ovos, uvas, batata, limão, salsinha, damasco, vagem, espinafre, hortelã, figo, quiabo, carambola, inhame, goiaba, melão, jaca, brócolis, tomate.",
+            "visualElements": "Desenho de uma pessoa vendendo frutas e verduras em uma banca, ao lado da lista de palavras e espaços numerados de 1 a 27 para escrever as palavras em ordem.",
+            "skill": "Ordenação alfabética de palavras",
+            "expectedAnswer": "1. amora; 2. batata; 3. brócolis; 4. carambola; 5. cebola; 6. damasco; 7. espinafre; 8. figo; 9. goiaba; 10. hortelã; 11. inhame; 12. jaca; 13. kiwi; 14. limão; 15. manga; 16. mel; 17. melão; 18. nabo; 19. ovos; 20. pepino; 21. quiabo; 22. repolho; 23. salsinha; 24. tangerina; 25. tomate; 26. uvas; ",
+            "steps": [
+              "Leia todas as palavras com atenção.",
+              "Observe a primeira letra de cada palavra e pense na ordem do alfabeto (A, B, C, D...).",
+              "Separe as palavras que começam com a mesma letra e compare a segunda letra para decidir a ordem.",
+              "Escreva as palavras na lista, começando pela que vem primeiro no alfabeto.",
+              "Revise a lista para garantir que está em ordem correta."
+            ],
+            "hints": [
+              "Pense na ordem do alfabeto: A vem antes de B, que vem antes de C.",
+              "Se duas palavras começam com a mesma letra, olhe a segunda letra para decidir qual vem primeiro.",
+              "Leia a lista em voz alta para verificar se a ordem está correta."
+            ]
+          }
+        ]
+      },
+      "isDidactic": true
+    },
+    {
       "id": "fc18ff1c-c5a6-4694-b882-d91c35c05a14",
       "familyId": "390e9fac-3c1e-4fc2-a8ac-999a004f1aa3",
       "profileId": "051c9e4e-42af-49e1-b18a-988069d00c32",
@@ -571,6 +622,46 @@
       "createdAt": "2026-11-21T22:35:45.119Z",
       "expiresAt": "2026-12-21T22:35:45.119Z",
       "adultVerifiedUntil": "2026-11-21T22:51:18.837Z"
+    },
+    {
+      "id": "8afee487-2bd8-4f58-8c17-54cf2855d629",
+      "tokenHash": "49350ad6d2060111ba6e1aac4f7236f1b2cc290e244bb671ca9427af104a315e",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-22T13:21:27.381Z",
+      "expiresAt": "2026-12-22T13:21:27.381Z"
+    },
+    {
+      "id": "d7083def-6df4-4207-9ea4-839df210a52d",
+      "tokenHash": "7beaf61e7b33e9a5ecfcbf68e85f83705aa27b0fe3190ba8a18c4b875673903e",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-22T13:33:32.885Z",
+      "expiresAt": "2026-12-22T13:33:32.885Z"
+    },
+    {
+      "id": "5003ae25-5cb6-434d-9e8b-f673ffc75fc3",
+      "tokenHash": "db88c3d2129d818273fa084106ebbc8608a5ae327a142d51ef72d7bfa8a9c08d",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-22T13:36:36.406Z",
+      "expiresAt": "2026-12-22T13:36:36.406Z"
+    },
+    {
+      "id": "4e208597-d7ff-404b-a7cd-812c8a7190e3",
+      "tokenHash": "6ade71549889ecf754490f8daa85546a79151d7627020c6f44a97f1ff2386601",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-22T13:37:06.856Z",
+      "expiresAt": "2026-12-22T13:37:06.856Z"
+    },
+    {
+      "id": "bf29d7b2-3fbd-4e04-9261-cddb34d7ba9b",
+      "tokenHash": "2a888001ae1a394c2ba2d8528e22a0fdb547caaa5af08a5c7e9420a31cc3a1ef",
+      "familyId": "demo-family",
+      "isDemo": true,
+      "createdAt": "2026-11-22T13:38:26.655Z",
+      "expiresAt": "2026-12-22T13:38:26.655Z"
     }
   ],
   "version": 3

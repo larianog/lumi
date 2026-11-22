@@ -11,6 +11,7 @@ import {
   Library,
   LoaderCircle,
   Send,
+  Sparkles,
   Star,
   Upload,
   WandSparkles,
@@ -22,6 +23,7 @@ import LumiVoiceAgent from '@/components/LumiVoiceAgent';
 import LumiMaterialLoading from '@/components/LumiMaterialLoading';
 import MaterialStudyPageClient from '@/components/MaterialStudyPageClient';
 import { calculateAge } from '@/lib/age';
+import { getLumiAvatarMode } from '@/lib/lumi-avatars';
 import { prepareUploadFile } from '@/lib/prepare-upload';
 import { messages } from '@/packages/i18n';
 import type { ActivityCompletion, LiteracyLevel, Profile } from '@/types/database';
@@ -273,6 +275,9 @@ export default function ProfilePage() {
           <span><Star size={18} fill="currentColor" />{starCount} estrelas</span>
         </div>
         <div className="home-profile-actions">
+          <button className="home-history-button" onClick={() => router.push(`/profile/${profileId}/avatars`)}>
+            <Sparkles size={18} />{messages.avatars.tab}
+          </button>
           <button className="home-history-button" onClick={() => router.push(`/profile/${profileId}/history`)}>
             <History size={18} />{messages.home.history}
           </button>
@@ -307,7 +312,8 @@ export default function ProfilePage() {
             activityTitle={messages.activities[selectedActivity].title}
             autoStart
             variant="inline"
-            avatarMode="local"
+            lumiAvatar={profile.lumiAvatar}
+            avatarMode={getLumiAvatarMode(profile.lumiAvatar)}
           />}
         </aside>
         <div className="activity-menu">

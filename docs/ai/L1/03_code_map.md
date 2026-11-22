@@ -33,6 +33,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 
 - `LumiApp.tsx`: welcome headline and sign-up/sign-in actions, without the former family-description paragraph. Demo entry, its hint and errors are rendered only in development (`NODE_ENV === 'development'`); the login API contract is unchanged.
 - `LumiConversationAvatar.tsx` + `lumi-conversation-avatar.module.css`: shared conversation idle/listening/speaking playback for profiles, materials and activities; completes outgoing cycles with immediate speaking priority, independent readiness and system reduced-motion handling.
+- `LumiAvatarPickerClient.tsx` + `/profile/[id]/avatars`: child avatar catalog and save action. `lib/lumi-avatars.ts` defaults missing choices to Plush and selects local/provider playback; `ChromaKeyAvatar.tsx` displays selected provider video. `lib/lumi-avatar-source.ts` maps catalog IDs to server-only Lemon Slice sources.
 - `lib/lumi-animation-transition.ts` + `lib/lumi-webp-timing.ts`: latest-state transition policy and RIFF/ANMF timing; `scripts/verify-lumi-transitions.ts` checks both via `verify:api`.
 - `useLumiSpeechState.ts` + `lib/lumi-speech.ts`: samples existing RTC tracks and smooths speech activity; `scripts/verify-lumi-speech.ts` exercises silence, noise, overlap, mute, blocked audio, and reconnect behavior through `verify:api`.
 - `useLumiIdleSleep.ts`: 30-second silent/visible inactivity timer for local voice avatars, page-interaction wake listeners and immediate speech wake-up. Its `sleeping` state is visual only; RTC and microphone ownership remain in the conversation hooks. `lummi-dormindo-transparente.webp` is shared with the playground.
@@ -41,6 +42,7 @@ Auto-discovered project files remain at the repository root. This includes packa
 - `LumiVoiceAgent.tsx`: profile/material/activity session owner; StrictMode-safe automatic startup and cancellation through managed conversation handles.
 - `lib/agora-rtm-session.ts`: one browser RTM instance, stable document UID, serialized leases and late-invite cleanup. Also used by `LandingPage` and the live playground. `scripts/verify-agora-rtm-session.ts` verifies lifecycle races with fake transports.
 - `lib/agora.ts`: shared agent/avatar IDs and participant generation/validation bounded to the Conversational AI maximum `2147483647`.
+- `lib/agora-agent-token.ts`: explicit managed-agent and Lemon Slice publisher tokens used by the invite route while the SDK's agent auto-token expiry is broken.
 - `ConversationComponent.tsx`: RTC join, mic publish, toolkit init, transcript/metrics/issues state.
 - `QuickstartConversationLayout.tsx`: in-call framing and slots.
 - `QuickstartTranscriptPanel.tsx`: live transcript panel.

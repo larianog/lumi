@@ -63,6 +63,7 @@ Requires env/project binding:
 ## Local Run Notes
 
 - `/playground/lumi-animation` provides a credential-free local motion study. Optional live tests require server-only `NEXT_LEMONSLICE_API_KEY` alongside the two Agora variables; restart dev after changing env. The base required env contract stays unchanged.
+- The child avatar picker is at `/profile/[id]/avatars`. Plush works with bundled animations and no avatar key; non-Plush live video requires optional server-only `NEXT_LEMONSLICE_API_KEY`. `NEXT_LEMONSLICE_AGENT_ID` can override the Explorer dashboard agent.
 
 - App + API routes run at `http://localhost:3000`.
 - For LAN access use `pnpm run dev --hostname 0.0.0.0 --port 3000` and the computer's current LAN IP. `127.0.0.1` is local-only. HTTP LAN previews cannot use the browser microphone; `pnpm run dev:lan` enables HTTPS for voice testing with a certificate trusted by the device.

@@ -207,6 +207,17 @@ export async function addProfileToFamily(familyId: string, profile: Profile) {
   });
 }
 
+/** Saves the avatar selected by a child in this family. */
+export async function setProfileLumiAvatar(familyId: string, profileId: string, lumiAvatar: string) {
+  return updateDb((db) => {
+    const family = db.families.find((candidate) => candidate.id === familyId);
+    const profile = family?.profiles.find((candidate) => candidate.id === profileId && candidate.type === 'child');
+    if (!profile) return null;
+    profile.lumiAvatar = lumiAvatar;
+    return { ...profile };
+  });
+}
+
 export async function createSession(familyId: string, isDemo = false) {
   const token = randomBytes(32).toString('base64url');
   const now = Date.now();
