@@ -57,7 +57,8 @@ Auto-discovered project files remain at the repository root. This includes packa
 
 ## Fast File Lookup
 
-- Change agent prompt/model/VAD -> `app/api/invite-agent/route.ts`.
+- Change Agora session wiring/model/VAD -> `app/api/invite-agent/route.ts`.
+- Change Portuguese tutor instructions -> `packages/i18n/pt-BR.ts` (`messages.voice.homeworkPrompt` and `messages.voice.agentPrompt`); behavior reference: `docs/specs/07-lummi-prompt-tutoria-v2.md`.
 - Change token policy/channel naming -> `app/api/generate-agora-token/route.ts`.
 - Change transcript mapping behavior -> `lib/conversation.ts` + `components/ConversationComponent.tsx`.
 - Change session bootstrap UX -> `components/LandingPage.tsx`.
